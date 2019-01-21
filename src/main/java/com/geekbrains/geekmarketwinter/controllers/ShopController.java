@@ -4,7 +4,12 @@ import com.geekbrains.geekmarketwinter.entites.Product;
 import com.geekbrains.geekmarketwinter.services.ProductService;
 import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.utils.ShoppingCart;
+import com.geekbrains.geekmarketwinter.utils.filters.ProductFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,13 +17,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 @Controller
 @RequestMapping("/shop")
 public class ShopController {
     private ProductService productService;
     private ShoppingCartService shoppingCartService;
+    private ProductFilter filter = new ProductFilter();
 
     @Autowired
     public void setProductService(ProductService productService) {
@@ -31,9 +36,11 @@ public class ShopController {
     }
 
     @GetMapping("")
-    public String shopPage(Model model) {
-        List<Product> products = productService.getAllProducts();
-        model.addAttribute("products", products);
+    public String shopPage(Model model,
+                           @PageableDefault(size = 5)
+                           @SortDefault Pageable pageable) {
+        Page<Product> products = productService.findAll(filter, pageable);
+        model.addAttribute("page", products);
         return "shop-page";
     }
 

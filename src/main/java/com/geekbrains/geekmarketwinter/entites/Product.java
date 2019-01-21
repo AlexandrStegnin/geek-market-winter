@@ -26,7 +26,7 @@ public class Product implements Serializable {
 
     @Column(name = "vendor_code")
     @NotNull(message = "не может быть пустым")
-    @Pattern(regexp = "([0-9]{1,})", message = "недопустимый символ")
+    @Pattern(regexp = "([0-9]+)", message = "недопустимый символ")
     @Size(min = 8, max=8, message = "требуется 8 числовых символов")
     private String vendorCode;
 
