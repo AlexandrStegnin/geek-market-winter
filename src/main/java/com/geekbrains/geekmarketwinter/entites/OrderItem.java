@@ -1,6 +1,5 @@
 package com.geekbrains.geekmarketwinter.entites;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Data;
 
 import javax.persistence.*;

@@ -32,16 +32,41 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="product : ${products}">
-            <td th:text="${product.id}"/>
-            <td th:text="${product.title}"/>
-            <td th:text="${product.price}"/>
+        <tr th:each="product : ${page.content}">
+            <td th:text="${product.id}"></td>
+            <td th:text="${product.title}"></td>
+            <td th:text="${product.price}"></td>
             <td>
                 <a th:href="@{'/shop/cart/add/' + ${product.id}}" class="btn btn-primary">Добавить в корзину</a>
             </td>
         </tr>
         </tbody>
     </table>
+
+    <nav class="text-center" aria-label="Товары">
+        <ul class="pagination pagination-sm justify-content-center">
+            <li class="page-item">
+                <span th:if="${page.hasPrevious()}">
+                    <a class="page-link" th:href="@{/shop(page=${page.number - 1},size=${page.size})}">Previous</a>
+                </span>
+            </li>
+            <th:block th:each="i: ${#numbers.sequence(0, page.totalPages - 1)}">
+                <li class="page-item">
+                    <span th:if="${page.number == i}" class="selected">
+                        <a class="page-link" th:href="@{/shop(page=${i},size=${page.size})}">[[${i}+1]]</a>
+                    </span>
+                    <span th:unless="${page.number == i}">
+                        <a class="page-link" th:href="@{/shop(page=${i},size=${page.size})}">[[${i}+1]]</a>
+                    </span>
+                </li>
+            </th:block>
+            <li class="page-item">
+                <span th:if="${page.hasNext()}">
+                    <a class="page-link" th:href="@{/shop(page=${page.number+1},size=${page.size})}">Next</a>
+                </span>
+            </li>
+        </ul>
+    </nav>
 </div>
 
 </body>
