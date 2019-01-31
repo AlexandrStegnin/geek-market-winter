@@ -1,7 +1,5 @@
 package com.geekbrains.geekmarketwinter.entites;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -9,9 +7,9 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Data
 @Entity
 @Table(name = "orders")
-@Data
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +18,6 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-//    @JsonBackReference
     private User user;
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "order", fetch = FetchType.EAGER)
@@ -36,7 +33,7 @@ public class Order {
     @Column(name = "delivery_price")
     private Double deliveryPrice;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "delivery_address_id")
     private DeliveryAddress deliveryAddress;
 
@@ -54,7 +51,4 @@ public class Order {
     @CreationTimestamp
     private LocalDateTime updateAt;
 
-//    @JsonIgnore
-//    @Transient
-//    private boolean confirmed;
 }

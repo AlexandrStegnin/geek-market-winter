@@ -14,8 +14,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
 		user.setLastName(systemUser.getLastName());
 		user.setEmail(systemUser.getEmail());
 
-		user.setRoles(Arrays.asList(roleRepository.findOneByName("ROLE_EMPLOYEE")));
+		user.setRoles(Collections.singletonList(roleRepository.findOneByName("ROLE_EMPLOYEE")));
 
 		userRepository.save(user);
 	}

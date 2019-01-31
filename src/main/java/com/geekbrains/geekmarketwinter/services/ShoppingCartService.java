@@ -2,10 +2,9 @@ package com.geekbrains.geekmarketwinter.services;
 
 import com.geekbrains.geekmarketwinter.entites.Product;
 import com.geekbrains.geekmarketwinter.utils.ShoppingCart;
+import com.vaadin.flow.server.VaadinRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpSession;
 
 @Service
 public class ShoppingCartService {
@@ -16,51 +15,51 @@ public class ShoppingCartService {
         this.productService = productService;
     }
 
-    public ShoppingCart getCurrentCart(HttpSession session) {
-        ShoppingCart cart = (ShoppingCart) session.getAttribute("cart");
+    public ShoppingCart getCurrentCart(VaadinRequest request) {
+        ShoppingCart cart = (ShoppingCart) request.getWrappedSession().getAttribute("cart");
         if (cart == null) {
             cart = new ShoppingCart();
-            session.setAttribute("cart", cart);
+            request.getWrappedSession().setAttribute("cart", cart);
         }
         return cart;
     }
 
-    public void resetCart(HttpSession session) {
-        session.removeAttribute("cart");
+    public void resetCart(VaadinRequest request) {
+        request.getWrappedSession().setAttribute("cart", new ShoppingCart());
     }
 
-    public void addToCart(HttpSession session, Long productId) {
+    public void addToCart(VaadinRequest request, Long productId) {
         Product product = productService.getProductById(productId);
-        addToCart(session, product);
+        addToCart(request, product);
     }
 
-    public void addToCart(HttpSession session, Product product) {
-        ShoppingCart cart = getCurrentCart(session);
+    public void addToCart(VaadinRequest request, Product product) {
+        ShoppingCart cart = getCurrentCart(request);
         cart.add(product);
     }
 
-    public void removeFromCart(HttpSession session, Long productId) {
+    public void removeFromCart(VaadinRequest request, Long productId) {
         Product product = productService.getProductById(productId);
-        removeFromCart(session, product);
+        removeFromCart(request, product);
     }
 
-    public void removeFromCart(HttpSession session, Product product) {
-        ShoppingCart cart = getCurrentCart(session);
+    public void removeFromCart(VaadinRequest request, Product product) {
+        ShoppingCart cart = getCurrentCart(request);
         cart.remove(product);
     }
 
-    public void setProductCount(HttpSession session, Long productId, Long quantity) {
-        ShoppingCart cart = getCurrentCart(session);
+    public void setProductCount(VaadinRequest request, Long productId, Long quantity) {
+        ShoppingCart cart = getCurrentCart(request);
         Product product = productService.getProductById(productId);
         cart.setQuantity(product, quantity);
     }
 
-    public void setProductCount(HttpSession session, Product product, Long quantity) {
-        ShoppingCart cart = getCurrentCart(session);
+    public void setProductCount(VaadinRequest request, Product product, Long quantity) {
+        ShoppingCart cart = getCurrentCart(request);
         cart.setQuantity(product, quantity);
     }
 
-    public double getTotalCost(HttpSession session) {
-        return getCurrentCart(session).getTotalCost();
+    public double getTotalCost(VaadinRequest request) {
+        return getCurrentCart(request).getTotalCost();
     }
 }

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @Controller
-@RequestMapping("/register")
+@RequestMapping("/api/register")
 public class RegistrationController {
     private UserService userService;
 

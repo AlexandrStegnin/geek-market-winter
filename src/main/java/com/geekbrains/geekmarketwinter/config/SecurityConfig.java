@@ -1,73 +1,103 @@
 package com.geekbrains.geekmarketwinter.config;
 
-import com.geekbrains.geekmarketwinter.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.geekbrains.geekmarketwinter.config.security.UserDetailsServiceImpl;
+import com.vaadin.flow.spring.annotation.EnableVaadin;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 
-import javax.sql.DataSource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
+import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
+
+@EnableVaadin
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private DataSource dataSource;
-    private UserService userService;
-    private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    private UserDetailsServiceImpl userDetailsService;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    @Autowired
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    @Autowired
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
-
-    @Autowired
-    public void setCustomAuthenticationSuccessHandler(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler) {
-        this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(authenticationProvider());
+    public SecurityConfig(UserDetailsServiceImpl userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+        this.userDetailsService = userDetailsService;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers("/register/**").permitAll()
-                .antMatchers("/admin/**").hasRole("ADMIN")
+        http.csrf().disable()
+                .authorizeRequests()
+                .antMatchers("/shop").permitAll()
+                .antMatchers(ALL_HTTP_MATCHERS).permitAll()
+                .regexMatchers(HttpMethod.POST, "/\\?v-r=.*").permitAll()
+                .anyRequest().authenticated()
                 .and()
-                .formLogin()
-                .loginPage("/login")
-                .loginProcessingUrl("/authenticateTheUser")
-                .successHandler(customAuthenticationSuccessHandler)
-                .permitAll()
+                .formLogin().loginPage(LOGIN_URL).permitAll()
+                .defaultSuccessUrl("/vaa", true)
+                .successHandler(this::loginSuccessHandler)
+                .failureHandler(this::loginFailureHandler)
                 .and()
-                .logout()
-                .permitAll();
+                .logout().logoutUrl(LOGOUT_URL).permitAll()
+                .logoutSuccessHandler(this::logoutSuccessHandler)
+                .invalidateHttpSession(true)
+                .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
+                .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    @Override
+    public void configure(AuthenticationManagerBuilder auth) {
+        auth.authenticationProvider(authenticationProvider());
+    }
+
+    @Override
+    public void configure(org.springframework.security.config.annotation.web.builders.WebSecurity web) {
+        web.ignoring().antMatchers(ALL_WEB_IGNORING_MATCHERS);
     }
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
-        auth.setUserDetailsService(userService);
-        auth.setPasswordEncoder(passwordEncoder());
-        return auth;
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(bCryptPasswordEncoder);
+        return provider;
+    }
+
+    private void loginSuccessHandler(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication) {
+        response.setStatus(HttpStatus.OK.value());
+    }
+
+    private void loginFailureHandler(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AuthenticationException e) throws IOException {
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    private void logoutSuccessHandler(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication) {
+
+        response.setStatus(HttpStatus.OK.value());
     }
 }

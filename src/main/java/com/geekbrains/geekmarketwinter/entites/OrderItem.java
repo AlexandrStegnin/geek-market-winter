@@ -28,6 +28,5 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "order_id")
-//    @JsonBackReference
     private Order order;
 }
