@@ -5,6 +5,7 @@ import com.geekbrains.geekmarketwinter.services.ProductService;
 import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.utils.ShoppingCart;
 import com.geekbrains.geekmarketwinter.utils.filters.ProductFilter;
+import com.vaadin.flow.server.VaadinService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import javax.servlet.http.HttpServletRequest;
 
 @Controller
-@RequestMapping("/shop")
+@RequestMapping("/api/shop")
 public class ShopController {
     private ProductService productService;
     private ShoppingCartService shoppingCartService;
@@ -46,19 +47,19 @@ public class ShopController {
 
     @GetMapping("/cart/add/{id}")
     public String addProductToCart(@PathVariable("id") Long id, HttpServletRequest httpServletRequest) {
-        shoppingCartService.addToCart(httpServletRequest.getSession(), id);
+        shoppingCartService.addToCart(VaadinService.getCurrentRequest(), id);
         return "redirect:/shop";
     }
 
     @GetMapping("/cart/remove/{id}")
     public String removeProductFromCart(@PathVariable("id") Long id, HttpServletRequest httpServletRequest) {
-        shoppingCartService.removeFromCart(httpServletRequest.getSession(), id);
+        shoppingCartService.removeFromCart(VaadinService.getCurrentRequest(), id);
         return "redirect:/shop/cart";
     }
 
     @GetMapping("/cart")
     public String showCart(Model model, HttpServletRequest request) {
-        ShoppingCart cart = shoppingCartService.getCurrentCart(request.getSession());
+        ShoppingCart cart = shoppingCartService.getCurrentCart(VaadinService.getCurrentRequest());
         model.addAttribute("cart", cart);
         return "cart-page";
     }
