@@ -1,9 +1,10 @@
-package com.geekbrains.geekmarketwinter;
+package com.geekbrains.geekmarketwinter.vaadin.ui;
 
 import com.geekbrains.geekmarketwinter.entites.Product;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.repositories.ProductRepository;
 import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
+import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
@@ -103,7 +104,6 @@ public class ShopView extends VerticalLayout {
                 .setFlexGrow(1);
 
         CustomAppLayout appLayout = new CustomAppLayout(auth, grid);
-        appLayout.setContent(grid);
         add(appLayout);
         setHeight("100vh");
 //      Setup Binder For Fields

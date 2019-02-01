@@ -99,11 +99,6 @@
 			<artifactId>spring-context-support</artifactId>
 			<version>5.0.5.RELEASE</version>
 		</dependency>
-		<dependency>
-			<groupId>org.thymeleaf</groupId>
-			<artifactId>thymeleaf</artifactId>
-			<version>3.0.11.RELEASE</version>
-		</dependency>
 
 	</dependencies>
 

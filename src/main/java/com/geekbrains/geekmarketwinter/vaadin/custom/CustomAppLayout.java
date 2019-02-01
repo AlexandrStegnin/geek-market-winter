@@ -1,4 +1,4 @@
-package com.geekbrains.geekmarketwinter;
+package com.geekbrains.geekmarketwinter.vaadin.custom;
 
 import com.geekbrains.geekmarketwinter.config.support.Constants;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;

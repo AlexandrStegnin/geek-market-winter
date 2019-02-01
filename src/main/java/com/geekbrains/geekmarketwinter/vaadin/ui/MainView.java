@@ -1,4 +1,4 @@
-package com.geekbrains.geekmarketwinter;
+package com.geekbrains.geekmarketwinter.vaadin.ui;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.notification.Notification;

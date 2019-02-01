@@ -1,4 +1,4 @@
-package com.geekbrains.geekmarketwinter;
+package com.geekbrains.geekmarketwinter.vaadin.ui;
 
 
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;

@@ -1,4 +1,4 @@
-package com.geekbrains.geekmarketwinter;
+package com.geekbrains.geekmarketwinter.vaadin.ui;
 
 import com.geekbrains.geekmarketwinter.entites.DeliveryAddress;
 import com.geekbrains.geekmarketwinter.entites.Order;
@@ -9,6 +9,7 @@ import com.geekbrains.geekmarketwinter.repositories.UserRepository;
 import com.geekbrains.geekmarketwinter.services.OrderService;
 import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.utils.ShoppingCart;
+import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
@@ -110,7 +111,7 @@ public class ConfirmView extends VerticalLayout {
             orderToBeCreated.setStatus(orderStatus);
 
             if (binder.writeBeanIfValid(orderToBeCreated)) {
-                orderService.createOrder(orderToBeCreated);
+                orderService.saveOrder(orderToBeCreated);
                 Notification.show("Saved bean values!");
                 getUI().ifPresent(ui -> ui.navigate("shop"));
             } else {
