@@ -25,7 +25,7 @@ public class ShoppingCartService {
     }
 
     public void resetCart(VaadinRequest request) {
-        request.getWrappedSession().setAttribute("cart", new ShoppingCart());
+        request.getWrappedSession().removeAttribute("cart");
     }
 
     public void addToCart(VaadinRequest request, Long productId) {

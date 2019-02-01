@@ -2,6 +2,7 @@ package com.geekbrains.geekmarketwinter.config;
 
 import com.geekbrains.geekmarketwinter.config.security.UserDetailsServiceImpl;
 import com.vaadin.flow.spring.annotation.EnableVaadin;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 
@@ -32,6 +34,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private UserDetailsServiceImpl userDetailsService;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Autowired
     public SecurityConfig(UserDetailsServiceImpl userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userDetailsService = userDetailsService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
@@ -83,6 +86,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             HttpServletRequest request,
             HttpServletResponse response,
             Authentication authentication) {
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         response.setStatus(HttpStatus.OK.value());
     }
 
@@ -97,7 +101,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             HttpServletRequest request,
             HttpServletResponse response,
             Authentication authentication) {
-
+        SecurityContextHolder.clearContext();
         response.setStatus(HttpStatus.OK.value());
     }
 }

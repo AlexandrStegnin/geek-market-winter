@@ -8,6 +8,7 @@ import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -30,7 +31,7 @@ public class Product implements Serializable {
     @Size(min = 8, max=8, message = "требуется 8 числовых символов")
     private String vendorCode;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "product")
     private List<ProductImage> images;
 
     @Column(name = "title")
@@ -57,4 +58,11 @@ public class Product implements Serializable {
     @Column(name = "update_at")
     @UpdateTimestamp
     private LocalDateTime updateAt;
+
+    public void addImage(ProductImage productImage) {
+        if (images == null) {
+            images = new ArrayList<>();
+        }
+        images.add(productImage);
+    }
 }

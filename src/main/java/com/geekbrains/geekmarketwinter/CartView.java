@@ -70,8 +70,6 @@ public class CartView extends VerticalLayout {
         grid.addComponentColumn(
                 orderItem -> {
                     Div div = new Div();
-
-
                     Button quantity = new Button(orderItem.getQuantity().toString());
                     quantity.setDisableOnClick(true);
 
@@ -96,8 +94,8 @@ public class CartView extends VerticalLayout {
                                 cartService.setProductCount(VaadinService.getCurrentRequest(), orderItem.getProduct(), qnt + 1L);
                                 dataProvider.refreshItem(orderItem);
                             });
-                    div.add(btnMinus, quantity, btnPlus);
 
+                    div.add(btnMinus, quantity, btnPlus);
                     return div;
                 })
                 .setHeader("Quantity")

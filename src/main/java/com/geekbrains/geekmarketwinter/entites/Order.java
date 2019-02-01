@@ -1,5 +1,6 @@
 package com.geekbrains.geekmarketwinter.entites;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -33,7 +34,7 @@ public class Order {
     @Column(name = "delivery_price")
     private Double deliveryPrice;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "delivery_address_id")
     private DeliveryAddress deliveryAddress;
 
@@ -51,4 +52,7 @@ public class Order {
     @CreationTimestamp
     private LocalDateTime updateAt;
 
+    @JsonIgnore
+    @Transient
+    private boolean confirmed;
 }
