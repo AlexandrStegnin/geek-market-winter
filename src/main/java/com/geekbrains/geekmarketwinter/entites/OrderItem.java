@@ -1,12 +1,14 @@
 package com.geekbrains.geekmarketwinter.entites;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "orders_item")
 @Data
+@EqualsAndHashCode(exclude = {"product", "order"})
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
