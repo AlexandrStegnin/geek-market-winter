@@ -20,11 +20,23 @@ public class CustomAppLayout extends AppLayout {
         img.setHeight("44px");
         setBranding(img);
 
+        AppLayoutMenuItem homeItem = new AppLayoutMenuItem(VaadinIcon.HOME.create(), "Home", "shop");
+        AppLayoutMenuItem cartItem = new AppLayoutMenuItem(VaadinIcon.CART.create(), "Cart", "cart");
+        AppLayoutMenuItem logoutItem = new AppLayoutMenuItem(VaadinIcon.SIGN_OUT.create(), "Logout", e -> logout());
+        AppLayoutMenuItem loginItem = new AppLayoutMenuItem(VaadinIcon.SIGN_IN.create(), "Login", "login");
+        AppLayoutMenuItem adminItem = new AppLayoutMenuItem(VaadinIcon.COGS.create(), "Admin", "admin/categories");
+
         menu.addMenuItems(
-                new AppLayoutMenuItem(VaadinIcon.HOME.create(), "Home", "shop"),
-                new AppLayoutMenuItem(VaadinIcon.CART.create(), "Cart", "cart"),
-                new AppLayoutMenuItem(VaadinIcon.SIGN_OUT.create(), "Logout", e -> logout())
+                homeItem,
+                cartItem
         );
+
+        if (auth.authenticated()) {
+            menu.addMenuItem(adminItem);
+            menu.addMenuItem(logoutItem);
+        } else {
+            menu.addMenuItem(loginItem);
+        }
 
         setContent(component);
     }
