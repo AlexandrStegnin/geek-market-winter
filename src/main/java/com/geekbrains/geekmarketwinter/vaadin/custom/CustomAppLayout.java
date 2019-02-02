@@ -21,8 +21,8 @@ public class CustomAppLayout extends AppLayout {
         setBranding(img);
 
         menu.addMenuItems(
-                new AppLayoutMenuItem(VaadinIcon.HOME.create(),"Home", "shop"),
-                new AppLayoutMenuItem(VaadinIcon.CART.create(), "Cart",  "cart"),
+                new AppLayoutMenuItem(VaadinIcon.HOME.create(), "Home", "shop"),
+                new AppLayoutMenuItem(VaadinIcon.CART.create(), "Cart", "cart"),
                 new AppLayoutMenuItem(VaadinIcon.SIGN_OUT.create(), "Logout", e -> logout())
         );
 

@@ -2,31 +2,29 @@ package com.geekbrains.geekmarketwinter.vaadin.ui;
 
 import com.geekbrains.geekmarketwinter.entites.DeliveryAddress;
 import com.geekbrains.geekmarketwinter.entites.Order;
-import com.geekbrains.geekmarketwinter.entites.OrderItem;
-import com.geekbrains.geekmarketwinter.entites.OrderStatus;
+import com.geekbrains.geekmarketwinter.entites.User;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.repositories.UserRepository;
+import com.geekbrains.geekmarketwinter.services.DeliveryAddressService;
 import com.geekbrains.geekmarketwinter.services.OrderService;
 import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.utils.ShoppingCart;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
-import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -38,11 +36,15 @@ public class ConfirmView extends VerticalLayout {
     private final ShoppingCartService cartService;
     private final UserRepository userRepo;
     private final OrderService orderService;
+    private final DeliveryAddressService addressService;
+    private String delivAddress;
 
     public ConfirmView(AuthRepository auth,
                        ShoppingCartService cartService,
                        UserRepository userRepo,
-                       OrderService orderService) {
+                       OrderService orderService,
+                       DeliveryAddressService addressService) {
+        this.addressService = addressService;
         this.orderService = orderService;
         this.cartService = cartService;
         this.userRepo = userRepo;
@@ -54,26 +56,23 @@ public class ConfirmView extends VerticalLayout {
 
         FormLayout formLayout = new FormLayout();
         Binder<Order> binder = new Binder<>();
-        Order orderToBeCreated = new Order();
 
-        TextField address = new TextField();
+        ComboBox<DeliveryAddress> deliveryAddress = new ComboBox<>();
+        deliveryAddress.setLabel("Выбрать адрес доставки");
+        deliveryAddress.setItems(addressService.getUserAddresses(1L)); // TODO 2019-02-02 заменить на пользователя системы
+        deliveryAddress.setItemLabelGenerator(DeliveryAddress::getAddress);
+        deliveryAddress.setRequired(false);
+
         TextField phone = new TextField();
-
-        formLayout.addFormItem(address, "Delivery address");
-        formLayout.addFormItem(phone, "Contact phone");
+        phone.setLabel("Phone");
+        phone.setPlaceholder("999999");
 
         Button btnPay = new Button("Pay order", e -> payOrder());
         Button btnCancel = new Button("Cancel", e -> getUI().ifPresent(ui -> ui.navigate("cart")));
 
-        HorizontalLayout actions = new HorizontalLayout();
-        actions.add(btnPay, btnCancel);
-
-        formLayout.addFormItem(actions, "");
-
-        formLayout.setResponsiveSteps(
-                new FormLayout.ResponsiveStep("0", 1),
-                new FormLayout.ResponsiveStep("21em", 2),
-                new FormLayout.ResponsiveStep("22em", 3));
+        formLayout.add(deliveryAddress, phone, btnPay, btnCancel);
+        formLayout.setHeight("100%");
+        formLayout.setSizeUndefined();
 
         SerializablePredicate<String> phonePredicate = value -> !phone
                 .getValue().trim().isEmpty();
@@ -86,33 +85,37 @@ public class ConfirmView extends VerticalLayout {
         // Trigger cross-field validation when the other field is changed
         phone.addValueChangeListener(event -> phoneBinding.validate());
 
-        address.setRequiredIndicatorVisible(true);
-
-        binder.forField(address)
-                .withValidator(new StringLengthValidator(
-                        "Please add the delivery address", 10, null))
-                .bind(order -> order.getDeliveryAddress().getAddress(),
-                        (order, s) -> order.getDeliveryAddress().setAddress(s));
+        deliveryAddress.setRequiredIndicatorVisible(true);
+        deliveryAddress.setAllowCustomValue(true);
+        deliveryAddress.setReadOnly(false);
+        deliveryAddress.addCustomValueSetListener(event -> {
+            delivAddress = event.getDetail();
+        });
 
         btnPay.addClickListener(event -> {
+            User user = userRepo.findOneByUserName("admin");
             ShoppingCart cart = cartService.getCurrentCart(VaadinService.getCurrentRequest());
-            List<OrderItem> items = cart.getItems();
-            orderToBeCreated.setUser(userRepo.findOneByUserName("admin"));
-            orderToBeCreated.setOrderItems(items);
-            orderToBeCreated.setPrice(cart.getTotalCost());
-            orderToBeCreated.setDeliveryPrice(100D);
-            orderToBeCreated.setDeliveryAddress(
-                    new DeliveryAddress(orderToBeCreated.getUser(), address.getValue())
-            );
-            orderToBeCreated.setPhoneNumber(phone.getValue());
-            OrderStatus orderStatus = new OrderStatus();
-            orderStatus.setId(1L);
-            orderStatus.setTitle("Сформирован");
-            orderToBeCreated.setStatus(orderStatus);
 
-            if (binder.writeBeanIfValid(orderToBeCreated)) {
-                orderService.saveOrder(orderToBeCreated);
-                Notification.show("Saved bean values!");
+            Order finalOrder = new Order();
+            finalOrder.setPhoneNumber(phone.getValue());
+
+            DeliveryAddress address = deliveryAddress.getValue();
+            if (address == null) {
+                address = new DeliveryAddress(user, delivAddress);
+                addressService.save(address);
+            }
+
+            finalOrder.setDeliveryAddress(address);
+            finalOrder = orderService.makeOrder(cart, user, finalOrder);
+
+            if (binder.writeBeanIfValid(finalOrder)) {
+                orderService.saveOrder(finalOrder);
+
+                Notification notification = new Notification(
+                        "Order have been confirmed", 3000,
+                        Notification.Position.TOP_END);
+                notification.open();
+
                 getUI().ifPresent(ui -> ui.navigate("shop"));
             } else {
                 BinderValidationStatus<Order> validate = binder.validate();
@@ -131,6 +134,9 @@ public class ConfirmView extends VerticalLayout {
         setHeight("100vh");
         setMargin(true);
         setAlignItems(Alignment.CENTER);
+        setAlignSelf(Alignment.CENTER);
+        setJustifyContentMode(JustifyContentMode.CENTER);
+
     }
 
     private void payOrder() {

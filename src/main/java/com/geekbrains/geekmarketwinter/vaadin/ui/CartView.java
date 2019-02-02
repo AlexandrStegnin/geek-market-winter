@@ -6,8 +6,10 @@ import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
+import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -42,19 +44,15 @@ public class CartView extends VerticalLayout {
         grid.setDataProvider(dataProvider);
         grid.setHeightByRows(true);
 
-        grid.addColumn(OrderItem::getId)
-                .setHeader("ID")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setWidth("10px")
-                .setFlexGrow(1);
-
-        grid.addColumn(orderItem -> orderItem.getProduct().getTitle())
-                .setHeader("Title")
+        Grid.Column<OrderItem> titleColumn = grid
+                .addColumn(orderItem -> orderItem.getProduct().getTitle())
+                .setHeader(new Label("Title"))
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        grid.addColumn(orderItem -> orderItem.getProduct().getPrice())
-                .setHeader("Price")
+        Grid.Column<OrderItem> priceColumn = grid
+                .addColumn(orderItem -> orderItem.getProduct().getPrice())
+                .setHeader(new Label("Price"))
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
@@ -68,7 +66,7 @@ public class CartView extends VerticalLayout {
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        grid.addComponentColumn(
+        Grid.Column<OrderItem> quantityColumn = grid.addComponentColumn(
                 orderItem -> {
                     Div div = new Div();
                     Button quantity = new Button(orderItem.getQuantity().toString());
@@ -103,8 +101,25 @@ public class CartView extends VerticalLayout {
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        Button confirm = new Button("Confirm", buttonClickEvent -> confirm());
+        FooterRow footerRow = grid.appendFooterRow();
+        Label total = new Label("Total");
+        total.getStyle().set("font-size", "18px");
+        total.getStyle().set("color", "black");
+        footerRow.getCell(titleColumn).setComponent(total);
 
+        Label price = new Label(cartService.getCurrentCart(VaadinService.getCurrentRequest()).getTotalCost().toString());
+        price.getStyle().set("font-size", "18px");
+        price.getStyle().set("color", "black");
+        footerRow.getCell(priceColumn).setComponent(price);
+
+        Label quantity = new Label();
+        quantity.getStyle().set("font-size", "18px");
+        quantity.getStyle().set("color", "black");
+        quantity.setText(getCartItems().stream().map(OrderItem::getQuantity).reduce(0L, (a, b) -> a + b).toString());
+        footerRow.getCell(quantityColumn).setComponent(quantity);
+
+        Button confirm = new Button("Confirm", buttonClickEvent -> confirm());
+        confirm.getStyle().set("margin-right", "50px");
         VerticalLayout box = new VerticalLayout(grid, confirm);
         box.setAlignItems(Alignment.END);
         CustomAppLayout appLayout = new CustomAppLayout(auth, box);

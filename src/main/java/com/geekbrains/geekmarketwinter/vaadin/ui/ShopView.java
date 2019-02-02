@@ -106,48 +106,6 @@ public class ShopView extends VerticalLayout {
         CustomAppLayout appLayout = new CustomAppLayout(auth, grid);
         add(appLayout);
         setHeight("100vh");
-//      Setup Binder For Fields
-//
-//        Binder<Product> binder = new Binder<>(Product.class);
-//        Editor<Product> editor = grid.getEditor();
-//        editor.setBinder(binder);
-//        editor.setBuffered(true);
-//
-//        Div validationStatus = new Div();
-//        validationStatus.setId("validation");
-//
-//        TextField field = new TextField();
-//        binder.forField(field)
-//                .withValidator(name -> name.startsWith("Person"),
-//                        "Name should start with Person")
-//                .withStatusLabel(validationStatus).bind("title");
-//        titleColumn.setEditorComponent(field);
-//
-//        Grid.Column<Product> editorColumn = grid.addComponentColumn(product -> {
-//            Button edit = new Button("Edit");
-//            edit.addClassName("edit");
-//            edit.addClickListener(e -> editor.editItem(product));
-//            return edit;
-//        });
-//
-//        Button save = new Button("Save", e -> editor.save());
-//        save.addClassName("save");
-//
-//        Button cancel = new Button("Cancel", e -> editor.cancel());
-//        cancel.addClassName("cancel");
-//
-// Add a keypress listener that listens for an escape key up event.
-// Note! some browsers return key as Escape and some as Esc
-//        grid.getElement().addEventListener("keyup", event -> editor.cancel())
-//                .setFilter("event.key === 'Escape' || even.key === 'Esc'");
-//
-//        Div buttons = new Div(save, cancel);
-//        editorColumn.setEditorComponent(buttons);
-//
-//        editor.addSaveListener(
-//                event -> message.setText(event.getItem().getLogin() + ", "
-//                        + event.getItem().isEnabled()));
-//
     }
 
     private List<Product> getAllProducts() {

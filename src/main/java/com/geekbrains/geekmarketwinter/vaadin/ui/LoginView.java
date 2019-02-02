@@ -12,7 +12,7 @@ import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 
 @Route("login")
-@Theme(value = Material.class)
+@Theme(value = Material.class, variant = Material.DARK)
 public class LoginView extends VerticalLayout {
 
     private final AuthRepository authRepository;
@@ -42,7 +42,10 @@ public class LoginView extends VerticalLayout {
         add(loginForm);
 
         setMargin(true);
+        setAlignSelf(Alignment.CENTER);
         setAlignItems(Alignment.CENTER);
+        setHeight("100%");
+        setJustifyContentMode(JustifyContentMode.CENTER);
     }
 
     private boolean authenticated(String login, String password) {
