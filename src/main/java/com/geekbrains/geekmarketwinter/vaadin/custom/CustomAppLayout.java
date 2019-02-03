@@ -32,8 +32,11 @@ public class CustomAppLayout extends AppLayout {
                 cartItem
         );
 
-        if (SecurityUtils.isUserLoggedIn()) {
+        if (SecurityUtils.isUserInRole("ROLE_ADMIN")) {
             menu.addMenuItem(adminItem);
+        }
+
+        if (SecurityUtils.isUserLoggedIn()) {
             menu.addMenuItem(logoutItem);
         } else {
             menu.addMenuItem(loginItem);

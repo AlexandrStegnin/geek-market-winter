@@ -23,7 +23,7 @@ public class AuthService extends AbstractRepository implements AuthRepository {
         Authentication auth = new UsernamePasswordAuthenticationToken(login, password);
         Authentication authentication = daoAuthenticationProvider.authenticate(auth);
         if (authentication.isAuthenticated()) {
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         } else {
             SecurityContextHolder.clearContext();
         }

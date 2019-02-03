@@ -1,10 +1,13 @@
 package com.geekbrains.geekmarketwinter.config.security;
 
 import com.vaadin.flow.server.ServletHelper.RequestType;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.ApplicationConstants;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -22,6 +25,9 @@ import java.util.stream.Stream;
  *
  */
 public final class SecurityUtils {
+
+    @Autowired(required = false)
+    private static GrantedAuthorityDefaults grantedAuthorityDefaults;
 
 	private SecurityUtils() {
 		// Util methods only
@@ -98,5 +104,9 @@ public final class SecurityUtils {
 		return parameterValue != null
 				&& Stream.of(RequestType.values()).anyMatch(r -> r.getIdentifier().equals(parameterValue));
 	}
+
+	public static boolean isUserInRole(String role) {
+        return VaadinService.getCurrentRequest().isUserInRole(role);
+    }
 
 }
