@@ -1,5 +1,6 @@
 package com.geekbrains.geekmarketwinter.vaadin.custom;
 
+import com.geekbrains.geekmarketwinter.config.security.SecurityUtils;
 import com.geekbrains.geekmarketwinter.config.support.Constants;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.vaadin.flow.component.Component;
@@ -31,7 +32,7 @@ public class CustomAppLayout extends AppLayout {
                 cartItem
         );
 
-        if (auth.authenticated()) {
+        if (SecurityUtils.isUserLoggedIn()) {
             menu.addMenuItem(adminItem);
             menu.addMenuItem(logoutItem);
         } else {
