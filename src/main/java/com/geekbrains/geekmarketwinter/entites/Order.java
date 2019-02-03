@@ -36,7 +36,7 @@ public class Order {
     @Column(name = "delivery_price")
     private Double deliveryPrice;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "delivery_address_id")
     private DeliveryAddress deliveryAddress;
 

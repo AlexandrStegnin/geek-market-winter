@@ -1,40 +1,29 @@
 package com.geekbrains.geekmarketwinter.services;
 
+import com.geekbrains.geekmarketwinter.config.security.SecurityUtils;
 import com.geekbrains.geekmarketwinter.entites.Order;
 import com.geekbrains.geekmarketwinter.entites.OrderItem;
 import com.geekbrains.geekmarketwinter.entites.OrderStatus;
 import com.geekbrains.geekmarketwinter.entites.User;
 import com.geekbrains.geekmarketwinter.repositories.OrderRepository;
 import com.geekbrains.geekmarketwinter.utils.ShoppingCart;
+import com.vaadin.flow.server.VaadinService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 @Service
 public class OrderService {
 
     private final OrderRepository orderRepo;
+    private final ShoppingCartService cartService;
 
     @Autowired
-    public OrderService(OrderRepository orderRepo) {
+    public OrderService(OrderRepository orderRepo, ShoppingCartService cartService) {
         this.orderRepo = orderRepo;
-    }
-
-    public Order makeOrder(ShoppingCart cart, User user) {
-        Order order = new Order();
-        order.setId(0L);
-        order.setUser(user);
-        OrderStatus os = new OrderStatus(); // todo исправить
-        os.setId(1L);
-        os.setTitle("Сформирован");
-        order.setStatus(os);
-        order.setPrice(cart.getTotalCost());
-        order.setOrderItems(new ArrayList<>(cart.getItems()));
-        for (OrderItem o : cart.getItems()) {
-            o.setOrder(order);
-        }
-        return order;
+        this.cartService = cartService;
     }
 
     public Order findById(Long id) {
@@ -45,5 +34,29 @@ public class OrderService {
         Order orderOut = orderRepo.save(order);
         orderOut.setConfirmed(true);
         return orderOut;
+    }
+
+    public Order makeOrder(Order order) {
+        User user = SecurityUtils.getCurrentUser();
+        ShoppingCart cart = cartService.getCurrentCart(VaadinService.getCurrentRequest());
+        order.getDeliveryAddress().setUser(user);
+        order.setId(0L);
+        order.setUser(user);
+        OrderStatus os = new OrderStatus(); // todo исправить
+        os.setId(1L);
+        os.setTitle("Сформирован");
+        order.setStatus(os);
+        order.setPrice(cart.getTotalCost());
+        order.setOrderItems(new ArrayList<>(cart.getItems()));
+        order.setDeliveryAddress(order.getDeliveryAddress());
+        order.setDeliveryPrice(100d);
+        order.setDeliveryDate(LocalDateTime.now().plusDays(7));
+        order.setPhoneNumber(order.getPhoneNumber());
+        order.setDeliveryDate(LocalDateTime.now().plusDays(7));
+        order.setDeliveryPrice(100d);
+        for (OrderItem o : cart.getItems()) {
+            o.setOrder(order);
+        }
+        return order;
     }
 }
