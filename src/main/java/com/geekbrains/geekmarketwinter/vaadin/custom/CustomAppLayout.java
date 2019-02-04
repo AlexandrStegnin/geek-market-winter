@@ -27,16 +27,15 @@ public class CustomAppLayout extends AppLayout {
         AppLayoutMenuItem logoutItem = new AppLayoutMenuItem(VaadinIcon.SIGN_OUT.create(), "Logout", e -> logout());
         AppLayoutMenuItem loginItem = new AppLayoutMenuItem(VaadinIcon.SIGN_IN.create(), "Login", "login");
         AppLayoutMenuItem adminItem = new AppLayoutMenuItem(VaadinIcon.COGS.create(), "Admin", "admin/categories");
+        AppLayoutMenuItem managerItem = new AppLayoutMenuItem(VaadinIcon.PACKAGE.create(), "Manage orders", "manager/orders");
 
         menu.addMenuItems(
                 homeItem,
                 cartItem
         );
 
-        if (SecurityUtils.isUserInRole("ROLE_ADMIN")) {
-            menu.addMenuItem(adminItem);
-        }
-
+        if (SecurityUtils.isUserInRole("ROLE_ADMIN")) menu.addMenuItem(adminItem);
+        if (SecurityUtils.isUserInRole("ROLE_MANAGER")) menu.addMenuItem(managerItem);
         if (SecurityUtils.isUserLoggedIn()) {
             menu.addMenuItem(logoutItem);
         } else {
