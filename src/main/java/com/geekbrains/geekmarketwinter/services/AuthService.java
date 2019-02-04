@@ -1,6 +1,7 @@
 package com.geekbrains.geekmarketwinter.services;
 
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
+import com.vaadin.flow.component.notification.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;

@@ -3,9 +3,20 @@ package com.geekbrains.geekmarketwinter.config.support;
 public class Constants {
     //    API Main
 
+    public static final String PATH_SEPARATOR = "/";
+
+    /**
+     * Application pages constants
+     * */
+    public static final String LOGIN_PAGE = "login";
+    public static final String SHOP_PAGE = "shop";
+    public static final String CART_PAGE = "cart";
+    public static final String CONFIRM_ORDER_PAGE = "confirm-order";
+
+
     public static final String API = "/api";
     public static final String LOGOUT_URL = "/logout";
-    public static final String LOGIN_URL = "/login";
+    public static final String LOGIN_URL = PATH_SEPARATOR + LOGIN_PAGE;
     public static final String[] ALL_HTTP_MATCHERS = {
             "/VAADIN/**", "/HEARTBEAT/**", "/UIDL/**", "/resources/**",
             "/login", "/login**", "/login/**", "/manifest.json", "/icons/**", "/images/**",

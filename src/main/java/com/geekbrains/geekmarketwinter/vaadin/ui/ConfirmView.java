@@ -3,10 +3,8 @@ package com.geekbrains.geekmarketwinter.vaadin.ui;
 import com.geekbrains.geekmarketwinter.entites.DeliveryAddress;
 import com.geekbrains.geekmarketwinter.entites.Order;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
-import com.geekbrains.geekmarketwinter.repositories.UserRepository;
 import com.geekbrains.geekmarketwinter.services.DeliveryAddressService;
 import com.geekbrains.geekmarketwinter.services.OrderService;
-import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -25,26 +23,22 @@ import com.vaadin.flow.theme.material.Material;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Theme(Material.class)
-@Route("confirm-order")
+import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
+
+@Theme(value = Material.class, variant = Material.DARK)
+@Route(CONFIRM_ORDER_PAGE)
 public class ConfirmView extends VerticalLayout {
 
     private final AuthRepository auth;
-    private final ShoppingCartService cartService;
-    private final UserRepository userRepo;
     private final OrderService orderService;
     private final DeliveryAddressService addressService;
     private String delivAddress;
 
     public ConfirmView(AuthRepository auth,
-                       ShoppingCartService cartService,
-                       UserRepository userRepo,
                        OrderService orderService,
                        DeliveryAddressService addressService) {
         this.addressService = addressService;
         this.orderService = orderService;
-        this.cartService = cartService;
-        this.userRepo = userRepo;
         this.auth = auth;
         init();
     }
@@ -65,7 +59,7 @@ public class ConfirmView extends VerticalLayout {
         phone.setPlaceholder("999999");
 
         Button btnPay = new Button("Pay order");
-        Button btnCancel = new Button("Cancel", e -> getUI().ifPresent(ui -> ui.navigate("cart")));
+        Button btnCancel = new Button("Cancel", e -> getUI().ifPresent(ui -> ui.navigate(CART_PAGE)));
 
         formLayout.add(deliveryAddress, phone, btnPay, btnCancel);
         formLayout.setHeight("100%");
@@ -107,7 +101,7 @@ public class ConfirmView extends VerticalLayout {
                         Notification.Position.TOP_END);
                 notification.open();
 
-                getUI().ifPresent(ui -> ui.navigate("shop"));
+                getUI().ifPresent(ui -> ui.navigate(SHOP_PAGE));
             } else {
                 BinderValidationStatus<Order> validate = binder.validate();
                 String errorText = validate.getFieldValidationStatuses()

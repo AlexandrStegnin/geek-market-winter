@@ -9,6 +9,7 @@ import com.vaadin.flow.component.applayout.AppLayoutMenu;
 import com.vaadin.flow.component.applayout.AppLayoutMenuItem;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 
 public class CustomAppLayout extends AppLayout {
 
@@ -46,6 +47,7 @@ public class CustomAppLayout extends AppLayout {
     }
 
     private void logout() {
+        Notification.show("You have been Log Out successful!", 3000, Notification.Position.MIDDLE);
         this.getUI().ifPresent(ui -> ui.navigate(Constants.LOGIN_URL.replace("/", "")));
         auth.logout();
     }

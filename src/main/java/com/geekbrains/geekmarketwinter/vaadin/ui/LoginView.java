@@ -11,7 +11,10 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 
-@Route("login")
+import static com.geekbrains.geekmarketwinter.config.support.Constants.LOGIN_PAGE;
+import static com.geekbrains.geekmarketwinter.config.support.Constants.SHOP_PAGE;
+
+@Route(LOGIN_PAGE)
 @Theme(value = Material.class, variant = Material.DARK)
 public class LoginView extends VerticalLayout {
 
@@ -26,16 +29,16 @@ public class LoginView extends VerticalLayout {
         FormLayout loginForm = new FormLayout();
 
         TextField loginField = new TextField();
-        loginField.setLabel("Имя пользователя");
-        loginField.setPlaceholder("Логин");
+        loginField.setLabel("Username");
+        loginField.setPlaceholder("Login");
 
         PasswordField passwordField = new PasswordField();
-        passwordField.setLabel("Пароль");
+        passwordField.setLabel("Password");
         passwordField.setPlaceholder("*****");
 
-        Button loginButton = new Button("Войти", e -> {
+        Button loginButton = new Button("LOG IN", e -> {
             if (authenticated(loginField.getValue(), passwordField.getValue()))
-                this.getUI().ifPresent(ui -> ui.navigate("shop"));
+                this.getUI().ifPresent(ui -> ui.navigate(SHOP_PAGE));
         });
 
         loginForm.add(loginField, passwordField, loginButton);
