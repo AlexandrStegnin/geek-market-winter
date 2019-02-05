@@ -14,6 +14,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
@@ -34,6 +35,8 @@ public class OrderView extends VerticalLayout {
     }
 
     private void init() {
+        Locale locale = new Locale("ru", "RU");
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(locale);
 
         grid.setDataProvider(dataProvider);
 
@@ -48,20 +51,21 @@ public class OrderView extends VerticalLayout {
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        Grid.Column<Order> deliveryPriceColumn = grid.addColumn(Order::getDeliveryPrice)
-                .setHeader("Delivery price")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(1);
+//        Grid.Column<Order> deliveryPriceColumn = grid.addColumn(Order::getDeliveryPrice)
+//                .setHeader("Delivery price")
+//                .setTextAlign(ColumnTextAlign.CENTER)
+//                .setFlexGrow(1);
 
         // NumberRenderer to render numbers in general
-        grid.addColumn(new NumberRenderer<>(Order::getPrice, "%(,.2f руб.",
-                Locale.ENGLISH, "0.00 руб.")).setHeader("Delivery price");
+        grid.addColumn(new NumberRenderer<>(Order::getPrice, currencyFormat)).setHeader("Delivery price")
+                .setTextAlign(ColumnTextAlign.CENTER)
+                .setFlexGrow(1);
 
 
         // You can also set complex objects directly. Internal properties of the
         // bean are accessible in the template.
         grid.addColumn(TemplateRenderer.<Order> of(
-                "<div>[[item.address.title]], <br><small>[[item.address.user.userName]]</small></div>")
+                "<div>[[item.address.title]], <br><small>[[item.user.userName]]</small></div>")
                 .withProperty("address", order -> order.getUser().getUserName()))
                 .setHeader("Address");
 
