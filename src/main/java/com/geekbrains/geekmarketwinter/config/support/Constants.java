@@ -1,5 +1,7 @@
 package com.geekbrains.geekmarketwinter.config.support;
 
+import java.util.Locale;
+
 public class Constants {
     //    API Main
 
@@ -13,6 +15,7 @@ public class Constants {
     public static final String CART_PAGE = "cart";
     public static final String CONFIRM_ORDER_PAGE = "confirm-order";
 
+    public static final Locale LOCALE_RU = new Locale("ru", "RU");
 
     public static final String API = "/api";
     public static final String LOGOUT_URL = "/logout";
