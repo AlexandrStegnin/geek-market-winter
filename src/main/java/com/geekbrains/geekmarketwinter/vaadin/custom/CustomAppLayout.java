@@ -46,7 +46,7 @@ public class CustomAppLayout extends AppLayout {
     }
 
     private void logout() {
-        Notification.show("You have been Log Out successful!", 3000, Notification.Position.MIDDLE);
+        Notification.show("You have been Log Out successful!", 3000, Notification.Position.TOP_END);
         this.getUI().ifPresent(ui -> ui.navigate(Constants.LOGIN_URL.replace("/", "")));
         auth.logout();
     }

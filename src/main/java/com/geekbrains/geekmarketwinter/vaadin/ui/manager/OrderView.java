@@ -8,11 +8,14 @@ import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.renderer.NumberRenderer;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 
 import java.util.List;
+import java.util.Locale;
 
 @Route("manager/orders")
 @Theme(value = Material.class, variant = Material.DARK)
@@ -44,6 +47,23 @@ public class OrderView extends VerticalLayout {
                 .setHeader("Price")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
+
+        Grid.Column<Order> deliveryPriceColumn = grid.addColumn(Order::getDeliveryPrice)
+                .setHeader("Delivery price")
+                .setTextAlign(ColumnTextAlign.CENTER)
+                .setFlexGrow(1);
+
+        // NumberRenderer to render numbers in general
+        grid.addColumn(new NumberRenderer<>(Order::getPrice, "%(,.2f руб.",
+                Locale.ENGLISH, "0.00 руб.")).setHeader("Delivery price");
+
+
+        // You can also set complex objects directly. Internal properties of the
+        // bean are accessible in the template.
+        grid.addColumn(TemplateRenderer.<Order> of(
+                "<div>[[item.address.title]], <br><small>[[item.address.user.userName]]</small></div>")
+                .withProperty("address", order -> order.getUser().getUserName()))
+                .setHeader("Address");
 
         Grid.Column<Order> statusColumn = grid.addColumn(order -> order.getStatus().getTitle())
                 .setHeader("Status")
