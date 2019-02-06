@@ -14,13 +14,17 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 
 import java.util.List;
 
-@Route("admin/order-statuses")
+import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_ORDER_STATUSES_PAGE;
+
+@PageTitle("Orders statuses")
+@Route(ADMIN_ORDER_STATUSES_PAGE)
 @Theme(value = Material.class, variant = Material.DARK)
 public class OrderStatusView extends VerticalLayout {
 

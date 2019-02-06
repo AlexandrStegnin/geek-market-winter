@@ -13,6 +13,7 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.theme.Theme;
@@ -21,7 +22,11 @@ import com.vaadin.flow.theme.material.Material;
 import java.util.ArrayList;
 import java.util.List;
 
-@Route("cart")
+import static com.geekbrains.geekmarketwinter.config.support.Constants.CART_PAGE;
+import static com.geekbrains.geekmarketwinter.config.support.Constants.CONFIRM_ORDER_PAGE;
+
+@Route(CART_PAGE)
+@PageTitle("Cart")
 @Theme(value = Material.class)
 public class CartView extends VerticalLayout {
 
@@ -137,6 +142,6 @@ public class CartView extends VerticalLayout {
     }
 
     private void confirm() {
-        this.getUI().ifPresent(ui -> ui.navigate("confirm-order"));
+        this.getUI().ifPresent(ui -> ui.navigate(CONFIRM_ORDER_PAGE));
     }
 }

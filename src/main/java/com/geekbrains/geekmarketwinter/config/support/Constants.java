@@ -9,23 +9,42 @@ public class Constants {
 
     /**
      * Application pages constants
-     * */
+     */
     public static final String LOGIN_PAGE = "login";
+    public static final String LOGOUT_PAGE = "logout";
     public static final String SHOP_PAGE = "shop";
     public static final String CART_PAGE = "cart";
     public static final String CONFIRM_ORDER_PAGE = "confirm-order";
+
+    /* ADMINS PAGES */
     public static final String ADMIN_PAGE = "admin";
+    public static final String CATEGORIES_PAGE = "categories";
+    public static final String ORDER_STATUSES_PAGE = "order-statuses";
+    public static final String ADMIN_CATEGORIES_PAGE = ADMIN_PAGE + PATH_SEPARATOR + CATEGORIES_PAGE;
+    public static final String ADMIN_ORDER_STATUSES_PAGE = ADMIN_PAGE + PATH_SEPARATOR + ORDER_STATUSES_PAGE;
+    public static final String USERS_PAGE = "users";
+    public static final String ADMIN_USERS_PAGE = ADMIN_PAGE + PATH_SEPARATOR + USERS_PAGE;
+    public static final String ROLES_PAGE = "roles";
+    public static final String ADMIN_ROLES_PAGE = ADMIN_PAGE + PATH_SEPARATOR + ROLES_PAGE;
+
+
+    /* MANAGER PAGES */
+    public static final String MANAGER_PAGE = "manager";
+    public static final String ORDERS_PAGE = "orders";
+    public static final String MANAGER_ORDERS_PAGE = MANAGER_PAGE + PATH_SEPARATOR + ORDERS_PAGE;
 
     /**
      * Application roles constants
      */
     public static final String ROLE_ADMIN = "ADMIN";
+    public static final String ROLE_EMPLOYEE = "EMPLOYEE";
+    public static final String ROLE_MANAGER = "MANAGER";
 
     public static final Locale LOCALE_RU = new Locale("ru", "RU");
 
-    public static final String API = "/api";
-    public static final String LOGOUT_URL = "/logout";
+    public static final String LOGOUT_URL = PATH_SEPARATOR + LOGOUT_PAGE;
     public static final String LOGIN_URL = PATH_SEPARATOR + LOGIN_PAGE;
+
     public static final String[] ALL_HTTP_MATCHERS = {
             "/VAADIN/**", "/HEARTBEAT/**", "/UIDL/**", "/resources/**",
             "/login", "/login**", "/login/**", "/manifest.json", "/icons/**", "/images/**",
@@ -65,21 +84,4 @@ public class Constants {
             // (production mode) static resources
             "/frontend-es5/**", "/frontend-es6/**"
     };
-
-    //    API для работы с User
-    public static final String API_USERS = "/users";
-    public static final String API_USER_ID = "userId";
-    public static final String API_USERS_USER_ID = "/{userId}";
-    public static final String API_AUTH_URL = API + API_USERS + "/auth";
-
-    //    API для работы с Role
-    public static final String API_ROLES = "/roles";
-    public static final String API_ROLE_ID = "roleId";
-    public static final String API_ROLES_ROLE_ID = "/{roleId}";
-
-    //    Security Constants
-    public static final String SIGN_UP_URL = "/users/sign-up";
-
-
-
 }

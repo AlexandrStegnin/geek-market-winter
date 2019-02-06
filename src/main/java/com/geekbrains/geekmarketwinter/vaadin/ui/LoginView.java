@@ -7,6 +7,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
@@ -14,6 +15,7 @@ import com.vaadin.flow.theme.material.Material;
 import static com.geekbrains.geekmarketwinter.config.support.Constants.LOGIN_PAGE;
 import static com.geekbrains.geekmarketwinter.config.support.Constants.SHOP_PAGE;
 
+@PageTitle("Login page")
 @Route(LOGIN_PAGE)
 @Theme(value = Material.class, variant = Material.DARK)
 public class LoginView extends VerticalLayout {

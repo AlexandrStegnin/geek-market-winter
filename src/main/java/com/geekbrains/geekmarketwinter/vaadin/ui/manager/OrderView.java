@@ -19,6 +19,7 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
@@ -29,8 +30,10 @@ import java.time.format.FormatStyle;
 import java.util.List;
 
 import static com.geekbrains.geekmarketwinter.config.support.Constants.LOCALE_RU;
+import static com.geekbrains.geekmarketwinter.config.support.Constants.MANAGER_ORDERS_PAGE;
 
-@Route("manager/orders")
+@PageTitle("Manage orders")
+@Route(MANAGER_ORDERS_PAGE)
 @Theme(value = Material.class, variant = Material.DARK)
 public class OrderView extends VerticalLayout {
     private final OrderService orderService;

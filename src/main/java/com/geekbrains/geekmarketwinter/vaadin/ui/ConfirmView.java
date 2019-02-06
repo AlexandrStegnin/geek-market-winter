@@ -16,6 +16,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
@@ -25,8 +26,9 @@ import java.util.stream.Collectors;
 
 import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
 
-@Theme(value = Material.class, variant = Material.DARK)
+@PageTitle("Confirm")
 @Route(CONFIRM_ORDER_PAGE)
+@Theme(value = Material.class, variant = Material.DARK)
 public class ConfirmView extends VerticalLayout {
 
     private final AuthRepository auth;

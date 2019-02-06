@@ -12,6 +12,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.theme.Theme;
@@ -22,7 +23,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.List;
 
-@Route("shop")
+import static com.geekbrains.geekmarketwinter.config.support.Constants.SHOP_PAGE;
+
+@PageTitle("Shop")
+@Route(SHOP_PAGE)
 @Theme(value = Material.class)
 public class ShopView extends VerticalLayout {
 
