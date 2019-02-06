@@ -26,7 +26,11 @@ public class CustomAppLayout extends AppLayout {
         AppLayoutMenuItem cartItem = new AppLayoutMenuItem(VaadinIcon.CART.create(), "Cart", "cart");
         AppLayoutMenuItem logoutItem = new AppLayoutMenuItem(VaadinIcon.SIGN_OUT.create(), "Logout", e -> logout());
         AppLayoutMenuItem loginItem = new AppLayoutMenuItem(VaadinIcon.SIGN_IN.create(), "Login", "login");
-        AppLayoutMenuItem adminItem = new AppLayoutMenuItem(VaadinIcon.COGS.create(), "Admin", "admin/categories");
+        AppLayoutMenuItem adminCategoryItem = new AppLayoutMenuItem(VaadinIcon.COGS.create(), "Admin", "admin");
+//        AppLayoutMenuItem adminStatusItem = new AppLayoutMenuItem(VaadinIcon.COGS.create(), "Admin", "admin/order-statuses");
+
+        // TODO: 2019-02-05 Сделать страницу админки
+
         AppLayoutMenuItem managerItem = new AppLayoutMenuItem(VaadinIcon.PACKAGE.create(), "Manage orders", "manager/orders");
 
         menu.addMenuItems(
@@ -34,7 +38,7 @@ public class CustomAppLayout extends AppLayout {
                 cartItem
         );
 
-        if (SecurityUtils.isUserInRole("ROLE_ADMIN")) menu.addMenuItem(adminItem);
+        if (SecurityUtils.isUserInRole("ROLE_ADMIN")) menu.addMenuItems(adminCategoryItem/*, adminStatusItem*/);
         if (SecurityUtils.isUserInRole("ROLE_MANAGER")) menu.addMenuItem(managerItem);
         if (SecurityUtils.isUserLoggedIn()) {
             menu.addMenuItem(logoutItem);

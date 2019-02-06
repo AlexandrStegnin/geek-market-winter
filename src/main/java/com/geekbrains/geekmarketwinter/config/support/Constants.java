@@ -14,6 +14,12 @@ public class Constants {
     public static final String SHOP_PAGE = "shop";
     public static final String CART_PAGE = "cart";
     public static final String CONFIRM_ORDER_PAGE = "confirm-order";
+    public static final String ADMIN_PAGE = "admin";
+
+    /**
+     * Application roles constants
+     */
+    public static final String ROLE_ADMIN = "ADMIN";
 
     public static final Locale LOCALE_RU = new Locale("ru", "RU");
 

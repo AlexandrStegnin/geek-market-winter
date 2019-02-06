@@ -22,4 +22,8 @@ public class OrderStatusService {
     public List<OrderStatus> findAll() {
         return orderStatusRepo.findAll();
     }
+
+    public void update(OrderStatus orderStatus) {
+        orderStatusRepo.save(orderStatus);
+    }
 }
