@@ -20,7 +20,9 @@ import com.vaadin.flow.theme.material.Material;
 
 import java.util.List;
 
-@Route("admin/order-statuses")
+import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_ORDER_STATUSES_PAGE;
+
+@Route(ADMIN_ORDER_STATUSES_PAGE)
 @Theme(value = Material.class, variant = Material.DARK)
 public class OrderStatusView extends VerticalLayout {
 

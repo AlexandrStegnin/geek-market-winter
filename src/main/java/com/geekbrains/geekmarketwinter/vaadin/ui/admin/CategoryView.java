@@ -20,7 +20,9 @@ import com.vaadin.flow.theme.material.Material;
 
 import java.util.List;
 
-@Route("admin/categories")
+import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_CATEGORIES_PAGE;
+
+@Route(ADMIN_CATEGORIES_PAGE)
 @Theme(value = Material.class, variant = Material.DARK)
 public class CategoryView extends VerticalLayout {
 

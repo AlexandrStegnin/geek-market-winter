@@ -40,10 +40,12 @@ public class AdminView extends VerticalLayout {
         content.setSizeFull();
 
         Image categoriesImg = new Image("images/sklad2.png", "Manage categories");
+        categoriesImg.setSizeUndefined();
         categoriesImg.setHeight("150px");
         categoriesImg.setWidth("150px");
 
-        Image statusesImg = new Image("images/dump-truck.png", "Manage delivery");
+        Image statusesImg = new Image("images/dump-truck.png", "Manage statuses");
+        statusesImg.setSizeUndefined();
         statusesImg.setHeight("150px");
         statusesImg.setWidth("150px");
 
@@ -56,8 +58,8 @@ public class AdminView extends VerticalLayout {
         btnLayout.setAlignItems(Alignment.CENTER);
         btnLayout.setSpacing(true);
 
-        Button categoriesBtn = new Button("View categories", categoriesImg, e -> goToPage(CategoryView.class));
-        Button orderStatusesBtn = new Button("View order statuses", statusesImg, e -> goToPage(OrderView.class));
+        Button categoriesBtn = new Button("Manage categories", categoriesImg, e -> goToPage(CategoryView.class));
+        Button orderStatusesBtn = new Button("Manage statuses", statusesImg, e -> goToPage(OrderView.class));
         btnLayout.add(categoriesBtn, orderStatusesBtn);
         CustomAppLayout appLayout = new CustomAppLayout(auth, btnLayout);
         add(appLayout);

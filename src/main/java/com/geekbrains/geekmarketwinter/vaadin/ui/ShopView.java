@@ -22,7 +22,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.List;
 
-@Route("shop")
+import static com.geekbrains.geekmarketwinter.config.support.Constants.SHOP_PAGE;
+
+@Route(SHOP_PAGE)
 @Theme(value = Material.class)
 public class ShopView extends VerticalLayout {
 

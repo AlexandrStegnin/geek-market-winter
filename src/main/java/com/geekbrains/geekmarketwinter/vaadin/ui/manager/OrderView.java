@@ -29,8 +29,9 @@ import java.time.format.FormatStyle;
 import java.util.List;
 
 import static com.geekbrains.geekmarketwinter.config.support.Constants.LOCALE_RU;
+import static com.geekbrains.geekmarketwinter.config.support.Constants.MANAGER_ORDERS_PAGE;
 
-@Route("manager/orders")
+@Route(MANAGER_ORDERS_PAGE)
 @Theme(value = Material.class, variant = Material.DARK)
 public class OrderView extends VerticalLayout {
     private final OrderService orderService;
