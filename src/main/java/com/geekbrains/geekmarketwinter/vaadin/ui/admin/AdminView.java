@@ -49,7 +49,7 @@ public class AdminView extends VerticalLayout {
         Button categoriesBtn = new Button("Categories", categoriesImg, e -> goToPage(CategoryView.class));
         Button orderStatusesBtn = new Button("Statuses", statusesImg, e -> goToPage(OrderView.class));
         Button usersBtn = new Button(" Users", usersImg, e -> showMessage());
-        Button rolesBtn = new Button("Roles", rolesImg, e -> showMessage());
+        Button rolesBtn = new Button("Roles", rolesImg, e -> goToPage(RoleView.class));
 
         btnLayout.add(categoriesBtn, orderStatusesBtn, usersBtn, rolesBtn);
         CustomAppLayout appLayout = new CustomAppLayout(auth, btnLayout);
