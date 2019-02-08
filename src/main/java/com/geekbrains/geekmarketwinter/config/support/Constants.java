@@ -20,6 +20,8 @@ public class Constants {
     public static final String ADMIN_PAGE = "admin";
     public static final String CATEGORIES_PAGE = "categories";
     public static final String ORDER_STATUSES_PAGE = "order-statuses";
+    public static final String PRODUCTS_PAGE = "products";
+    public static final String ADMIN_PRODUCTS_PAGE = ADMIN_PAGE + PATH_SEPARATOR + PRODUCTS_PAGE;
     public static final String ADMIN_CATEGORIES_PAGE = ADMIN_PAGE + PATH_SEPARATOR + CATEGORIES_PAGE;
     public static final String ADMIN_ORDER_STATUSES_PAGE = ADMIN_PAGE + PATH_SEPARATOR + ORDER_STATUSES_PAGE;
     public static final String USERS_PAGE = "users";
