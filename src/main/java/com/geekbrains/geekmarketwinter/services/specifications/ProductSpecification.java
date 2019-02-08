@@ -1,5 +1,6 @@
 package com.geekbrains.geekmarketwinter.services.specifications;
 
+import com.geekbrains.geekmarketwinter.entites.Category;
 import com.geekbrains.geekmarketwinter.entites.Product;
 import com.geekbrains.geekmarketwinter.entites.Product_;
 import com.geekbrains.geekmarketwinter.utils.filters.ProductFilter;
@@ -17,6 +18,7 @@ public class ProductSpecification extends BaseSpecification<Product, ProductFilt
     public Specification<Product> getFilter(ProductFilter filter) {
         return (root, query, cb) -> where(
                 titleLike(filter.getTitle()))
+                .and(categoryEquals(filter.getCategory()))
                 .toPredicate(root, query, cb);
     }
 
@@ -30,4 +32,16 @@ public class ProductSpecification extends BaseSpecification<Product, ProductFilt
         }
         );
     }
+
+    private static Specification<Product> categoryEquals(Category category) {
+        return ((root, criteriaQuery, criteriaBuilder) -> {
+            if (Objects.equals(null, category)) {
+                return null;
+            } else {
+                return criteriaBuilder.equal(root.get(Product_.category), category);
+            }
+        }
+        );
+    }
+
 }

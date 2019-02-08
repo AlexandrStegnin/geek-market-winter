@@ -1,6 +1,7 @@
 package com.geekbrains.geekmarketwinter.entites;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -14,6 +15,7 @@ import java.util.List;
 @Entity
 @Table(name = "products")
 @Data
+@EqualsAndHashCode(exclude = "category")
 public class Product implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

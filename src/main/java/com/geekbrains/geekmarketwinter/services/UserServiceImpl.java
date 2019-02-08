@@ -15,7 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,8 +55,9 @@ public class UserServiceImpl implements UserService {
 		user.setFirstName(systemUser.getFirstName());
 		user.setLastName(systemUser.getLastName());
 		user.setEmail(systemUser.getEmail());
-
-		user.setRoles(Collections.singletonList(roleRepository.findOneByName("ROLE_EMPLOYEE")));
+		Set<Role> roles = new HashSet<>();
+		roles.add(roleRepository.findOneByName("ROLE_EMPLOYEE"));
+		user.setRoles(roles);
 
 		userRepository.save(user);
 	}

@@ -1,6 +1,7 @@
 package com.geekbrains.geekmarketwinter.services;
 
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
+import com.vaadin.flow.component.notification.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -23,7 +24,7 @@ public class AuthService extends AbstractRepository implements AuthRepository {
         Authentication auth = new UsernamePasswordAuthenticationToken(login, password);
         Authentication authentication = daoAuthenticationProvider.authenticate(auth);
         if (authentication.isAuthenticated()) {
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         } else {
             SecurityContextHolder.clearContext();
         }

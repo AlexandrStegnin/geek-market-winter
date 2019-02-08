@@ -1,6 +1,5 @@
-package com.geekbrains.geekmarketwinter.config;
+package com.geekbrains.geekmarketwinter.config.security;
 
-import com.geekbrains.geekmarketwinter.config.security.UserDetailsServiceImpl;
 import com.vaadin.flow.spring.annotation.EnableVaadin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -44,13 +43,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/shop").permitAll()
+                .requestMatchers(SecurityUtils::isFrameworkInternalRequest).permitAll() // важный пункт, без него переход по url сбрасывал аутентификацию
+                .antMatchers(PATH_SEPARATOR + SHOP_PAGE, PATH_SEPARATOR + CART_PAGE).permitAll()
+                .antMatchers("/").permitAll()
                 .antMatchers(ALL_HTTP_MATCHERS).permitAll()
                 .regexMatchers(HttpMethod.POST, "/\\?v-r=.*").permitAll()
+                .antMatchers(PATH_SEPARATOR + ADMIN_PAGE).hasRole(ROLE_ADMIN)
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().loginPage(LOGIN_URL).permitAll()
-                .defaultSuccessUrl("/vaa", true)
+                .defaultSuccessUrl(PATH_SEPARATOR + SHOP_PAGE, true)
                 .successHandler(this::loginSuccessHandler)
                 .failureHandler(this::loginFailureHandler)
                 .and()
@@ -61,7 +63,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling()
                 .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
                 .and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
     }
 
     @Override

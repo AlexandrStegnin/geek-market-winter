@@ -1,12 +1,16 @@
 package com.geekbrains.geekmarketwinter.entites;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 @Data
 @Entity
 @NoArgsConstructor
+@ToString(exclude = "user")
+@EqualsAndHashCode(exclude = "user")
 @Table(name = "delivery_addresses")
 public class DeliveryAddress {
     @Id

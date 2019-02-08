@@ -1,4 +1,4 @@
-package com.geekbrains.geekmarketwinter.config;
+package com.geekbrains.geekmarketwinter.config.security;
 
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 import org.springframework.stereotype.Component;

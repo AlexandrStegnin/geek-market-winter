@@ -1,12 +1,14 @@
 package com.geekbrains.geekmarketwinter.entites;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "orders_item")
 @Data
+@EqualsAndHashCode(exclude = {"product", "order"})
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,11 +24,11 @@ public class OrderItem {
     @Column(name = "total_price")
     private Double totalPrice;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "order_id")
     private Order order;
 }
