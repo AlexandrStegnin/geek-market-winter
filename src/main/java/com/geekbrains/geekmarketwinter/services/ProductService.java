@@ -31,4 +31,8 @@ public class ProductService {
                 pageable
         );
     }
+
+    public int countByFilter(ProductFilter filter, Pageable pageable) {
+        return findAll(filter, pageable).getContent().size();
+    }
 }
