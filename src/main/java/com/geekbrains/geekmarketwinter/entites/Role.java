@@ -1,25 +1,24 @@
 package com.geekbrains.geekmarketwinter.entites;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
 @Data
 @Table(name = "roles")
+@NoArgsConstructor
 public class Role {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id")
 	private Long id;
 
 	@Column(name = "name")
 	private String name;
 
-	public Role() {
-	}
+	@Column(name = "humanized")
+	private String humanized;
 
-	public Role(String name) {
-		this.name = name;
-	}
 }

@@ -38,6 +38,7 @@ public class Constants {
     /**
      * Application roles constants
      */
+    public static final String ROLE_PREFIX = "ROLE_";
     public static final String ROLE_ADMIN = "ADMIN";
     public static final String ROLE_EMPLOYEE = "EMPLOYEE";
     public static final String ROLE_MANAGER = "MANAGER";

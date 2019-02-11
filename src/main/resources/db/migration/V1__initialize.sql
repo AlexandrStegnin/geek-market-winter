@@ -18,6 +18,7 @@ DROP TABLE IF EXISTS roles;
 CREATE TABLE roles (
   id                    INT(11) NOT NULL AUTO_INCREMENT,
   name                  VARCHAR(50) DEFAULT NULL,
+  humanized                  VARCHAR(50) DEFAULT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
@@ -136,27 +137,32 @@ CREATE TABLE orders_item (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
-INSERT INTO roles (name)
+INSERT INTO roles (name, humanized)
 VALUES
-('ROLE_EMPLOYEE'), ('ROLE_MANAGER'), ('ROLE_ADMIN');
+('ROLE_EMPLOYEE', 'Пользователь'), ('ROLE_MANAGER', 'Менеджер'), ('ROLE_ADMIN', 'Администратор');
 
 INSERT INTO users (username,password,first_name,last_name,email,phone)
 VALUES
-('admin','$2a$04$Fx/SX9.BAvtPlMyIIqqFx.hLY2Xp8nnhpzvEEVINvVpwIPbA3v/.i','Admin','Admin','admin@gmail.com','+79881111111');
+('admin','$2a$04$Fx/SX9.BAvtPlMyIIqqFx.hLY2Xp8nnhpzvEEVINvVpwIPbA3v/.i','Admin','Admin','admin@gmail.com','+79881111111'),
+('employee','$2a$04$Fx/SX9.BAvtPlMyIIqqFx.hLY2Xp8nnhpzvEEVINvVpwIPbA3v/.i','Employee','Employee','employee@gmail.com','+79882222222'),
+('manager','$2a$04$Fx/SX9.BAvtPlMyIIqqFx.hLY2Xp8nnhpzvEEVINvVpwIPbA3v/.i','Manager','Manager','manager@gmail.com','+79883333333');
 
 INSERT INTO users_roles (user_id, role_id)
 VALUES
 (1, 1),
 (1, 2),
-(1, 3);
+(1, 3),
+(2, 1),
+(3, 2);
 
 INSERT INTO categories (title)
 VALUES
-("Телевизоры"), ("Ноутбуки");
+('Телевизоры'), ('Ноутбуки');
 
 INSERT INTO orders_statuses (title)
 VALUES
-("Сформирован");
+('Сформирован'),
+('Ожидает оплаты');
 
 INSERT INTO products (category_id, vendor_code, title, short_description, full_description, price)
 VALUES
@@ -174,7 +180,11 @@ VALUES
 
 INSERT INTO products_images (product_id, path)
 VALUES
-(2, "2.jpg");
+(2, 'samsung_tv43.png'),
+(7, 'macbook2 (1).png'),
+(8, 'macbook_air_13.png'),
+(9, 'samsung1.png'),
+(10, 'samsung1.png');
 
 INSERT INTO delivery_addresses (user_id, address)
 VALUES
