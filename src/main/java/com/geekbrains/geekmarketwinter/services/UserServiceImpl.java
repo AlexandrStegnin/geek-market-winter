@@ -3,7 +3,6 @@ package com.geekbrains.geekmarketwinter.services;
 import com.geekbrains.geekmarketwinter.entites.Role;
 import com.geekbrains.geekmarketwinter.entites.SystemUser;
 import com.geekbrains.geekmarketwinter.entites.User;
-import com.geekbrains.geekmarketwinter.repositories.RoleRepository;
 import com.geekbrains.geekmarketwinter.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,17 +12,18 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.geekbrains.geekmarketwinter.config.support.Constants.ROLE_EMPLOYEE;
+import static com.geekbrains.geekmarketwinter.config.support.Constants.ROLE_PREFIX;
 
 @Service
 public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
-	private RoleRepository roleRepository;
+	private RoleService roleService;
 	private BCryptPasswordEncoder passwordEncoder;
 
 	@Autowired
@@ -32,8 +32,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Autowired
-	public void setRoleRepository(RoleRepository roleRepository) {
-		this.roleRepository = roleRepository;
+	public void setRoleService(RoleService roleService) {
+		this.roleService = roleService;
 	}
 
 	@Autowired
@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
 		user.setLastName(systemUser.getLastName());
 		user.setEmail(systemUser.getEmail());
 		Set<Role> roles = new HashSet<>();
-		roles.add(roleRepository.findOneByName("ROLE_EMPLOYEE"));
+		roles.add(roleService.findRoleByName(ROLE_PREFIX + ROLE_EMPLOYEE));
 		user.setRoles(roles);
 
 		userRepository.save(user);
@@ -80,6 +80,14 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User create(User user) {
+		if (user.getRoles().size() == 0) user.setRoles(
+				Collections.singleton(roleService.findRoleByName(ROLE_PREFIX + ROLE_EMPLOYEE))
+		);
+		if (StringUtils.hasText(user.getPassword())) {
+			user.setPassword(passwordEncoder.encode(user.getPassword()));
+		} else {
+			user.setPassword(userRepository.findOneByUserName(user.getUserName()).getPassword());
+		}
 		return userRepository.save(user);
 	}
 

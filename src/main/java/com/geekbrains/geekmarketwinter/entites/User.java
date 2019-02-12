@@ -31,6 +31,9 @@ public class User {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "phone")
+    private String phone;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -48,13 +51,14 @@ public class User {
         this.email = email;
     }
 
-    public User(String userName, String password, String firstName, String lastName, String email,
+    public User(String userName, String password, String firstName, String lastName, String email, String phone,
                 Set<Role> roles) {
         this.userName = userName;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.phone = phone;
         this.roles = roles;
     }
 }

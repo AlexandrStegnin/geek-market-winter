@@ -3,27 +3,27 @@ package com.geekbrains.geekmarketwinter.vaadin.ui.admin;
 import com.geekbrains.geekmarketwinter.entites.Role;
 import com.geekbrains.geekmarketwinter.entites.User;
 import com.geekbrains.geekmarketwinter.services.AuthService;
+import com.geekbrains.geekmarketwinter.services.RoleService;
 import com.geekbrains.geekmarketwinter.services.UserServiceImpl;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,16 +35,20 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_USE
 public class UserView extends VerticalLayout {
 
     private final UserServiceImpl userService;
+    private final RoleService roleService;
     private Grid<User> grid;
     private final AuthService auth;
     private final Button addNewBtn;
     private ListDataProvider<User> dataProvider;
+    private List<Role> roles;
 
-    public UserView(UserServiceImpl userService, AuthService auth) {
+    public UserView(UserServiceImpl userService, AuthService auth, RoleService roleService) {
         this.userService = userService;
+        this.roleService = roleService;
         this.grid = new Grid<>();
         this.dataProvider = new ListDataProvider<>(getAll());
         this.addNewBtn = new Button("New user", VaadinIcon.PLUS.create(), e -> showAddDialog());
+        this.roles = getRoles();
         this.auth = auth;
         init();
     }
@@ -59,106 +63,65 @@ public class UserView extends VerticalLayout {
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(0);
 
-        Grid.Column<User> nameColumn = grid.addColumn(User::getUserName)
+        grid.addColumn(User::getUserName)
                 .setHeader("Username")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        Grid.Column<User> firstNameColumn = grid.addColumn(User::getFirstName)
+        grid.addColumn(User::getFirstName)
                 .setHeader("First name")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        Grid.Column<User> lastNameColumn = grid.addColumn(User::getLastName)
+        grid.addColumn(User::getLastName)
                 .setHeader("Last name")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        Grid.Column<User> emailColumn = grid.addColumn(User::getEmail)
+        grid.addColumn(User::getEmail)
                 .setHeader("Last name")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        Grid.Column<User> rolesColumn = grid.addColumn(user -> user.getRoles().stream().map(Role::getHumanized)
+        grid.addColumn(User::getPhone)
+                .setHeader("Phone")
+                .setTextAlign(ColumnTextAlign.CENTER)
+                .setFlexGrow(1);
+
+        grid.addColumn(user -> user.getRoles().stream().map(Role::getHumanized)
                 .collect(Collectors.joining(", ")))
                 .setHeader("Roles")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        Binder<User> binder = new Binder<>(User.class);
-        Editor<User> editor = grid.getEditor();
-        editor.setBinder(binder);
-        editor.setBuffered(true);
+        Button save = new Button("Save");
+        save.addClassName("save");
 
-        TextField nameField = new TextField();
-        binder.bind(nameField, "userName");
-        nameColumn.setEditorComponent(nameField);
-        nameColumn.setTextAlign(ColumnTextAlign.CENTER);
-        nameField.setSizeFull();
-
-        TextField firstNameField = new TextField();
-        binder.bind(firstNameField, "firstName");
-        firstNameColumn.setEditorComponent(firstNameField);
-        firstNameColumn.setTextAlign(ColumnTextAlign.CENTER);
-        firstNameField.setSizeFull();
-
-        TextField lastNameField = new TextField();
-        binder.bind(lastNameField, "lastName");
-        lastNameColumn.setEditorComponent(lastNameField);
-        lastNameColumn.setTextAlign(ColumnTextAlign.CENTER);
-        lastNameField.setSizeFull();
-
-        TextField emailField = new TextField();
-        binder.bind(emailField, "email");
-        emailColumn.setEditorComponent(emailField);
-        emailColumn.setTextAlign(ColumnTextAlign.CENTER);
-        emailField.setSizeFull();
+        Button cancel = new Button("Cancel");
+        cancel.addClassName("cancel");
 
         Grid.Column<User> editorColumn = grid.addComponentColumn(user -> {
             Div actions = new Div();
             Button edit = new Button("", VaadinIcon.EDIT.create());
-            edit.addClickListener(e -> editor.editItem(user));
+            edit.addClickListener(e -> showEditDialog(user));
             Button delete = new Button("", VaadinIcon.TRASH.create());
             delete.addClickListener(e -> showDeleteDialog(user));
             actions.add(edit, delete);
             return actions;
         });
-        editorColumn.setHeader("Actions");
-        editorColumn.setKey("actions");
 
-        Button save = new Button("Save", e -> editor.save());
-        save.addClassName("save");
+        Div empty = new Div(); // TODO: 12.02.2019 Разобраться с component column, без setEditorComponent не рендерится
+        editorColumn.setEditorComponent(empty);
+        editorColumn
+                .setHeader("Actions")
+                .setTextAlign(ColumnTextAlign.CENTER)
+                .setFlexGrow(1);
 
-        Button cancel = new Button("Cancel", e -> editor.cancel());
-        cancel.addClassName("cancel");
-
-        grid.getElement().addEventListener("keyup", event -> editor.cancel())
-                .setFilter("event.key === 'Escape' || event.key === 'Esc'");
-
-        Div buttons = new Div(save, cancel);
-        editorColumn.setEditorComponent(buttons);
-
-        Notification message = new Notification("", 3000, Notification.Position.TOP_END);
-
-        VerticalLayout verticalLayout = new VerticalLayout();
-
-        verticalLayout.add(addNewBtn, grid);
+        VerticalLayout verticalLayout = new VerticalLayout(addNewBtn, grid);
         verticalLayout.setAlignItems(Alignment.END);
         CustomAppLayout appLayout = new CustomAppLayout(auth, verticalLayout);
         add(appLayout);
         setHeight("100vh");
-
-        editor.addSaveListener(event -> {
-            User updatedUser = event.getItem();
-            binder.writeBeanIfValid(updatedUser);
-            grid.getDataProvider().refreshItem(updatedUser); // для refreshItem необходимо переопределить equal & hashCode
-            userService.update(updatedUser);
-            message.setText("User successful updated: " +
-                    "Name = " + updatedUser.getUserName());
-            message.open();
-        });
-
-        grid.getColumnByKey("actions").setTextAlign(ColumnTextAlign.CENTER);
 
     }
 
@@ -182,22 +145,72 @@ public class UserView extends VerticalLayout {
         TextField email = new TextField("Email");
         email.setPlaceholder("Enter email");
 
-        // TODO: 2019-02-12 Добавление ролей через list box/combobox
+        TextField phone = new TextField("Phone");
+        email.setPlaceholder("Enter phone");
+
+        CheckboxGroup<Role> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setLabel("Choose roles");
+        checkboxGroup.setItemLabelGenerator(Role::getHumanized);
+        checkboxGroup.setItems(roles);
+
         // TODO: 2019-02-12 Переделать SystemUser - валидация
 
-        formLayout.add(userName, pwdField, firstName, lastName, email);
+        formLayout.add(userName, pwdField, firstName, lastName, email, phone, checkboxGroup);
 
         dialog.setCloseOnEsc(false);
         dialog.setCloseOnOutsideClick(false);
         Button save = new Button("Save", e -> {
-            User user = new User();
-            user.setUserName(userName.getValue());
-            user.setPassword(pwdField.getValue());
-            user.setFirstName(firstName.getValue());
-            user.setLastName(lastName.getValue());
-            user.setEmail(email.getValue());
-
+            User user = new User(userName.getValue(), pwdField.getValue(), firstName.getValue(),
+                    lastName.getValue(), email.getValue(), phone.getValue(), checkboxGroup.getSelectedItems());
             addNewUser(user);
+            dialog.close();
+        });
+        Button cancel = new Button("Cancel", e -> dialog.close());
+        HorizontalLayout actions = new HorizontalLayout();
+        actions.add(save, cancel);
+
+        VerticalLayout content = new VerticalLayout();
+        content.add(formLayout, actions);
+        dialog.add(content);
+        dialog.open();
+        userName.getElement().callFunction("focus");
+    }
+
+    private void showEditDialog(User user) {
+
+        FormLayout formLayout = new FormLayout();
+
+        Dialog dialog = new Dialog();
+        TextField userName = new TextField("Username");
+        userName.setValue(user.getUserName());
+
+        TextField pwdField = new TextField("Password");
+        pwdField.setValue("");
+
+        TextField firstName = new TextField("First name");
+        firstName.setValue(user.getFirstName());
+
+        TextField lastName = new TextField("Last name");
+        lastName.setValue(user.getLastName());
+
+        TextField email = new TextField("Email");
+        email.setValue(user.getEmail());
+
+        TextField phone = new TextField("Phone");
+        email.setValue(user.getPhone());
+
+        CheckboxGroup<Role> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setLabel("Choose roles");
+        checkboxGroup.setItemLabelGenerator(Role::getHumanized);
+        checkboxGroup.setItems(roles);
+        checkboxGroup.updateSelection(user.getRoles(), new HashSet<>(roles));
+
+        formLayout.add(userName, pwdField, firstName, lastName, email, phone, checkboxGroup);
+
+        dialog.setCloseOnEsc(false);
+        dialog.setCloseOnOutsideClick(false);
+        Button save = new Button("Save", e -> {
+            updateUser(user);
             dialog.close();
         });
         Button cancel = new Button("Cancel", e -> dialog.close());
@@ -215,6 +228,10 @@ public class UserView extends VerticalLayout {
         user = userService.create(user);
         dataProvider.getItems().add(user);
         dataProvider.refreshAll();
+    }
+
+    private void updateUser(User user) {
+        addNewUser(user);
     }
 
     private List<User> getAll() {
@@ -248,4 +265,7 @@ public class UserView extends VerticalLayout {
         dataProvider.refreshAll();
     }
 
+    private List<Role> getRoles() {
+        return roleService.getAllRoles();
+    }
 }

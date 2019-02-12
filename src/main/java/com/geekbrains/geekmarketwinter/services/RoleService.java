@@ -23,7 +23,7 @@ public class RoleService {
         return roleRepo.findAll();
     }
 
-    public Role getRoleByName(String roleName) {
+    public Role findRoleByName(String roleName) {
         return roleRepo.findOneByName(roleName);
     }
 
