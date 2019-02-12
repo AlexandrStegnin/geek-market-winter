@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -75,5 +76,25 @@ public class UserServiceImpl implements UserService {
 
 	private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {
 		return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+	}
+
+	@Override
+	public User create(User user) {
+		return userRepository.save(user);
+	}
+
+	@Override
+	public List<User> findAll() {
+		return userRepository.findAll();
+	}
+
+	@Override
+	public User update(User user) {
+		return userRepository.save(user);
+	}
+
+	@Override
+	public void delete(User user) {
+		userRepository.delete(user);
 	}
 }
