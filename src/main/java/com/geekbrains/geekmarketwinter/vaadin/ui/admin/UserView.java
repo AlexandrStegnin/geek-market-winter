@@ -1,5 +1,6 @@
 package com.geekbrains.geekmarketwinter.vaadin.ui.admin;
 
+import com.geekbrains.geekmarketwinter.entites.Role;
 import com.geekbrains.geekmarketwinter.entites.User;
 import com.geekbrains.geekmarketwinter.services.AuthService;
 import com.geekbrains.geekmarketwinter.services.UserServiceImpl;
@@ -24,6 +25,7 @@ import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_USERS_PAGE;
 
@@ -77,7 +79,11 @@ public class UserView extends VerticalLayout {
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        // TODO: 2019-02-12 Добавить вывод ролей в grid
+        Grid.Column<User> rolesColumn = grid.addColumn(user -> user.getRoles().stream().map(Role::getHumanized)
+                .collect(Collectors.joining(", ")))
+                .setHeader("Roles")
+                .setTextAlign(ColumnTextAlign.CENTER)
+                .setFlexGrow(1);
 
         Binder<User> binder = new Binder<>(User.class);
         Editor<User> editor = grid.getEditor();
