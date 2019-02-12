@@ -7,6 +7,7 @@ import com.geekbrains.geekmarketwinter.services.RoleService;
 import com.geekbrains.geekmarketwinter.services.UserServiceImpl;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -23,7 +24,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -197,15 +197,11 @@ public class UserView extends VerticalLayout {
         email.setValue(user.getEmail());
 
         TextField phone = new TextField("Phone");
-        email.setValue(user.getPhone());
+        phone.setValue(user.getPhone());
 
-        CheckboxGroup<Role> checkboxGroup = new CheckboxGroup<>();
-        checkboxGroup.setLabel("Choose roles");
-        checkboxGroup.setItemLabelGenerator(Role::getHumanized);
-        checkboxGroup.setItems(roles);
-        checkboxGroup.updateSelection(user.getRoles(), new HashSet<>(roles));
+        Div checkBoxDiv = getUserRolesDiv(user);
 
-        formLayout.add(userName, pwdField, firstName, lastName, email, phone, checkboxGroup);
+        formLayout.add(userName, pwdField, firstName, lastName, email, phone, checkBoxDiv);
 
         dialog.setCloseOnEsc(false);
         dialog.setCloseOnOutsideClick(false);
@@ -231,7 +227,8 @@ public class UserView extends VerticalLayout {
     }
 
     private void updateUser(User user) {
-        addNewUser(user);
+        userService.update(user);
+        dataProvider.refreshAll();
     }
 
     private List<User> getAll() {
@@ -267,5 +264,33 @@ public class UserView extends VerticalLayout {
 
     private List<Role> getRoles() {
         return roleService.getAllRoles();
+    }
+
+    private Div getUserRolesDiv(User user) {
+        Div checkBoxDiv = new Div();
+        Div label = new Div();
+        label.setText("Choose roles");
+        label.getStyle().set("margin", "10px 0");
+        checkBoxDiv.add(label);
+        Div contentDiv = new Div();
+        roles.forEach(role -> {
+            Checkbox checkbox = new Checkbox(
+                    role.getHumanized(),
+                    user.getRoles().contains(role));
+            checkbox.addValueChangeListener(e -> {
+                String roleName = e.getSource().getElement().getText();
+                Role userRole = roles.stream()
+                        .filter(r -> r.getHumanized().equalsIgnoreCase(roleName))
+                        .findAny().orElse(null);
+                if (e.getValue()) {
+                    user.getRoles().add(userRole);
+                } else {
+                    user.getRoles().remove(userRole);
+                }
+            });
+            contentDiv.add(checkbox);
+        });
+        checkBoxDiv.add(contentDiv);
+        return checkBoxDiv;
     }
 }
