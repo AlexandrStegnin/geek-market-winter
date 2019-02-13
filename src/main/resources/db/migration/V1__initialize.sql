@@ -135,6 +135,19 @@ CREATE TABLE orders_item (
   REFERENCES products (id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
+DROP TABLE IF EXISTS file_assets;
+
+CREATE TABLE file_assets
+(
+  id                 INT(11) NOT NULL AUTO_INCREMENT,
+  created_date_time  TIMESTAMP,
+  expiring_date_time TIMESTAMP,
+  file_name          VARCHAR(255),
+  hash               VARCHAR(255),
+  name               VARCHAR(255),
+    PRIMARY KEY(id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 INSERT INTO roles (name, humanized)
@@ -166,17 +179,17 @@ VALUES
 
 INSERT INTO products (category_id, vendor_code, title, short_description, full_description, price)
 VALUES
-(1, "00000001", "40\" Телевизор Samsung UE40NU7170U", "Коротко: Хороший телевизор Samsung 40", "LED телевизор Samsung 40", 26000.00),
-(1, "00000002", "48\" Телевизор Samsung UE48NU3870U", "Коротко: Хороший телевизор Samsung 48", "LED телевизор Samsung 48", 32000.00),
-(1, "00000003", "56\" Телевизор Samsung UE56NU8390U", "Коротко: Хороший телевизор Samsung 56", "LED телевизор Samsung 56", 44000.00),
+(1, '00000001', '40\' Телевизор Samsung UE40NU7170U', 'Коротко: Хороший телевизор Samsung 40', 'LED телевизор Samsung 40', 26000.00),
+(1, '00000002', '48\' Телевизор Samsung UE48NU3870U', 'Коротко: Хороший телевизор Samsung 48', 'LED телевизор Samsung 48', 32000.00),
+(1, '00000003', '56\' Телевизор Samsung UE56NU8390U', 'Коротко: Хороший телевизор Samsung 56', 'LED телевизор Samsung 56', 44000.00),
 
-(1, "00000004", "56\" Телевизор LG UE56NU8150U", "Коротко: Хороший телевизор LG 56", "LED телевизор LG 56", 30000.00),
-(1, "00000005", "48\" Телевизор LG UE48NU5740U", "Коротко: Хороший телевизор LG 48", "LED телевизор LG 48", 48000.00),
-(1, "00000006", "40\" Телевизор LG UE40NU7170U", "Коротко: Хороший телевизор LG 40", "LED телевизор LG 40", 27000.00),
-(2, "00000007", "15\" Ноутбук Apple MacBook Pro", "Коротко: Хороший ноутбук MacBook Pro 15", "Ноутбук MacBook Pro 15", 100000.00),
-(2, "00000008", "13\" Ноутбук Apple MacBook Air", "Коротко: Хороший ноутбук Apple MacBook Air 13", "Ноутбук Apple MacBook Air", 80000.00),
-(2, "00000009", "15\" Ноутбук Samsung UE15NU8330U", "Коротко: Хороший ноутбук Samsung 15", "Ноутбук Samsung 15", 95000.00),
-(2, "00000010", "13\" Ноутбук Samsung UE15NU8630U", "Коротко: Хороший ноутбук Samsung 13", "Ноутбук Samsung 13", 70000.00);
+(1, '00000004', '56\' Телевизор LG UE56NU8150U', 'Коротко: Хороший телевизор LG 56', 'LED телевизор LG 56', 30000.00),
+(1, '00000005', '48\' Телевизор LG UE48NU5740U', 'Коротко: Хороший телевизор LG 48', 'LED телевизор LG 48', 48000.00),
+(1, '00000006', '40\' Телевизор LG UE40NU7170U', 'Коротко: Хороший телевизор LG 40', 'LED телевизор LG 40', 27000.00),
+(2, '00000007', '15\' Ноутбук Apple MacBook Pro', 'Коротко: Хороший ноутбук MacBook Pro 15', 'Ноутбук MacBook Pro 15', 100000.00),
+(2, '00000008', '13\' Ноутбук Apple MacBook Air', 'Коротко: Хороший ноутбук Apple MacBook Air 13', 'Ноутбук Apple MacBook Air', 80000.00),
+(2, '00000009', '15\' Ноутбук Samsung UE15NU8330U', 'Коротко: Хороший ноутбук Samsung 15', 'Ноутбук Samsung 15', 95000.00),
+(2, '00000010', '13\' Ноутбук Samsung UE15NU8630U', 'Коротко: Хороший ноутбук Samsung 13', 'Ноутбук Samsung 13', 70000.00);
 
 INSERT INTO products_images (product_id, path)
 VALUES
@@ -188,5 +201,5 @@ VALUES
 
 INSERT INTO delivery_addresses (user_id, address)
 VALUES
-(1, "18a Diagon Alley"),
-(1, "4 Privet Drive");
+(1, '18a Diagon Alley'),
+(1, '4 Privet Drive');

@@ -35,4 +35,8 @@ public class ProductService {
     public int countByFilter(ProductFilter filter, Pageable pageable) {
         return findAll(filter, pageable).getContent().size();
     }
+
+    public Product create(Product product) {
+        return productRepository.save(product);
+    }
 }

@@ -2,6 +2,7 @@ package com.geekbrains.geekmarketwinter.entites;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -15,6 +16,7 @@ import java.util.List;
 @Entity
 @Table(name = "products")
 @Data
+@NoArgsConstructor
 @EqualsAndHashCode(exclude = "category")
 public class Product implements Serializable {
     @Id
@@ -66,5 +68,15 @@ public class Product implements Serializable {
             images = new ArrayList<>();
         }
         images.add(productImage);
+    }
+
+    public Product(Category category, String vendorCode, String title,
+                   String shortDescription, String fullDescription, double price) {
+        this.category = category;
+        this.vendorCode = vendorCode;
+        this.title = title;
+        this.shortDescription = shortDescription;
+        this.fullDescription = fullDescription;
+        this.price = price;
     }
 }
