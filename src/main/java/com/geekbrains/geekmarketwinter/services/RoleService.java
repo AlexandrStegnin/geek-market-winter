@@ -28,6 +28,8 @@ public class RoleService {
     }
 
     public Role save(Role role) {
+        if (!role.getName().startsWith(ROLE_PREFIX))
+            role.setName(ROLE_PREFIX + role.getName().toUpperCase());
         return roleRepo.save(role);
     }
 
@@ -44,8 +46,6 @@ public class RoleService {
     }
 
     public Role create(Role role) {
-        if (!role.getName().startsWith(ROLE_PREFIX))
-            role.setName(ROLE_PREFIX + role.getName().toUpperCase());
         return save(role);
     }
 }

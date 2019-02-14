@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 
 @Entity
 @Data
@@ -11,14 +12,16 @@ import javax.persistence.*;
 @NoArgsConstructor
 public class Role {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private Long id;
 
 	@Column(name = "name")
+	@Size(min = 3, message = "Название роли не может быть менее 3 символов")
 	private String name;
 
 	@Column(name = "humanized")
+	@Size(min = 3, message = "Описание не может быть менее 3 символов")
 	private String humanized;
 
 }
