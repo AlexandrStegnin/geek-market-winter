@@ -6,6 +6,7 @@ import com.geekbrains.geekmarketwinter.services.AuthService;
 import com.geekbrains.geekmarketwinter.services.RoleService;
 import com.geekbrains.geekmarketwinter.services.UserServiceImpl;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
+import com.geekbrains.geekmarketwinter.vaadin.support.VaadinViewUtils;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
@@ -100,15 +101,10 @@ public class UserView extends VerticalLayout {
         Button cancel = new Button("Cancel");
         cancel.addClassName("cancel");
 
-        Grid.Column<User> editorColumn = grid.addComponentColumn(user -> {
-            Div actions = new Div();
-            Button edit = new Button("", VaadinIcon.EDIT.create());
-            edit.addClickListener(e -> showEditDialog(user));
-            Button delete = new Button("", VaadinIcon.TRASH.create());
-            delete.addClickListener(e -> showDeleteDialog(user));
-            actions.add(edit, delete);
-            return actions;
-        });
+        Grid.Column<User> editorColumn = grid.addComponentColumn(user ->
+                VaadinViewUtils.makeEditorColumnActions(
+                        e -> showEditDialog(user),
+                        e -> showDeleteDialog(user)));
 
         Div empty = new Div(); // TODO: 12.02.2019 Разобраться с component column, без setEditorComponent не рендерится
         editorColumn.setEditorComponent(empty);
