@@ -49,4 +49,12 @@ public class ProductService {
     public List<Product> fetchAll(ProductFilter filter) {
         return productRepository.findAll(specification.getFilter(filter));
     }
+
+    public Product update(Product product) {
+        return create(product);
+    }
+
+    public void delete(Product product) {
+        productRepository.delete(product);
+    }
 }

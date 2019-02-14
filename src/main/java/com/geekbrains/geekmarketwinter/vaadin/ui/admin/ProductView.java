@@ -13,6 +13,7 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -121,6 +122,23 @@ public class ProductView extends VerticalLayout {
                 )
         )
                 .setHeader("Created at")
+                .setTextAlign(ColumnTextAlign.CENTER)
+                .setFlexGrow(1);
+
+        Grid.Column<Product> editorColumn = grid.addComponentColumn(user -> {
+            Div actions = new Div();
+            Button edit = new Button("", VaadinIcon.EDIT.create());
+            edit.addClickListener(e -> showEditDialog(user));
+            Button delete = new Button("", VaadinIcon.TRASH.create());
+            delete.addClickListener(e -> showDeleteDialog(user));
+            actions.add(edit, delete);
+            return actions;
+        });
+
+        Div empty = new Div();
+        editorColumn.setEditorComponent(empty);
+        editorColumn
+                .setHeader("Actions")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
@@ -252,6 +270,92 @@ public class ProductView extends VerticalLayout {
 
     private List<Product> getAllProducts(ProductFilter filter) {
         return productService.fetchAll(filter);
+    }
+
+    private void showEditDialog(Product product) {
+
+        FormLayout formLayout = new FormLayout();
+
+        Dialog dialog = new Dialog();
+        TextField vendorCode = new TextField("Vendor code");
+        vendorCode.setValue(product.getVendorCode());
+
+        ComboBox<Category> categoryComboBox = new ComboBox<>("Select category", getAllCategories());
+        categoryComboBox.setItemLabelGenerator(Category::getTitle);
+        categoryComboBox.setValue(product.getCategory());
+
+        TextField titleField = new TextField("Title");
+        titleField.setValue(product.getTitle());
+
+        TextField shortDescr = new TextField("Short description");
+        shortDescr.setValue(product.getShortDescription());
+
+        TextField fullDescr = new TextField("Full description");
+        fullDescr.setValue(product.getFullDescription());
+
+        TextField price = new TextField("Price");
+        price.setValue(String.valueOf(product.getPrice()));
+
+        MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
+        Upload upload = new Upload(buffer);
+
+        upload.addSucceededListener(event -> {});
+
+        formLayout.add(vendorCode, titleField, shortDescr, fullDescr, price, categoryComboBox, upload);
+
+        dialog.setCloseOnEsc(false);
+        dialog.setCloseOnOutsideClick(false);
+        Button save = new Button("Save", e -> {
+            product.setVendorCode(vendorCode.getValue());
+            product.setCategory(categoryComboBox.getValue());
+            product.setTitle(titleField.getValue());
+            product.setShortDescription(shortDescr.getValue());
+            product.setFullDescription(fullDescr.getValue());
+            product.setPrice(Double.valueOf(price.getValue()));
+            updateProduct(product);
+            dialog.close();
+        });
+        Button cancel = new Button("Cancel", e -> dialog.close());
+        HorizontalLayout actions = new HorizontalLayout();
+        actions.add(save, cancel);
+
+        VerticalLayout content = new VerticalLayout();
+        content.add(formLayout, actions);
+        dialog.add(content);
+        dialog.open();
+        vendorCode.getElement().callFunction("focus");
+    }
+
+    private void updateProduct(Product product) {
+        productService.update(product);
+        dataProvider.refreshAll();
+    }
+
+    private void showDeleteDialog(Product product) {
+        Dialog dialog = new Dialog();
+        Div contentText = new Div();
+        contentText.setText("Are you sure, you want to delete product: \n" + product.getTitle() + "?");
+
+        dialog.setCloseOnEsc(false);
+        dialog.setCloseOnOutsideClick(false);
+        Button yes = new Button("Yes", e -> {
+            deleteProduct(product);
+            dialog.close();
+        });
+        Button no = new Button("No", e -> dialog.close());
+        HorizontalLayout actions = new HorizontalLayout();
+        actions.add(yes, no);
+
+        VerticalLayout content = new VerticalLayout();
+        content.add(contentText, actions);
+        dialog.add(content);
+        dialog.open();
+    }
+
+    private void deleteProduct(Product product) {
+        dataProvider.getItems().remove(product);
+        productService.delete(product);
+        dataProvider.refreshAll();
     }
 
 }

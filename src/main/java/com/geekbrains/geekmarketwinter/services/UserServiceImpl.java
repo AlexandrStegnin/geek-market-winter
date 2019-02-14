@@ -17,7 +17,7 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.geekbrains.geekmarketwinter.config.support.Constants.ROLE_EMPLOYEE;
+import static com.geekbrains.geekmarketwinter.config.support.Constants.EMPLOYEE;
 import static com.geekbrains.geekmarketwinter.config.support.Constants.ROLE_PREFIX;
 
 @Service
@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
 		user.setLastName(systemUser.getLastName());
 		user.setEmail(systemUser.getEmail());
 		Set<Role> roles = new HashSet<>();
-		roles.add(roleService.findRoleByName(ROLE_PREFIX + ROLE_EMPLOYEE));
+		roles.add(roleService.findRoleByName(ROLE_PREFIX + EMPLOYEE));
 		user.setRoles(roles);
 
 		userRepository.save(user);
@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User create(User user) {
 		if (user.getRoles().size() == 0) user.setRoles(
-				Collections.singleton(roleService.findRoleByName(ROLE_PREFIX + ROLE_EMPLOYEE))
+				Collections.singleton(roleService.findRoleByName(ROLE_PREFIX + EMPLOYEE))
 		);
 		if (StringUtils.hasText(user.getPassword())) {
 			user.setPassword(passwordEncoder.encode(user.getPassword()));
