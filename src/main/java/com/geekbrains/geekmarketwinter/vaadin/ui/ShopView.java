@@ -18,10 +18,8 @@ import com.github.appreciated.card.label.SecondaryLabel;
 import com.github.appreciated.card.label.TitleLabel;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -101,7 +99,7 @@ public class ShopView extends VerticalLayout {
         cartIcon.getStyle().set("margin-left", "5px");
 
         Button addToCartBtn = new Button("Add to cart", cartIcon,
-                e -> cartService.addToCart(VaadinService.getCurrentRequest(), product));
+                e -> addToCart(product));
         addToCartBtn.setIconAfterText(true);
         addToCartBtn.getStyle().set("line-height", "0");
         addToCartBtn.setSizeFull();
@@ -189,33 +187,18 @@ public class ShopView extends VerticalLayout {
         return categoryService.getAllCategories();
     }
 
-    private void testCard() {
-//        Icon cartIcon = new Icon(VaadinIcon.CART);
-        HorizontalLayout horizontalLayout = new HorizontalLayout();
-        Label title = new Label("Some title");
-        title.setHeight("100px");
-        VerticalLayout card1 = new VerticalLayout();
-        card1.setAlignItems(Alignment.STRETCH);
-        card1.add(title);
-        for (int i = 0; i < 4; i++) {
-            Button button = new Button("Add to cart " + i,
-                    e -> {});
-            button.setHeight("100px");
-            card1.add(button);
-        }
+    private void addToCart(Product product) {
+        cartService.addToCart(VaadinService.getCurrentRequest(), product);
+        incrementBadge(1);
+    }
 
-        Label title2 = new Label("Some title");
-        title2.setHeight("100px");
-        VerticalLayout card2 = new VerticalLayout();
-        card2.setAlignItems(Alignment.STRETCH);
-        card2.add(title2);
-        for (int i = 0; i < 4; i++) {
-            Button button = new Button("Add to cart " + i,
-                    e -> {});
-            button.setHeight("100px");
-            card2.add(button);
-        }
-        horizontalLayout.add(card1, card2);
-        add(horizontalLayout);
+    private void incrementBadge(int cnt) {
+        getUI().ifPresent(ui -> ui.getElement().getChildren().forEach(element -> {
+            if (element.getTag().equalsIgnoreCase("paper-badge")) {
+                String count = element.getAttribute("label");
+                count = String.valueOf(Integer.valueOf(count) + cnt);
+                element.setAttribute("label", count);
+            }
+        }));
     }
 }

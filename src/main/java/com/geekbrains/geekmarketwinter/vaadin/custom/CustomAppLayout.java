@@ -10,6 +10,9 @@ import com.vaadin.flow.component.applayout.AppLayoutMenuItem;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import org.vaadin.PaperBadge;
+
+import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
 
 public class CustomAppLayout extends AppLayout {
 
@@ -27,16 +30,22 @@ public class CustomAppLayout extends AppLayout {
         AppLayoutMenuItem logoutItem = new AppLayoutMenuItem(VaadinIcon.SIGN_OUT.create(), "Logout", e -> logout());
         AppLayoutMenuItem loginItem = new AppLayoutMenuItem(VaadinIcon.SIGN_IN.create(), "Login", "login");
         AppLayoutMenuItem adminCategoryItem = new AppLayoutMenuItem(VaadinIcon.COGS.create(), "Admin", "admin");
-
         AppLayoutMenuItem managerItem = new AppLayoutMenuItem(VaadinIcon.PACKAGE.create(), "Manage orders", "manager/orders");
+
+        cartItem.setId("cartItem");
+        PaperBadge cartBadge = new PaperBadge(cartItem);
+        cartBadge.setHeight("20px");
+        cartBadge.setWidth("20px");
+        cartBadge.setLabel("0"); // TODO: 14.02.2019 Передавть кол-во товаров в корзине
+        cartBadge.getStyle().set("--paper-badge-background", "#b794f6");
 
         menu.addMenuItems(
                 homeItem,
                 cartItem
         );
 
-        if (SecurityUtils.isUserInRole("ROLE_ADMIN")) menu.addMenuItems(adminCategoryItem);
-        if (SecurityUtils.isUserInRole("ROLE_MANAGER")) menu.addMenuItem(managerItem);
+        if (SecurityUtils.isUserInRole(ROLE_ADMIN)) menu.addMenuItems(adminCategoryItem);
+        if (SecurityUtils.isUserInRole(ROLE_MANAGER)) menu.addMenuItem(managerItem);
         if (SecurityUtils.isUserLoggedIn()) {
             menu.addMenuItem(logoutItem);
         } else {
