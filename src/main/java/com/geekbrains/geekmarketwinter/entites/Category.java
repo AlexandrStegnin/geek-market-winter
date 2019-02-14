@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 
 @Data
 @Entity
@@ -16,6 +17,7 @@ public class Category {
     private Long id;
 
     @Column(name = "title")
+    @Size(min = 3, message = "Название категории должно быть более 2 символов")
     private String title;
 
     @Column(name = "description")
