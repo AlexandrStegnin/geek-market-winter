@@ -47,7 +47,6 @@ public class ProductView extends VerticalLayout {
 
     private final AuthRepository auth;
     private final ProductService productService;
-//    private ConfigurableFilterDataProvider<Product, String, Category> dataProvider;
     private ListDataProvider<Product> dataProvider;
     private Grid<Product> grid;
     private ProductFilter productFilter;
@@ -64,13 +63,13 @@ public class ProductView extends VerticalLayout {
         this.categoryService = categoryService;
         this.page = productService.findAll(productFilter, Pageable.unpaged());
         this.addNewBtn = new Button("New product", VaadinIcon.PLUS.create(), e -> showAddDialog());
+        this.dataProvider = new ListDataProvider<>(getAllProducts(productFilter));
         this.auth = auth;
         init();
     }
 
     private void init() {
         addNewBtn.setIconAfterText(true);
-        dataProvider = new ListDataProvider<>(getAllProducts());
         grid.setDataProvider(dataProvider);
 
         grid.addColumn(Product::getId)
@@ -199,17 +198,8 @@ public class ProductView extends VerticalLayout {
 
         // TODO: 13.02.2019 Доделать загрузку картинок
 
-        MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
-        Upload upload = new Upload(buffer);
-
-        upload.addSucceededListener(event -> {
-//            Component component = createComponent(event.getMIMEType(),
-//                    event.getFileName(),
-//                    buffer.getInputStream(event.getFileName()));
-//            showOutput(event.getFileName(), component);
-        });
-
         ComboBox<Category> categoryComboBox = new ComboBox<>("Select category", getAllCategories());
+        categoryComboBox.setItemLabelGenerator(Category::getTitle);
 
         TextField titleField = new TextField("Title");
         titleField.setPlaceholder("Enter title");
@@ -223,7 +213,17 @@ public class ProductView extends VerticalLayout {
         TextField price = new TextField("Price");
         price.setPlaceholder("Enter price");
 
-        formLayout.add(vendorCode, titleField, shortDescr, fullDescr, price, upload);
+        MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
+        Upload upload = new Upload(buffer);
+
+        upload.addSucceededListener(event -> {
+//            Component component = createComponent(event.getMIMEType(),
+//                    event.getFileName(),
+//                    buffer.getInputStream(event.getFileName()));
+//            showOutput(event.getFileName(), component);
+        });
+
+        formLayout.add(vendorCode, titleField, shortDescr, fullDescr, price, categoryComboBox, upload);
 
         dialog.setCloseOnEsc(false);
         dialog.setCloseOnOutsideClick(false);
@@ -250,8 +250,8 @@ public class ProductView extends VerticalLayout {
         dataProvider.refreshAll();
     }
 
-    private List<Product> getAllProducts() {
-        return productService.findAll(productFilter, Pageable.unpaged()).getContent();
+    private List<Product> getAllProducts(ProductFilter filter) {
+        return productService.fetchAll(filter);
     }
 
 }
