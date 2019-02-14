@@ -1,5 +1,6 @@
 package com.geekbrains.geekmarketwinter.vaadin.ui.admin;
 
+import com.geekbrains.geekmarketwinter.config.support.OperationEnum;
 import com.geekbrains.geekmarketwinter.entites.Category;
 import com.geekbrains.geekmarketwinter.entites.Category_;
 import com.geekbrains.geekmarketwinter.services.AuthService;
@@ -40,12 +41,12 @@ public class CategoryView extends VerticalLayout {
     private Binder<Category> binder;
 
     public CategoryView(CategoryService categoryService, AuthService auth) {
+        this.addNewBtn = new Button("Add new category", e -> showDialog(new Category(), OperationEnum.CREATE));
+        this.binder = new BeanValidationBinder<>(Category.class);
         this.categoryService = categoryService;
         this.dataProvider = new ListDataProvider<>(getAllCategories());
         this.grid = new Grid<>();
         this.auth = auth;
-        this.addNewBtn = new Button("Add new category", e -> showAddDialog(new Category()));
-        this.binder = new BeanValidationBinder<>(Category.class);
         init();
     }
 
@@ -74,9 +75,9 @@ public class CategoryView extends VerticalLayout {
         grid.addComponentColumn(category -> {
             Div actions = new Div();
             Button edit = new Button("", VaadinIcon.EDIT.create());
-            edit.addClickListener(e -> showEditDialog(category));
+            edit.addClickListener(e -> showDialog(category, OperationEnum.UPDATE));
             Button delete = new Button("", VaadinIcon.TRASH.create());
-            delete.addClickListener(e -> showDeleteDialog(category));
+            delete.addClickListener(e -> showDialog(category, OperationEnum.DELETE));
             actions.add(edit, delete);
             return actions;
         })
@@ -94,67 +95,6 @@ public class CategoryView extends VerticalLayout {
         setHeight("100vh");
     }
 
-    private void deleteCategory(Category category) {
-        dataProvider.getItems().remove(category);
-        categoryService.delete(category);
-        dataProvider.refreshAll();
-    }
-
-    private void showAddDialog(Category category) {
-        Dialog dialog = new Dialog();
-
-        TextField title = new TextField("Title");
-        title.setPlaceholder("Enter title");
-        binder.forField(title)
-                .bind(Category_.TITLE);
-
-        TextField description = new TextField("Description");
-        description.setPlaceholder("Enter description");
-        HorizontalLayout fields = new HorizontalLayout();
-        fields.add(title, description);
-
-        dialog.setCloseOnEsc(false);
-        dialog.setCloseOnOutsideClick(false);
-        Button save = new Button("Save", e -> {
-            category.setTitle(title.getValue());
-            category.setDescription(description.getValue());
-            if (binder.writeBeanIfValid(category)) {
-                addNewCategory(category);
-                dialog.close();
-            }
-        });
-        Button cancel = new Button("Cancel", e -> dialog.close());
-        HorizontalLayout actions = new HorizontalLayout();
-        actions.add(save, cancel);
-
-        VerticalLayout content = new VerticalLayout();
-        content.add(fields, actions);
-        dialog.add(content);
-        dialog.open();
-        title.getElement().callFunction("focus");
-    }
-
-    private void showDeleteDialog(Category category) {
-        Dialog dialog = new Dialog();
-        Div contentText = new Div();
-        contentText.setText("Are you sure, you want to delete category: \n" + category.getTitle() + "?");
-
-        dialog.setCloseOnEsc(false);
-        dialog.setCloseOnOutsideClick(false);
-        Button yes = new Button("Yes", e -> {
-            deleteCategory(category);
-            dialog.close();
-        });
-        Button no = new Button("No", e -> dialog.close());
-        HorizontalLayout actions = new HorizontalLayout();
-        actions.add(yes, no);
-
-        VerticalLayout content = new VerticalLayout();
-        content.add(contentText, actions);
-        dialog.add(content);
-        dialog.open();
-    }
-
     private List<Category> getAllCategories() {
         return categoryService.getAllCategories();
     }
@@ -165,42 +105,75 @@ public class CategoryView extends VerticalLayout {
         dataProvider.refreshAll();
     }
 
-    private void showEditDialog(Category category) {
-        FormLayout formLayout = new FormLayout();
-
-        Dialog dialog = new Dialog();
-        TextField title = new TextField("Title");
-        title.setValue(category.getTitle());
-        binder.forField(title)
-                .bind(Category_.TITLE);
-
-        TextField description = new TextField("Description");
-        description.setValue(category.getDescription());
-
-        formLayout.add(title, description);
-
-        dialog.setCloseOnEsc(false);
-        dialog.setCloseOnOutsideClick(false);
-        Button save = new Button("Save", e -> {
-            category.setTitle(title.getValue());
-            category.setDescription(description.getValue());
-            updateCategory(category);
-            dialog.close();
-        });
-        Button cancel = new Button("Cancel", e -> dialog.close());
-        HorizontalLayout actions = new HorizontalLayout();
-        actions.add(save, cancel);
-
-        VerticalLayout content = new VerticalLayout();
-        content.add(formLayout, actions);
-        dialog.add(content);
-        dialog.open();
-        title.getElement().callFunction("focus");
-    }
-
     private void updateCategory(Category category) {
         categoryService.update(category);
         dataProvider.refreshAll();
     }
 
+    private void deleteCategory(Category category) {
+        dataProvider.getItems().remove(category);
+        categoryService.delete(category);
+        dataProvider.refreshAll();
+    }
+
+    private void showDialog(Category category, OperationEnum operation) {
+        FormLayout formLayout = new FormLayout();
+        Dialog dialog = new Dialog();
+        TextField title = new TextField("Title");
+        title.setValue(category.getTitle() == null ? "" : category.getTitle());
+        binder.forField(title)
+                .bind(Category_.TITLE);
+        TextField description = new TextField("Description");
+        description.setValue(category.getDescription() == null ? "" : category.getDescription());
+
+        formLayout.add(title, description);
+
+        dialog.setCloseOnEsc(false);
+        dialog.setCloseOnOutsideClick(false);
+        Button save = new Button("Save");
+
+        Button cancel = new Button("Cancel", e -> dialog.close());
+        HorizontalLayout actions = new HorizontalLayout();
+        actions.add(save, cancel);
+
+        VerticalLayout content = new VerticalLayout();
+
+        switch (operation) {
+            case UPDATE:
+                content.add(formLayout, actions);
+                save.addClickListener(e -> {
+                    category.setTitle(title.getValue());
+                    category.setDescription(description.getValue());
+                    updateCategory(category);
+                    dialog.close();
+                });
+                break;
+            case CREATE:
+                content.add(formLayout, actions);
+                save.addClickListener(e -> {
+                category.setTitle(title.getValue());
+                category.setDescription(description.getValue());
+                if (binder.writeBeanIfValid(category)) {
+                    addNewCategory(category);
+                    dialog.close();
+                }
+                });
+                break;
+            case DELETE:
+                Div contentText = new Div();
+                contentText.setText("Confirm delete category: " + category.getTitle() + "?");
+                content.add(contentText, actions);
+                save.setText("Yes");
+                save.addClickListener(e -> {
+                    deleteCategory(category);
+                    dialog.close();
+                });
+                break;
+        }
+
+        dialog.add(content);
+        dialog.open();
+        title.getElement().callFunction("focus");
+
+    }
 }
