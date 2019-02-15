@@ -57,11 +57,6 @@ public class RoleView extends VerticalLayout {
 
         grid.setDataProvider(dataProvider);
 
-        grid.addColumn(Role::getId)
-                .setHeader("ID")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(0);
-
         grid.addColumn(Role::getName)
                 .setHeader("Role name")
                 .setTextAlign(ColumnTextAlign.CENTER)
@@ -74,12 +69,11 @@ public class RoleView extends VerticalLayout {
 
         grid.addComponentColumn(role -> VaadinViewUtils.makeEditorColumnActions(
                 e -> showDialog(role, OperationEnum.UPDATE),
-                e -> showDialog(role, OperationEnum.DELETE))
-        )
+                e -> showDialog(role, OperationEnum.DELETE)))
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setEditorComponent(new Div())
-                .setHeader("Actions")
-                .setKey("actions");
+                .setFlexGrow(2)
+                .setHeader("Actions");
 
         VerticalLayout verticalLayout = new VerticalLayout();
 
@@ -97,7 +91,6 @@ public class RoleView extends VerticalLayout {
 
     private void showDialog(Role role, OperationEnum operation) {
         FormLayout roleForm = new FormLayout();
-        Dialog dialog = new Dialog();
         TextField nameField = new TextField("Role name");
         nameField.setValue(role.getName() == null ? "" : role.getName());
         binder.forField(nameField)
@@ -110,11 +103,10 @@ public class RoleView extends VerticalLayout {
 
         roleForm.add(nameField, humanized);
 
-        dialog.setCloseOnEsc(false);
-        dialog.setCloseOnOutsideClick(false);
+        Dialog dialog = VaadinViewUtils.initDialog();
         Button save = new Button("Save");
-
         Button cancel = new Button("Cancel", e -> dialog.close());
+
         HorizontalLayout actions = new HorizontalLayout();
         actions.add(save, cancel);
 
@@ -124,19 +116,18 @@ public class RoleView extends VerticalLayout {
             case UPDATE:
                 content.add(roleForm, actions);
                 save.addClickListener(e -> {
-                    role.setName(nameField.getValue());
-                    role.setHumanized(humanized.getValue());
-                    updateRole(role);
-                    dialog.close();
+                    if (binder.writeBeanIfValid(role)) {
+                        saveRole(role);
+                        dialog.close();
+                    }
                 });
                 break;
             case CREATE:
                 content.add(roleForm, actions);
                 save.addClickListener(e -> {
-                    role.setName(nameField.getValue());
-                    role.setHumanized(humanized.getValue());
                     if (binder.writeBeanIfValid(role)) {
-                        addNewRole(role);
+                        dataProvider.getItems().add(role);
+                        saveRole(role);
                         dialog.close();
                     }
                 });
@@ -158,14 +149,8 @@ public class RoleView extends VerticalLayout {
         nameField.getElement().callFunction("focus");
     }
 
-    private void addNewRole(Role role) {
-        role = roleService.create(role);
-        dataProvider.getItems().add(role);
-        dataProvider.refreshAll();
-    }
-
-    private void updateRole(Role role) {
-        roleService.update(role);
+    private void saveRole(Role role) {
+        roleService.save(role);
         dataProvider.refreshAll();
     }
 
