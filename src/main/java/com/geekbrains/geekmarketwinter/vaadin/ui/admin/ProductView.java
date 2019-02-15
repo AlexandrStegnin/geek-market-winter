@@ -1,12 +1,15 @@
 package com.geekbrains.geekmarketwinter.vaadin.ui.admin;
 
+import com.geekbrains.geekmarketwinter.config.support.OperationEnum;
 import com.geekbrains.geekmarketwinter.entites.Category;
 import com.geekbrains.geekmarketwinter.entites.Product;
+import com.geekbrains.geekmarketwinter.entites.Product_;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.services.CategoryService;
 import com.geekbrains.geekmarketwinter.services.ProductService;
 import com.geekbrains.geekmarketwinter.utils.filters.ProductFilter;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
+import com.geekbrains.geekmarketwinter.vaadin.support.VaadinViewUtils;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -19,7 +22,9 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
+import com.vaadin.flow.data.binder.BeanValidationBinder;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.converter.StringToDoubleConverter;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
@@ -36,6 +41,7 @@ import java.time.format.FormatStyle;
 import java.util.List;
 
 import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_PRODUCTS_PAGE;
+import static com.geekbrains.geekmarketwinter.config.support.Constants.LOCALE_RU;
 
 /**
  * @author stegnin
@@ -54,6 +60,8 @@ public class ProductView extends VerticalLayout {
     private Page<Product> page;
     private final Button addNewBtn;
     private final CategoryService categoryService;
+    private Binder<Product> binder;
+
 
     public ProductView(AuthRepository auth,
                        ProductService productService,
@@ -63,8 +71,10 @@ public class ProductView extends VerticalLayout {
         this.productFilter = new ProductFilter();
         this.categoryService = categoryService;
         this.page = productService.findAll(productFilter, Pageable.unpaged());
-        this.addNewBtn = new Button("New product", VaadinIcon.PLUS.create(), e -> showAddDialog());
+        this.addNewBtn = new Button("New product", VaadinIcon.PLUS.create(), e -> showDialog(new Product(),
+                OperationEnum.CREATE));
         this.dataProvider = new ListDataProvider<>(getAllProducts(productFilter));
+        this.binder = new BeanValidationBinder<>(Product.class);
         this.auth = auth;
         init();
     }
@@ -73,34 +83,29 @@ public class ProductView extends VerticalLayout {
         addNewBtn.setIconAfterText(true);
         grid.setDataProvider(dataProvider);
 
-        grid.addColumn(Product::getId)
-                .setHeader("ID")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(0);
-
         grid.addColumn(Product::getTitle)
                 .setHeader("Title")
-                .setKey("title")
+                .setKey(Product_.TITLE)
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
         grid.addColumn(Product::getVendorCode)
                 .setHeader("Vendor code")
-                .setKey("code")
+                .setKey(Product_.VENDOR_CODE)
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
         grid.addColumn(new NumberRenderer<>(
                 Product::getPrice,
-                NumberFormat.getCurrencyInstance()))
+                NumberFormat.getCurrencyInstance(LOCALE_RU)))
                 .setHeader("Price")
-                .setKey("price")
+                .setKey(Product_.PRICE)
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
         grid.addColumn(product -> product.getCategory().getTitle())
                 .setHeader("Category")
-                .setKey("category")
+                .setKey(Product_.CATEGORY)
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
@@ -118,29 +123,19 @@ public class ProductView extends VerticalLayout {
                         Product::getCreateAt,
                         DateTimeFormatter.ofLocalizedDateTime(
                                 FormatStyle.SHORT,
-                                FormatStyle.MEDIUM)
-                )
-        )
+                                FormatStyle.MEDIUM)))
                 .setHeader("Created at")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        Grid.Column<Product> editorColumn = grid.addComponentColumn(user -> {
-            Div actions = new Div();
-            Button edit = new Button("", VaadinIcon.EDIT.create());
-            edit.addClickListener(e -> showEditDialog(user));
-            Button delete = new Button("", VaadinIcon.TRASH.create());
-            delete.addClickListener(e -> showDeleteDialog(user));
-            actions.add(edit, delete);
-            return actions;
-        });
-
-        Div empty = new Div();
-        editorColumn.setEditorComponent(empty);
-        editorColumn
-                .setHeader("Actions")
+        grid.addComponentColumn(product ->
+                VaadinViewUtils.makeEditorColumnActions(
+                        e -> showDialog(product, OperationEnum.UPDATE),
+                        e -> showDialog(product, OperationEnum.DELETE)))
                 .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(1);
+                .setEditorComponent(new Div())
+                .setHeader("Actions")
+                .setFlexGrow(2);
 
         /*HeaderRow filterRow = grid.appendHeaderRow();
 
@@ -206,65 +201,8 @@ public class ProductView extends VerticalLayout {
         return categoryService.getAllCategories();
     }
 
-    private void showAddDialog() {
-
-        FormLayout formLayout = new FormLayout();
-
-        Dialog dialog = new Dialog();
-        TextField vendorCode = new TextField("Vendor code");
-        vendorCode.setPlaceholder("Enter vendor code");
-
-        // TODO: 13.02.2019 Доделать загрузку картинок
-
-        ComboBox<Category> categoryComboBox = new ComboBox<>("Select category", getAllCategories());
-        categoryComboBox.setItemLabelGenerator(Category::getTitle);
-
-        TextField titleField = new TextField("Title");
-        titleField.setPlaceholder("Enter title");
-
-        TextField shortDescr = new TextField("Short description");
-        shortDescr.setPlaceholder("Enter short description");
-
-        TextField fullDescr = new TextField("Full description");
-        fullDescr.setPlaceholder("Enter full description");
-
-        TextField price = new TextField("Price");
-        price.setPlaceholder("Enter price");
-
-        MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
-        Upload upload = new Upload(buffer);
-
-        upload.addSucceededListener(event -> {
-//            Component component = createComponent(event.getMIMEType(),
-//                    event.getFileName(),
-//                    buffer.getInputStream(event.getFileName()));
-//            showOutput(event.getFileName(), component);
-        });
-
-        formLayout.add(vendorCode, titleField, shortDescr, fullDescr, price, categoryComboBox, upload);
-
-        dialog.setCloseOnEsc(false);
-        dialog.setCloseOnOutsideClick(false);
-        Button save = new Button("Save", e -> {
-            Product product = new Product(categoryComboBox.getValue(), vendorCode.getValue(), titleField.getValue(),
-                    shortDescr.getValue(), fullDescr.getValue(), Double.valueOf(price.getValue()));
-            addNewProduct(product);
-            dialog.close();
-        });
-        Button cancel = new Button("Cancel", e -> dialog.close());
-        HorizontalLayout actions = new HorizontalLayout();
-        actions.add(save, cancel);
-
-        VerticalLayout content = new VerticalLayout();
-        content.add(formLayout, actions);
-        dialog.add(content);
-        dialog.open();
-        vendorCode.getElement().callFunction("focus");
-    }
-
-    private void addNewProduct(Product product) {
-        product = productService.create(product);
-        dataProvider.getItems().add(product);
+    private void saveProduct(Product product) {
+        productService.save(product);
         dataProvider.refreshAll();
     }
 
@@ -272,90 +210,104 @@ public class ProductView extends VerticalLayout {
         return productService.fetchAll(filter);
     }
 
-    private void showEditDialog(Product product) {
+    private void deleteProduct(Product product) {
+        dataProvider.getItems().remove(product);
+        productService.delete(product);
+        dataProvider.refreshAll();
+    }
 
+    private void showDialog(Product product, OperationEnum operation) {
         FormLayout formLayout = new FormLayout();
 
-        Dialog dialog = new Dialog();
+        ComboBox<Category> category = new ComboBox<>("Select category", getAllCategories());
+        category.setItemLabelGenerator(Category::getTitle);
+        binder.forField(category)
+                .bind(Product_.CATEGORY);
+        if (product.getCategory() != null) {
+            category.setValue(product.getCategory());
+        }
         TextField vendorCode = new TextField("Vendor code");
-        vendorCode.setValue(product.getVendorCode());
+        vendorCode.setValue(product.getVendorCode() == null ? "" : product.getVendorCode());
+        binder.forField(vendorCode)
+                .bind(Product_.VENDOR_CODE);
 
-        ComboBox<Category> categoryComboBox = new ComboBox<>("Select category", getAllCategories());
-        categoryComboBox.setItemLabelGenerator(Category::getTitle);
-        categoryComboBox.setValue(product.getCategory());
+        TextField title = new TextField("Title");
+        title.setValue(product.getTitle() == null ? "" : product.getTitle());
+        binder.forField(title)
+                .bind(Product_.TITLE);
 
-        TextField titleField = new TextField("Title");
-        titleField.setValue(product.getTitle());
+        TextField shortDescription = new TextField("Short description");
+        shortDescription.setValue(product.getShortDescription() == null ? "" : product.getShortDescription());
+        binder.forField(shortDescription)
+                .bind(Product_.SHORT_DESCRIPTION);
 
-        TextField shortDescr = new TextField("Short description");
-        shortDescr.setValue(product.getShortDescription());
-
-        TextField fullDescr = new TextField("Full description");
-        fullDescr.setValue(product.getFullDescription());
+        TextField fullDescription = new TextField("Full description");
+        fullDescription.setValue(product.getFullDescription() == null ? "" : product.getFullDescription());
+        binder.forField(fullDescription)
+                .bind(Product_.FULL_DESCRIPTION);
 
         TextField price = new TextField("Price");
-        price.setValue(String.valueOf(product.getPrice()));
+        price.setValue(product.getPrice() == 0 ? String.valueOf(0d) : String.valueOf(product.getPrice()));
+        binder.forField(price)
+                // input should not be null or empty
+                .withValidator(string -> string != null && !string.isEmpty(), "Input values should not be empty")
+                // convert String to Integer, throw ValidationException if String is in incorrect format
+                .withConverter(new StringToDoubleConverter("Input value should be an integer"))
+                // validate converted integer: it should be positive
+                .withValidator(dbl -> dbl > 0, "Input value should be a positive double")
+                .bind(Product_.PRICE);
 
-        MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
-        Upload upload = new Upload(buffer);
+        Upload images = new Upload();
 
-        upload.addSucceededListener(event -> {});
+        // TODO: 13.02.2019 Доделать загрузку картинок
 
-        formLayout.add(vendorCode, titleField, shortDescr, fullDescr, price, categoryComboBox, upload);
+        formLayout.add(category, vendorCode, title, shortDescription, fullDescription, price, images);
 
-        dialog.setCloseOnEsc(false);
-        dialog.setCloseOnOutsideClick(false);
-        Button save = new Button("Save", e -> {
-            product.setVendorCode(vendorCode.getValue());
-            product.setCategory(categoryComboBox.getValue());
-            product.setTitle(titleField.getValue());
-            product.setShortDescription(shortDescr.getValue());
-            product.setFullDescription(fullDescr.getValue());
-            product.setPrice(Double.valueOf(price.getValue()));
-            updateProduct(product);
-            dialog.close();
-        });
+        Dialog dialog = VaadinViewUtils.initDialog();
+        Button save = new Button("Save");
+
         Button cancel = new Button("Cancel", e -> dialog.close());
         HorizontalLayout actions = new HorizontalLayout();
         actions.add(save, cancel);
 
         VerticalLayout content = new VerticalLayout();
-        content.add(formLayout, actions);
+
+        switch (operation) {
+            case UPDATE:
+                content.add(formLayout, actions);
+                save.addClickListener(e -> {
+                    if (binder.writeBeanIfValid(product)) {
+                        saveProduct(product);
+                        dialog.close();
+                    }
+                });
+                break;
+            case CREATE:
+                content.add(formLayout, actions);
+                save.addClickListener(e -> {
+                    if (binder.writeBeanIfValid(product)) {
+                        dataProvider.getItems().add(product);
+                        saveProduct(product);
+                        dialog.close();
+                    }
+                });
+                break;
+            case DELETE:
+                Div contentText = new Div();
+                contentText.setText("Confirm delete product: " + product.getTitle() + "?");
+                content.add(contentText, actions);
+                save.setText("Yes");
+                save.addClickListener(e -> {
+                    deleteProduct(product);
+                    dialog.close();
+                });
+                break;
+        }
+
         dialog.add(content);
         dialog.open();
         vendorCode.getElement().callFunction("focus");
-    }
 
-    private void updateProduct(Product product) {
-        productService.update(product);
-        dataProvider.refreshAll();
-    }
-
-    private void showDeleteDialog(Product product) {
-        Dialog dialog = new Dialog();
-        Div contentText = new Div();
-        contentText.setText("Are you sure, you want to delete product: \n" + product.getTitle() + "?");
-
-        dialog.setCloseOnEsc(false);
-        dialog.setCloseOnOutsideClick(false);
-        Button yes = new Button("Yes", e -> {
-            deleteProduct(product);
-            dialog.close();
-        });
-        Button no = new Button("No", e -> dialog.close());
-        HorizontalLayout actions = new HorizontalLayout();
-        actions.add(yes, no);
-
-        VerticalLayout content = new VerticalLayout();
-        content.add(contentText, actions);
-        dialog.add(content);
-        dialog.open();
-    }
-
-    private void deleteProduct(Product product) {
-        dataProvider.getItems().remove(product);
-        productService.delete(product);
-        dataProvider.refreshAll();
     }
 
 }
