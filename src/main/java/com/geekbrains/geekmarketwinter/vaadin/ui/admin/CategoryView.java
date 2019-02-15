@@ -6,6 +6,7 @@ import com.geekbrains.geekmarketwinter.entites.Category_;
 import com.geekbrains.geekmarketwinter.services.AuthService;
 import com.geekbrains.geekmarketwinter.services.CategoryService;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
+import com.geekbrains.geekmarketwinter.vaadin.support.VaadinViewUtils;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -56,12 +57,6 @@ public class CategoryView extends VerticalLayout {
 
         grid.setDataProvider(dataProvider);
 
-        grid.addColumn(Category::getId)
-                .setHeader("ID")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setWidth("10px")
-                .setFlexGrow(0);
-
         grid.addColumn(Category::getTitle)
                 .setHeader("Title")
                 .setTextAlign(ColumnTextAlign.CENTER)
@@ -72,19 +67,12 @@ public class CategoryView extends VerticalLayout {
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        grid.addComponentColumn(category -> {
-            Div actions = new Div();
-            Button edit = new Button("", VaadinIcon.EDIT.create());
-            edit.addClickListener(e -> showDialog(category, OperationEnum.UPDATE));
-            Button delete = new Button("", VaadinIcon.TRASH.create());
-            delete.addClickListener(e -> showDialog(category, OperationEnum.DELETE));
-            actions.add(edit, delete);
-            return actions;
-        })
+        grid.addComponentColumn(category -> VaadinViewUtils.makeEditorColumnActions(
+                e -> showDialog(category, OperationEnum.UPDATE), e -> showDialog(category, OperationEnum.DELETE)))
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setEditorComponent(new Div())
                 .setHeader("Actions")
-                .setKey("actions");
+                .setFlexGrow(2);
 
         VerticalLayout verticalLayout = new VerticalLayout();
 
@@ -99,14 +87,8 @@ public class CategoryView extends VerticalLayout {
         return categoryService.getAllCategories();
     }
 
-    private void addNewCategory(Category category) {
-        category = categoryService.create(category);
-        dataProvider.getItems().add(category);
-        dataProvider.refreshAll();
-    }
-
-    private void updateCategory(Category category) {
-        categoryService.update(category);
+    private void saveCategory(Category category) {
+        categoryService.save(category);
         dataProvider.refreshAll();
     }
 
@@ -118,18 +100,19 @@ public class CategoryView extends VerticalLayout {
 
     private void showDialog(Category category, OperationEnum operation) {
         FormLayout formLayout = new FormLayout();
-        Dialog dialog = new Dialog();
         TextField title = new TextField("Title");
         title.setValue(category.getTitle() == null ? "" : category.getTitle());
         binder.forField(title)
                 .bind(Category_.TITLE);
+
         TextField description = new TextField("Description");
         description.setValue(category.getDescription() == null ? "" : category.getDescription());
+        binder.forField(description)
+                .bind(Category_.DESCRIPTION);
 
         formLayout.add(title, description);
 
-        dialog.setCloseOnEsc(false);
-        dialog.setCloseOnOutsideClick(false);
+        Dialog dialog = VaadinViewUtils.initDialog();
         Button save = new Button("Save");
 
         Button cancel = new Button("Cancel", e -> dialog.close());
@@ -142,21 +125,20 @@ public class CategoryView extends VerticalLayout {
             case UPDATE:
                 content.add(formLayout, actions);
                 save.addClickListener(e -> {
-                    category.setTitle(title.getValue());
-                    category.setDescription(description.getValue());
-                    updateCategory(category);
-                    dialog.close();
+                    if (binder.writeBeanIfValid(category)) {
+                        saveCategory(category);
+                        dialog.close();
+                    }
                 });
                 break;
             case CREATE:
                 content.add(formLayout, actions);
                 save.addClickListener(e -> {
-                category.setTitle(title.getValue());
-                category.setDescription(description.getValue());
-                if (binder.writeBeanIfValid(category)) {
-                    addNewCategory(category);
-                    dialog.close();
-                }
+                    if (binder.writeBeanIfValid(category)) {
+                        dataProvider.getItems().add(category);
+                        saveCategory(category);
+                        dialog.close();
+                    }
                 });
                 break;
             case DELETE:
