@@ -10,9 +10,9 @@ public interface UserService extends UserDetailsService {
 
     User findByUserName(String userName);
 
-    void save(SystemUser systemUser);
+    void create(SystemUser systemUser);
 
-    User create(User user);
+    User save(User user);
 
     List<User> findAll();
 

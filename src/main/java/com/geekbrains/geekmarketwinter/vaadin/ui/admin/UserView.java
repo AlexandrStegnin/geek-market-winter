@@ -1,15 +1,15 @@
 package com.geekbrains.geekmarketwinter.vaadin.ui.admin;
 
+import com.geekbrains.geekmarketwinter.config.support.OperationEnum;
 import com.geekbrains.geekmarketwinter.entites.Role;
 import com.geekbrains.geekmarketwinter.entites.User;
+import com.geekbrains.geekmarketwinter.entites.User_;
 import com.geekbrains.geekmarketwinter.services.AuthService;
 import com.geekbrains.geekmarketwinter.services.RoleService;
 import com.geekbrains.geekmarketwinter.services.UserServiceImpl;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.geekbrains.geekmarketwinter.vaadin.support.VaadinViewUtils;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
@@ -19,6 +19,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.BeanValidationBinder;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -42,13 +44,16 @@ public class UserView extends VerticalLayout {
     private final Button addNewBtn;
     private ListDataProvider<User> dataProvider;
     private List<Role> roles;
+    private Binder<User> binder;
+
 
     public UserView(UserServiceImpl userService, AuthService auth, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
         this.grid = new Grid<>();
         this.dataProvider = new ListDataProvider<>(getAll());
-        this.addNewBtn = new Button("New user", VaadinIcon.PLUS.create(), e -> showAddDialog());
+        this.binder = new BeanValidationBinder<>(User.class);
+        this.addNewBtn = new Button("New user", VaadinIcon.PLUS.create(), e -> showDialog(new User(), OperationEnum.CREATE));
         this.roles = getRoles();
         this.auth = auth;
         init();
@@ -58,11 +63,6 @@ public class UserView extends VerticalLayout {
         addNewBtn.setIconAfterText(true);
 
         grid.setDataProvider(dataProvider);
-
-        grid.addColumn(User::getId)
-                .setHeader("ID")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(0);
 
         grid.addColumn(User::getUserName)
                 .setHeader("Username")
@@ -101,155 +101,31 @@ public class UserView extends VerticalLayout {
         Button cancel = new Button("Cancel");
         cancel.addClassName("cancel");
 
-        Grid.Column<User> editorColumn = grid.addComponentColumn(user ->
+        grid.addComponentColumn(user ->
                 VaadinViewUtils.makeEditorColumnActions(
-                        e -> showEditDialog(user),
-                        e -> showDeleteDialog(user)));
-
-        Div empty = new Div(); // TODO: 12.02.2019 Разобраться с component column, без setEditorComponent не рендерится
-        editorColumn.setEditorComponent(empty);
-        editorColumn
-                .setHeader("Actions")
+                        e -> showDialog(user, OperationEnum.UPDATE),
+                        e -> showDialog(user, OperationEnum.DELETE)))
                 .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(1);
+                .setEditorComponent(new Div())
+                .setHeader("Actions")
+                .setFlexGrow(2);
+
+        // TODO: 12.02.2019 Разобраться с component column, без setEditorComponent не рендерится
 
         VerticalLayout verticalLayout = new VerticalLayout(addNewBtn, grid);
         verticalLayout.setAlignItems(Alignment.END);
         CustomAppLayout appLayout = new CustomAppLayout(auth, verticalLayout);
         add(appLayout);
         setHeight("100vh");
-
     }
 
-    private void showAddDialog() {
-
-        FormLayout formLayout = new FormLayout();
-
-        Dialog dialog = new Dialog();
-        TextField userName = new TextField("Username");
-        userName.setPlaceholder("Enter username");
-
-        TextField pwdField = new TextField("Password");
-        pwdField.setPlaceholder("Enter password");
-
-        TextField firstName = new TextField("First name");
-        firstName.setPlaceholder("Enter first name");
-
-        TextField lastName = new TextField("Last name");
-        lastName.setPlaceholder("Enter last name");
-
-        TextField email = new TextField("Email");
-        email.setPlaceholder("Enter email");
-
-        TextField phone = new TextField("Phone");
-        email.setPlaceholder("Enter phone");
-
-        CheckboxGroup<Role> checkboxGroup = new CheckboxGroup<>();
-        checkboxGroup.setLabel("Choose roles");
-        checkboxGroup.setItemLabelGenerator(Role::getHumanized);
-        checkboxGroup.setItems(roles);
-
-        // TODO: 2019-02-12 Переделать SystemUser - валидация
-
-        formLayout.add(userName, pwdField, firstName, lastName, email, phone, checkboxGroup);
-
-        dialog.setCloseOnEsc(false);
-        dialog.setCloseOnOutsideClick(false);
-        Button save = new Button("Save", e -> {
-            User user = new User(userName.getValue(), pwdField.getValue(), firstName.getValue(),
-                    lastName.getValue(), email.getValue(), phone.getValue(), checkboxGroup.getSelectedItems());
-            addNewUser(user);
-            dialog.close();
-        });
-        Button cancel = new Button("Cancel", e -> dialog.close());
-        HorizontalLayout actions = new HorizontalLayout();
-        actions.add(save, cancel);
-
-        VerticalLayout content = new VerticalLayout();
-        content.add(formLayout, actions);
-        dialog.add(content);
-        dialog.open();
-        userName.getElement().callFunction("focus");
-    }
-
-    private void showEditDialog(User user) {
-
-        FormLayout formLayout = new FormLayout();
-
-        Dialog dialog = new Dialog();
-        TextField userName = new TextField("Username");
-        userName.setValue(user.getUserName());
-
-        TextField pwdField = new TextField("Password");
-        pwdField.setValue("");
-
-        TextField firstName = new TextField("First name");
-        firstName.setValue(user.getFirstName());
-
-        TextField lastName = new TextField("Last name");
-        lastName.setValue(user.getLastName());
-
-        TextField email = new TextField("Email");
-        email.setValue(user.getEmail());
-
-        TextField phone = new TextField("Phone");
-        phone.setValue(user.getPhone());
-
-        Div checkBoxDiv = getUserRolesDiv(user);
-
-        formLayout.add(userName, pwdField, firstName, lastName, email, phone, checkBoxDiv);
-
-        dialog.setCloseOnEsc(false);
-        dialog.setCloseOnOutsideClick(false);
-        Button save = new Button("Save", e -> {
-            updateUser(user);
-            dialog.close();
-        });
-        Button cancel = new Button("Cancel", e -> dialog.close());
-        HorizontalLayout actions = new HorizontalLayout();
-        actions.add(save, cancel);
-
-        VerticalLayout content = new VerticalLayout();
-        content.add(formLayout, actions);
-        dialog.add(content);
-        dialog.open();
-        userName.getElement().callFunction("focus");
-    }
-
-    private void addNewUser(User user) {
-        user = userService.create(user);
-        dataProvider.getItems().add(user);
-        dataProvider.refreshAll();
-    }
-
-    private void updateUser(User user) {
-        userService.update(user);
+    private void saveUser(User user) {
+        userService.save(user);
         dataProvider.refreshAll();
     }
 
     private List<User> getAll() {
         return userService.findAll();
-    }
-
-    private void showDeleteDialog(User user) {
-        Dialog dialog = new Dialog();
-        Div contentText = new Div();
-        contentText.setText("Are you sure, you want to delete user: \n" + user.getUserName() + "?");
-
-        dialog.setCloseOnEsc(false);
-        dialog.setCloseOnOutsideClick(false);
-        Button yes = new Button("Yes", e -> {
-            deleteUser(user);
-            dialog.close();
-        });
-        Button no = new Button("No", e -> dialog.close());
-        HorizontalLayout actions = new HorizontalLayout();
-        actions.add(yes, no);
-
-        VerticalLayout content = new VerticalLayout();
-        content.add(contentText, actions);
-        dialog.add(content);
-        dialog.open();
     }
 
     private void deleteUser(User user) {
@@ -262,31 +138,86 @@ public class UserView extends VerticalLayout {
         return roleService.getAllRoles();
     }
 
-    private Div getUserRolesDiv(User user) {
-        Div checkBoxDiv = new Div();
-        Div label = new Div();
-        label.setText("Choose roles");
-        label.getStyle().set("margin", "10px 0");
-        checkBoxDiv.add(label);
-        Div contentDiv = new Div();
-        roles.forEach(role -> {
-            Checkbox checkbox = new Checkbox(
-                    role.getHumanized(),
-                    user.getRoles().contains(role));
-            checkbox.addValueChangeListener(e -> {
-                String roleName = e.getSource().getElement().getText();
-                Role userRole = roles.stream()
-                        .filter(r -> r.getHumanized().equalsIgnoreCase(roleName))
-                        .findAny().orElse(null);
-                if (e.getValue()) {
-                    user.getRoles().add(userRole);
-                } else {
-                    user.getRoles().remove(userRole);
-                }
-            });
-            contentDiv.add(checkbox);
-        });
-        checkBoxDiv.add(contentDiv);
-        return checkBoxDiv;
+    private void showDialog(User user, OperationEnum operation) {
+        FormLayout formLayout = new FormLayout();
+        TextField userName = new TextField("Username");
+        userName.setValue(user.getUserName() == null ? "" : user.getUserName());
+        binder.forField(userName)
+                .bind(User_.USER_NAME);
+
+        TextField pwdField = new TextField("Password");
+        pwdField.setValue("");
+        binder.forField(pwdField)
+                .bind(User_.PASSWORD);
+
+        TextField firstName = new TextField("First name");
+        firstName.setValue(user.getFirstName() == null ? "" : user.getFirstName());
+        binder.forField(firstName)
+                .bind(User_.FIRST_NAME);
+
+        TextField lastName = new TextField("Last name");
+        lastName.setValue(user.getLastName() == null ? "" : user.getLastName());
+        binder.forField(lastName)
+                .bind(User_.LAST_NAME);
+
+        TextField email = new TextField("Email");
+        email.setValue(user.getEmail() == null ? "" : user.getEmail());
+        binder.forField(email)
+                .bind(User_.EMAIL);
+
+        TextField phone = new TextField("Phone");
+        phone.setValue(user.getPhone() == null ? "" : user.getPhone());
+        binder.forField(phone)
+                .bind(User_.PHONE);
+
+        Div checkBoxDiv = VaadinViewUtils.makeUserRolesDiv(user, roles);
+
+        formLayout.add(userName, pwdField, firstName, lastName, email, phone, checkBoxDiv);
+
+        Dialog dialog = VaadinViewUtils.initDialog();
+        Button save = new Button("Save");
+
+        Button cancel = new Button("Cancel", e -> dialog.close());
+        HorizontalLayout actions = new HorizontalLayout();
+        actions.add(save, cancel);
+
+        VerticalLayout content = new VerticalLayout();
+
+        switch (operation) {
+            case UPDATE:
+                content.add(formLayout, actions);
+                save.addClickListener(e -> {
+                    if (binder.writeBeanIfValid(user)) {
+                        saveUser(user);
+                        dialog.close();
+                    }
+                });
+                break;
+            case CREATE:
+                content.add(formLayout, actions);
+                save.addClickListener(e -> {
+                    if (binder.writeBeanIfValid(user)) {
+                        dataProvider.getItems().add(user);
+                        saveUser(user);
+                        dialog.close();
+                    }
+                });
+                break;
+            case DELETE:
+                Div contentText = new Div();
+                contentText.setText("Confirm delete user: " + user.getUserName() + "?");
+                content.add(contentText, actions);
+                save.setText("Yes");
+                save.addClickListener(e -> {
+                    deleteUser(user);
+                    dialog.close();
+                });
+                break;
+        }
+
+        dialog.add(content);
+        dialog.open();
+        userName.getElement().callFunction("focus");
+
     }
 }

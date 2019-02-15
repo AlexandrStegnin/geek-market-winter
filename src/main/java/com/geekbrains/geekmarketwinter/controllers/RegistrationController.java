@@ -55,7 +55,7 @@ public class RegistrationController {
             logger.debug("User name already exists.");
             return "registration-form";
         }
-        userService.save(theSystemUser);
+        userService.create(theSystemUser);
         logger.debug("Successfully created user: " + userName);
         return "registration-confirmation";
     }

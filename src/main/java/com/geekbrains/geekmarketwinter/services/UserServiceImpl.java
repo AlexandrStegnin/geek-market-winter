@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@Transactional
-	public void save(SystemUser systemUser) {
+	public void create(SystemUser systemUser) {
 		User user = new User();
 		user.setUserName(systemUser.getUserName());
 		user.setPassword(passwordEncoder.encode(systemUser.getPassword()));
@@ -79,14 +79,15 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User create(User user) {
+	public User save(User user) {
 		if (user.getRoles().size() == 0) user.setRoles(
 				Collections.singleton(roleService.findRoleByName(ROLE_PREFIX + EMPLOYEE))
 		);
 		if (StringUtils.hasText(user.getPassword())) {
 			user.setPassword(passwordEncoder.encode(user.getPassword()));
 		} else {
-			user.setPassword(userRepository.findOneByUserName(user.getUserName()).getPassword());
+			userRepository.findById(user.getId())
+					.ifPresent(u -> user.setPassword(u.getPassword()));
 		}
 		return userRepository.save(user);
 	}
