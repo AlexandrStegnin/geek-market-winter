@@ -56,8 +56,8 @@ target
 .idea
 !.mvn/wrapper/maven-wrapper.jar
 mvnw*
-!application.properties
 *.properties
+!application.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 
