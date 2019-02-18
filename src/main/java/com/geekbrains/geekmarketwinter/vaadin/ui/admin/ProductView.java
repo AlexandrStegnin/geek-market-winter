@@ -17,7 +17,6 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -71,7 +70,7 @@ public class ProductView extends VerticalLayout {
         this.productFilter = new ProductFilter();
         this.categoryService = categoryService;
         this.page = productService.findAll(productFilter, Pageable.unpaged());
-        this.addNewBtn = new Button("New product", VaadinIcon.PLUS.create(), e -> showDialog(new Product(),
+        this.addNewBtn = new Button("Add new product", e -> showDialog(new Product(),
                 OperationEnum.CREATE));
         this.dataProvider = new ListDataProvider<>(getAllProducts(productFilter));
         this.binder = new BeanValidationBinder<>(Product.class);
@@ -120,10 +119,10 @@ public class ProductView extends VerticalLayout {
                 .setFlexGrow(1);
 
         grid.addColumn(new LocalDateTimeRenderer<>(
-                        Product::getCreateAt,
-                        DateTimeFormatter.ofLocalizedDateTime(
-                                FormatStyle.SHORT,
-                                FormatStyle.MEDIUM)))
+                Product::getCreateAt,
+                DateTimeFormatter.ofLocalizedDateTime(
+                        FormatStyle.SHORT,
+                        FormatStyle.MEDIUM)))
                 .setHeader("Created at")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
@@ -137,65 +136,25 @@ public class ProductView extends VerticalLayout {
                 .setHeader("Actions")
                 .setFlexGrow(2);
 
-        /*HeaderRow filterRow = grid.appendHeaderRow();
-
-        grid.getColumns().forEach(column -> {
-
-            if (!Objects.equals(null, column.getKey())) {
-                // TODO: 13.02.2019 Фильтрация
-                if (column.getKey().equalsIgnoreCase("title")) {
-                    TextField field = new TextField();
-                    field.setValueChangeMode(ValueChangeMode.EAGER);
-                    field.setSizeFull();
-                    field.setPlaceholder("Filter");
-                    field.addValueChangeListener(event -> {
-                        if (Objects.equals(null, productFilter)) productFilter = new ProductFilter();
-                        productFilter.setTitle(event.getValue());
-                        dataProvider.refreshAll();
-                    });
-                    filterRow.getCell(column).setComponent(field);
-                } else if (column.getKey().equalsIgnoreCase("category")) {
-                    ComboBox<Category> comboBox = new ComboBox<>();
-                    comboBox.setItemLabelGenerator(Category::getTitle);
-                    comboBox.setItems(getAllCategories());
-                    comboBox.addValueChangeListener(event -> {
-                        if (Objects.equals(null, productFilter)) productFilter = new ProductFilter();
-                        productFilter.setCategory(event.getValue());
-                        dataProvider.setFilter(event.getValue());
-                        dataProvider.refreshAll();
-                    });
-                    filterRow.getCell(column).setComponent(comboBox);
-                }
-            }
-        });*/
-        VerticalLayout verticalLayout = new VerticalLayout(addNewBtn, grid);
+        VerticalLayout horizontalLayout = new VerticalLayout();
+        HorizontalLayout filterForm = VaadinViewUtils.getProductFilterForm(dataProvider, getAllCategories());
+        addNewBtn.getStyle()
+                .set("position", "absolute")
+                .set("right", "5%");
+        filterForm.add(addNewBtn);
+        filterForm.setWidth("100%");
+        filterForm.setAlignSelf(Alignment.END, addNewBtn);
+        VerticalLayout verticalLayout = new VerticalLayout(/*addNewBtn, */grid);
+        horizontalLayout.add(filterForm, verticalLayout);
+        horizontalLayout.setSpacing(true);
+        horizontalLayout.setPadding(true);
+        horizontalLayout.setSizeFull();
+        horizontalLayout.setAlignItems(Alignment.START);
         verticalLayout.setAlignItems(Alignment.END);
-        CustomAppLayout appLayout = new CustomAppLayout(auth, verticalLayout);
+        CustomAppLayout appLayout = new CustomAppLayout(auth, horizontalLayout);
         add(appLayout);
         setHeight("100vh");
     }
-
-//    private ConfigurableFilterDataProvider<Product, String, Category> getDataProvider(ProductService service) {
-//        DataProvider<Product, ProductFilter> dataProvider =
-//                DataProvider.fromFilteringCallbacks(query -> {
-//                    // getFilter returns Optional<String>
-//                    productFilter = query.getFilter().orElse(new ProductFilter());
-//                    int offset = query.getOffset();
-//                    int limit = query.getLimit();
-//                    page = service.findAll(
-//                            productFilter, PageRequest.of(offset, limit));
-//                    return page.getContent().stream();
-//                }, query -> {
-//                    productFilter = query.getFilter().orElse(new ProductFilter());
-//                    int offset = query.getOffset();
-//                    int limit = query.getLimit();
-//                    return service.countByFilter(productFilter, PageRequest.of(offset, limit));
-//                });
-//
-//        return dataProvider
-//                .withConfigurableFilter(
-//                        ProductFilter::new);
-//    }
 
     private List<Category> getAllCategories() {
         return categoryService.getAllCategories();
@@ -252,8 +211,8 @@ public class ProductView extends VerticalLayout {
                 // input should not be null or empty
                 .withValidator(string -> string != null && !string.isEmpty(), "Input values should not be empty")
                 // convert String to Integer, throw ValidationException if String is in incorrect format
-                .withConverter(new StringToDoubleConverter("Input value should be an integer"))
-                // validate converted integer: it should be positive
+                .withConverter(new StringToDoubleConverter("Input value should be an double"))
+                // validate converted double: it should be positive
                 .withValidator(dbl -> dbl > 0, "Input value should be a positive double")
                 .bind(Product_.PRICE);
 

@@ -1,14 +1,22 @@
 package com.geekbrains.geekmarketwinter.vaadin.support;
 
+import com.geekbrains.geekmarketwinter.entites.Category;
+import com.geekbrains.geekmarketwinter.entites.Product;
 import com.geekbrains.geekmarketwinter.entites.Role;
 import com.geekbrains.geekmarketwinter.entites.User;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import java.util.HashSet;
 import java.util.List;
@@ -60,6 +68,35 @@ public class VaadinViewUtils {
         });
         checkBoxDiv.add(contentDiv);
         return checkBoxDiv;
+    }
+
+    public static HorizontalLayout getProductFilterForm(ListDataProvider<Product> dataProvider, List<Category> categories) {
+        HorizontalLayout formLayout = new HorizontalLayout();
+        TextField title = new TextField("Search by title");
+        title.setValueChangeMode(ValueChangeMode.EAGER);
+        title.setPlaceholder("Search by title");
+        title.addValueChangeListener(e -> {
+            dataProvider.setFilter(product -> product.getTitle().toLowerCase().contains(e.getValue().toLowerCase()));
+            dataProvider.refreshAll();
+        });
+        ComboBox<Category> comboBox = new ComboBox<>("Search by category");
+        comboBox.setPlaceholder("Search by category");
+        comboBox.setItemLabelGenerator(Category::getTitle);
+        comboBox.setItems(categories);
+        comboBox.addValueChangeListener(event -> {
+            if (event.getValue() != null) {
+                dataProvider.setFilter(value -> value.getCategory().equals(event.getValue()));
+                dataProvider.refreshAll();
+            } else {
+                dataProvider.clearFilters();
+                dataProvider.refreshAll();
+            }
+        });
+        formLayout.add(title, comboBox);
+        formLayout.setPadding(true);
+        formLayout.setSpacing(true);
+        formLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
+        return formLayout;
     }
 
 }
