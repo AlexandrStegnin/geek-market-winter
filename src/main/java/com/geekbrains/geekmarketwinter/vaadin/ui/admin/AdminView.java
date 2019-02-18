@@ -39,6 +39,7 @@ public class AdminView extends VerticalLayout {
         Image statusesImg = createImage("images/dump-truck.png", "Manage statuses");
         Image usersImg = createImage("images/users-png.png", "Manage users");
         Image rolesImg = createImage("images/manage-roles.png", "Manage roles");
+        Image productsImg = createImage("images/products.png", "Manage products");
 
         HorizontalLayout btnLayout = new HorizontalLayout();
         btnLayout.setSizeFull();
@@ -48,10 +49,11 @@ public class AdminView extends VerticalLayout {
 
         Button categoriesBtn = new Button("Categories", categoriesImg, e -> goToPage(CategoryView.class));
         Button orderStatusesBtn = new Button("Statuses", statusesImg, e -> goToPage(OrderView.class));
-        Button usersBtn = new Button(" Users", usersImg, e -> showMessage());
+        Button usersBtn = new Button(" Users", usersImg, e -> goToPage(UserView.class));
         Button rolesBtn = new Button("Roles", rolesImg, e -> goToPage(RoleView.class));
+        Button productsBtn = new Button("Products", productsImg, e -> goToPage(ProductView.class));
 
-        btnLayout.add(categoriesBtn, orderStatusesBtn, usersBtn, rolesBtn);
+        btnLayout.add(categoriesBtn, orderStatusesBtn, usersBtn, rolesBtn, productsBtn);
         CustomAppLayout appLayout = new CustomAppLayout(auth, btnLayout);
         add(appLayout);
         setHeight("100vh");

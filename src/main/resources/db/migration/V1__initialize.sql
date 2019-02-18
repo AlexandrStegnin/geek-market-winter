@@ -18,6 +18,7 @@ DROP TABLE IF EXISTS roles;
 CREATE TABLE roles (
   id                    INT(11) NOT NULL AUTO_INCREMENT,
   name                  VARCHAR(50) DEFAULT NULL,
+  humanized                  VARCHAR(50) DEFAULT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
@@ -134,49 +135,71 @@ CREATE TABLE orders_item (
   REFERENCES products (id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
+DROP TABLE IF EXISTS file_assets;
+
+CREATE TABLE file_assets
+(
+  id                 INT(11) NOT NULL AUTO_INCREMENT,
+  created_date_time  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expiring_date_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  file_name          VARCHAR(255),
+  hash               VARCHAR(255),
+  name               VARCHAR(255),
+    PRIMARY KEY(id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
-INSERT INTO roles (name)
+INSERT INTO roles (name, humanized)
 VALUES
-('ROLE_EMPLOYEE'), ('ROLE_MANAGER'), ('ROLE_ADMIN');
+('ROLE_EMPLOYEE', 'Пользователь'), ('ROLE_MANAGER', 'Менеджер'), ('ROLE_ADMIN', 'Администратор');
 
 INSERT INTO users (username,password,first_name,last_name,email,phone)
 VALUES
-('admin','$2a$04$Fx/SX9.BAvtPlMyIIqqFx.hLY2Xp8nnhpzvEEVINvVpwIPbA3v/.i','Admin','Admin','admin@gmail.com','+79881111111');
+('admin','$2a$04$Fx/SX9.BAvtPlMyIIqqFx.hLY2Xp8nnhpzvEEVINvVpwIPbA3v/.i','Admin','Admin','admin@gmail.com','+79881111111'),
+('employee','$2a$04$Fx/SX9.BAvtPlMyIIqqFx.hLY2Xp8nnhpzvEEVINvVpwIPbA3v/.i','Employee','Employee','employee@gmail.com','+79882222222'),
+('manager','$2a$04$Fx/SX9.BAvtPlMyIIqqFx.hLY2Xp8nnhpzvEEVINvVpwIPbA3v/.i','Manager','Manager','manager@gmail.com','+79883333333');
 
 INSERT INTO users_roles (user_id, role_id)
 VALUES
 (1, 1),
 (1, 2),
-(1, 3);
+(1, 3),
+(2, 1),
+(3, 2);
 
 INSERT INTO categories (title)
 VALUES
-("Телевизоры"), ("Ноутбуки");
+('Телевизоры'), ('Ноутбуки');
 
 INSERT INTO orders_statuses (title)
 VALUES
-("Сформирован");
+('Сформирован'),
+('Ожидает оплаты');
 
 INSERT INTO products (category_id, vendor_code, title, short_description, full_description, price)
 VALUES
-(1, "00000001", "40\" Телевизор Samsung UE40NU7170U", "Коротко: Хороший телевизор Samsung 40", "LED телевизор Samsung 40", 26000.00),
-(1, "00000002", "48\" Телевизор Samsung UE48NU3870U", "Коротко: Хороший телевизор Samsung 48", "LED телевизор Samsung 48", 32000.00),
-(1, "00000003", "56\" Телевизор Samsung UE56NU8390U", "Коротко: Хороший телевизор Samsung 56", "LED телевизор Samsung 56", 44000.00),
+(1, '00000001', '40 Телевизор Samsung UE40NU7170U', 'Коротко: Хороший телевизор Samsung 40', 'LED телевизор Samsung 40', 26000.00),
+(1, '00000002', '48 Телевизор Samsung UE48NU3870U', 'Коротко: Хороший телевизор Samsung 48', 'LED телевизор Samsung 48', 32000.00),
+(1, '00000003', '56 Телевизор Samsung UE56NU8390U', 'Коротко: Хороший телевизор Samsung 56', 'LED телевизор Samsung 56', 44000.00),
 
-(1, "00000004", "56\" Телевизор LG UE56NU8150U", "Коротко: Хороший телевизор LG 56", "LED телевизор LG 56", 30000.00),
-(1, "00000005", "48\" Телевизор LG UE48NU5740U", "Коротко: Хороший телевизор LG 48", "LED телевизор LG 48", 48000.00),
-(1, "00000006", "40\" Телевизор LG UE40NU7170U", "Коротко: Хороший телевизор LG 40", "LED телевизор LG 40", 27000.00),
-(2, "00000007", "15\" Ноутбук Apple MacBook Pro", "Коротко: Хороший ноутбук MacBook Pro 15", "Ноутбук MacBook Pro 15", 100000.00),
-(2, "00000008", "13\" Ноутбук Apple MacBook Air", "Коротко: Хороший ноутбук Apple MacBook Air 13", "Ноутбук Apple MacBook Air", 80000.00),
-(2, "00000009", "15\" Ноутбук Samsung UE15NU8330U", "Коротко: Хороший ноутбук Samsung 15", "Ноутбук Samsung 15", 95000.00),
-(2, "00000010", "13\" Ноутбук Samsung UE15NU8630U", "Коротко: Хороший ноутбук Samsung 13", "Ноутбук Samsung 13", 70000.00);
+(1, '00000004', '56 Телевизор LG UE56NU8150U', 'Коротко: Хороший телевизор LG 56', 'LED телевизор LG 56', 30000.00),
+(1, '00000005', '48 Телевизор LG UE48NU5740U', 'Коротко: Хороший телевизор LG 48', 'LED телевизор LG 48', 48000.00),
+(1, '00000006', '40 Телевизор LG UE40NU7170U', 'Коротко: Хороший телевизор LG 40', 'LED телевизор LG 40', 27000.00),
+(2, '00000007', '15 Ноутбук Apple MacBook Pro', 'Коротко: Хороший ноутбук MacBook Pro 15', 'Ноутбук MacBook Pro 15', 100000.00),
+(2, '00000008', '13 Ноутбук Apple MacBook Air', 'Коротко: Хороший ноутбук Apple MacBook Air 13', 'Ноутбук Apple MacBook Air', 80000.00),
+(2, '00000009', '15 Ноутбук Samsung UE15NU8330U', 'Коротко: Хороший ноутбук Samsung 15', 'Ноутбук Samsung 15', 95000.00),
+(2, '00000010', '13 Ноутбук Samsung UE15NU8630U', 'Коротко: Хороший ноутбук Samsung 13', 'Ноутбук Samsung 13', 70000.00);
 
 INSERT INTO products_images (product_id, path)
 VALUES
-(2, "2.jpg");
+(2, 'samsung_tv43.png'),
+(7, 'macbook2 (1).png'),
+(8, 'macbook_air_13.png'),
+(9, 'samsung1.png'),
+(10, 'samsung1.png');
 
 INSERT INTO delivery_addresses (user_id, address)
 VALUES
-(1, "18a Diagon Alley"),
-(1, "4 Privet Drive");
+(1, '18a Diagon Alley'),
+(1, '4 Privet Drive');

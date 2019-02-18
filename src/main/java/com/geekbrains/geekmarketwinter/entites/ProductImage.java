@@ -1,15 +1,14 @@
 package com.geekbrains.geekmarketwinter.entites;
 
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.ToString;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "products_images")
 @Data
+@ToString(exclude = "product")
 public class ProductImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -106,20 +106,25 @@ public class CartView extends VerticalLayout {
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
+        Div empty = new Div();
+        quantityColumn.setEditorComponent(empty);
+        // TODO: 14.02.2019 Bug? Без setEditorComponent не рендерится
+        // TODO: 14.02.2019 при увеличении/уменьшении кол-ва изменять строку total
+
         FooterRow footerRow = grid.appendFooterRow();
         Label total = new Label("Total");
         total.getStyle().set("font-size", "18px");
-        total.getStyle().set("color", "black");
+        total.getStyle().set("color", "white");
         footerRow.getCell(titleColumn).setComponent(total);
 
         Label price = new Label(cartService.getCurrentCart(VaadinService.getCurrentRequest()).getTotalCost().toString());
         price.getStyle().set("font-size", "18px");
-        price.getStyle().set("color", "black");
+        price.getStyle().set("color", "white");
         footerRow.getCell(priceColumn).setComponent(price);
 
         Label quantity = new Label();
         quantity.getStyle().set("font-size", "18px");
-        quantity.getStyle().set("color", "black");
+        quantity.getStyle().set("color", "white");
         quantity.setText(getCartItems().stream().map(OrderItem::getQuantity).reduce(0L, (a, b) -> a + b).toString());
         footerRow.getCell(quantityColumn).setComponent(quantity);
 

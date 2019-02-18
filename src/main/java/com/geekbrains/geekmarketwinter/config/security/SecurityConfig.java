@@ -48,7 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/").permitAll()
                 .antMatchers(ALL_HTTP_MATCHERS).permitAll()
                 .regexMatchers(HttpMethod.POST, "/\\?v-r=.*").permitAll()
-                .antMatchers(PATH_SEPARATOR + ADMIN_PAGE).hasRole(ROLE_ADMIN)
+                .antMatchers(PATH_SEPARATOR + ADMIN_PAGE).hasRole(ADMIN)
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().loginPage(LOGIN_URL).permitAll()

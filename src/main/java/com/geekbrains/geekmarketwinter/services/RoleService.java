@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.geekbrains.geekmarketwinter.config.support.Constants.ROLE_PREFIX;
+
 @Service
 public class RoleService {
 
@@ -21,16 +23,18 @@ public class RoleService {
         return roleRepo.findAll();
     }
 
-    public Role getRoleByName(String roleName) {
+    public Role findRoleByName(String roleName) {
         return roleRepo.findOneByName(roleName);
     }
 
-    public Role add(Role role) {
+    public Role save(Role role) {
+        if (!role.getName().startsWith(ROLE_PREFIX))
+            role.setName(ROLE_PREFIX + role.getName().toUpperCase());
         return roleRepo.save(role);
     }
 
     public Role update(Role role) {
-        return add(role);
+        return save(role);
     }
 
     public void delete(Role role) {
@@ -39,5 +43,9 @@ public class RoleService {
 
     public Role findById(Long id) {
         return roleRepo.getOne(id);
+    }
+
+    public Role create(Role role) {
+        return save(role);
     }
 }

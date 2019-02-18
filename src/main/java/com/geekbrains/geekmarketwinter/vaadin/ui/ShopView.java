@@ -8,18 +8,21 @@ import com.geekbrains.geekmarketwinter.services.ProductService;
 import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.utils.filters.ProductFilter;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
+import com.github.appreciated.card.Card;
+import com.github.appreciated.card.action.Actions;
+import com.github.appreciated.card.content.HorizontalCardComponentContainer;
+import com.github.appreciated.card.content.IconItem;
+import com.github.appreciated.card.content.Item;
+import com.github.appreciated.card.label.PrimaryLabel;
+import com.github.appreciated.card.label.SecondaryLabel;
+import com.github.appreciated.card.label.TitleLabel;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.grid.ColumnTextAlign;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
-import com.vaadin.flow.data.renderer.NumberRenderer;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinService;
@@ -30,26 +33,23 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.text.NumberFormat;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.List;
-import java.util.Objects;
 
+import static com.geekbrains.geekmarketwinter.config.support.Constants.LOCALE_RU;
 import static com.geekbrains.geekmarketwinter.config.support.Constants.SHOP_PAGE;
 
 @PageTitle("Shop")
 @Route(SHOP_PAGE)
-@Theme(value = Material.class)
+@Theme(value = Material.class, variant = Material.DARK)
 public class ShopView extends VerticalLayout {
 
     private final AuthRepository auth;
     private final ProductService productService;
     private final ShoppingCartService cartService;
-    private ConfigurableFilterDataProvider<Product, String, Category> dataProvider;
-    private Grid<Product> grid;
     private ProductFilter productFilter;
     private Page<Product> page;
     private final CategoryService categoryService;
+    private NumberFormat numberFormat = NumberFormat.getCurrencyInstance(LOCALE_RU);
 
     public ShopView(AuthRepository auth,
                     ProductService productService,
@@ -57,7 +57,6 @@ public class ShopView extends VerticalLayout {
                     CategoryService categoryService) {
         this.cartService = cartService;
         this.productService = productService;
-        this.grid = new Grid<>();
         this.productFilter = new ProductFilter();
         this.categoryService = categoryService;
         this.page = productService.findAll(productFilter, Pageable.unpaged());
@@ -66,116 +65,96 @@ public class ShopView extends VerticalLayout {
     }
 
     private void init() {
-        dataProvider = getDataProvider(productService);
-        grid.setDataProvider(dataProvider);
-//        List<ValueProvider<Product, String>> valueProviders = new ArrayList<>();
-//        valueProviders.add(Product::getTitle);
-//        valueProviders.add(product -> String.valueOf(product.getVendorCode()));
-//        valueProviders.add(product -> String.valueOf(product.getPrice()));
-//        valueProviders.add(product -> String.valueOf(product.getCategory().getTitle()));
-//
-//        Iterator<ValueProvider<Product, String>> iterator = valueProviders
-//                .iterator();
+        HorizontalCardComponentContainer cardContainer = new HorizontalCardComponentContainer();
+        cardContainer.setJustifyContentMode(JustifyContentMode.CENTER);
+        cardContainer.getStyle().set("flex-wrap", "wrap");
+        cardContainer.getStyle().set("display", "flex");
+        cardContainer.setSpacing(false);
+        cardContainer.setPadding(true);
+        List<Product> products = getAllProducts();
+        products.forEach(product -> {
+            Card card = createCard(product);
+            cardContainer.add(card);
+        });
+        CustomAppLayout appLayout = new CustomAppLayout(auth, cardContainer);
+        add(appLayout);
+        setAlignItems(Alignment.STRETCH);
+    }
 
-        grid.addColumn(Product::getId)
-                .setHeader("ID")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(0);
+    private Card createCard(Product product) {
+        Image defaultImage = createImage("images/users-png.png", "Coming soon");
+        Image productImage = null;
+        if (product.getImages().size() > 0) {
+            productImage = createImage("images/" + product.getImages().get(0).getPath(), product.getTitle());
+//            productImage.setHeight("150px");
+//            productImage.setWidth("150px");
+        }
 
-        grid.addColumn(Product::getTitle)
-                .setHeader("Title")
-                .setKey("title")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(1);
+        String price = numberFormat.format(product.getPrice());
+        SecondaryLabel priceLabel = new SecondaryLabel(price);
+        priceLabel.getStyle().set("text-align", "right");
 
-        grid.addColumn(Product::getVendorCode)
-                .setHeader("Vendor code")
-                .setKey("code")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(1);
+        Icon cartIcon = new Icon(VaadinIcon.CART);
+        cartIcon.getStyle().set("display", "inline-flex");
+        cartIcon.getStyle().set("margin-left", "5px");
 
-        grid.addColumn(new NumberRenderer<>(
-                Product::getPrice,
-                NumberFormat.getCurrencyInstance()))
-                .setHeader("Price")
-                .setKey("price")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(1);
+        Button addToCartBtn = new Button("Add to cart", cartIcon,
+                e -> addToCart(product));
+        addToCartBtn.setIconAfterText(true);
+        addToCartBtn.getStyle().set("line-height", "0");
+        addToCartBtn.setSizeFull();
+        addToCartBtn.setHeight("100%");
 
-        grid.addColumn(product -> product.getCategory().getTitle())
-                .setHeader("Category")
-                .setKey("category")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(1);
+        Item shortDescriptionItem = new Item("", product.getShortDescription());
+        shortDescriptionItem.setAlignItems(Alignment.CENTER);
 
-        grid.addColumn(Product::getShortDescription)
-                .setHeader("Short description")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(2);
+        TitleLabel titleLabel = new TitleLabel(product.getTitle());
+        titleLabel.setFlexGrow(1);
+        cartIcon.setId("category");
 
-        grid.addColumn(Product::getFullDescription)
-                .setHeader("Full description")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(1);
+        PrimaryLabel emptyLabel = new PrimaryLabel("");
+        emptyLabel.setFlexGrow(1);
 
-        grid.addColumn(new LocalDateTimeRenderer<>(
-                        Product::getCreateAt,
-                        DateTimeFormatter.ofLocalizedDateTime(
-                                FormatStyle.SHORT,
-                                FormatStyle.MEDIUM)
+        IconItem productIconItem = new IconItem(productImage == null ? defaultImage : productImage, "", "");
+        productIconItem.setFlexGrow(1);
+
+        Card card = new Card(
+                // if you don't want the title to wrap you can set the whitespace = nowrap
+                titleLabel,
+//                emptyLabel,
+                priceLabel,
+                productIconItem,
+                shortDescriptionItem,
+//                defaultImage,
+                new Actions(
+                        addToCartBtn
+//                        new ActionButton("Add to cart", event -> cartService.addToCart(VaadinService.getCurrentRequest(), product))
                 )
-        )
-                .setHeader("Created at")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(1);
+        );
+        card.setFlexGrow(1);
+        card.setWidth("250px");
+        card.setHeight("440px");
+        card.getStyle().set("margin", "10px");
+        card.getStyle().set("border", "1px solid black");
+        card.getStyle().set("border-radius", "10px");
+        card.getContent().getChildren().forEach(component -> {
+            if (component.getId().isPresent()) {
+                if (component.getId().get().equalsIgnoreCase("category")) {
 
-        grid.addComponentColumn(
-                product -> {
-                    Button button = new Button("Add to cart",
-                            e -> cartService.addToCart(VaadinService.getCurrentRequest(), product));
-                    button.setIconAfterText(false);
-                    button.setSizeFull();
-                    return button;
-                })
-                .setHeader("Actions")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(1);
-
-        HeaderRow filterRow = grid.appendHeaderRow();
-//        Iterator<ValueProvider<Product, String>> iterator2 = valueProviders
-//                .iterator();
-
-        grid.getColumns().forEach(column -> {
-            if (!Objects.equals(null, column.getKey())) {
-                if (column.getKey().equalsIgnoreCase("title")) {
-                    TextField field = new TextField();
-                    field.setValueChangeMode(ValueChangeMode.EAGER);
-                    field.setSizeFull();
-                    field.setPlaceholder("Filter");
-                    field.addValueChangeListener(event -> {
-                        if (Objects.equals(null, productFilter)) productFilter = new ProductFilter();
-                        productFilter.setTitle(event.getValue());
-                        dataProvider.refreshAll();
-                    });
-                    filterRow.getCell(column).setComponent(field);
-                } else if (column.getKey().equalsIgnoreCase("category")) {
-                    ComboBox<Category> comboBox = new ComboBox<>();
-                    comboBox.setItemLabelGenerator(Category::getTitle);
-                    comboBox.setItems(getAllCategories());
-                    comboBox.addValueChangeListener(event -> {
-                        if (Objects.equals(null, productFilter)) productFilter = new ProductFilter();
-                        productFilter.setCategory(event.getValue());
-                        dataProvider.setFilter(event.getValue());
-                        dataProvider.refreshAll();
-                    });
-                    filterRow.getCell(column).setComponent(comboBox);
                 }
             }
         });
+        return card;
+    }
 
-        CustomAppLayout appLayout = new CustomAppLayout(auth, grid);
-        add(appLayout);
-        setHeight("100vh");
+    private Image createImage(String src, String alt) {
+        Image image = new Image(src, alt);
+        image.setHeight("150px");
+        image.setWidth("150px");
+        image.getStyle().set("position", "relative");
+        image.getStyle().set("left", "25%");
+        image.getStyle().set("margin", "0");
+        return image;
     }
 
     private List<Product> getAllProducts() {
@@ -206,5 +185,20 @@ public class ShopView extends VerticalLayout {
 
     private List<Category> getAllCategories() {
         return categoryService.getAllCategories();
+    }
+
+    private void addToCart(Product product) {
+        cartService.addToCart(VaadinService.getCurrentRequest(), product);
+        incrementBadge(1);
+    }
+
+    private void incrementBadge(int cnt) {
+        getUI().ifPresent(ui -> ui.getElement().getChildren().forEach(element -> {
+            if (element.getTag().equalsIgnoreCase("paper-badge")) {
+                String count = element.getAttribute("label");
+                count = String.valueOf(Integer.valueOf(count) + cnt);
+                element.setAttribute("label", count);
+            }
+        }));
     }
 }
