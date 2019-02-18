@@ -1,11 +1,10 @@
 package com.geekbrains.geekmarketwinter.vaadin.ui.admin;
 
 import com.geekbrains.geekmarketwinter.config.support.OperationEnum;
-import com.geekbrains.geekmarketwinter.entites.Category;
-import com.geekbrains.geekmarketwinter.entites.Product;
-import com.geekbrains.geekmarketwinter.entites.Product_;
+import com.geekbrains.geekmarketwinter.entites.*;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.services.CategoryService;
+import com.geekbrains.geekmarketwinter.services.FileAssetService;
 import com.geekbrains.geekmarketwinter.services.ProductService;
 import com.geekbrains.geekmarketwinter.utils.filters.ProductFilter;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
@@ -21,6 +20,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.converter.StringToDoubleConverter;
@@ -31,16 +31,22 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.List;
 
-import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_PRODUCTS_PAGE;
-import static com.geekbrains.geekmarketwinter.config.support.Constants.LOCALE_RU;
+import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
 
 /**
  * @author stegnin
@@ -51,6 +57,9 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.LOCALE_RU
 @Theme(value = Material.class, variant = Material.DARK)
 public class ProductView extends VerticalLayout {
 
+    @Value("${spring.config.file-upload-directory}")
+    private String fileUploadDirectory;
+
     private final AuthRepository auth;
     private final ProductService productService;
     private ListDataProvider<Product> dataProvider;
@@ -60,11 +69,15 @@ public class ProductView extends VerticalLayout {
     private final Button addNewBtn;
     private final CategoryService categoryService;
     private Binder<Product> binder;
-
+    private MultiFileMemoryBuffer buffer;
+    private FileAssetService fileAssetService;
 
     public ProductView(AuthRepository auth,
                        ProductService productService,
-                       CategoryService categoryService) {
+                       CategoryService categoryService,
+                       FileAssetService fileAssetService) {
+        this.fileAssetService = fileAssetService;
+        this.buffer = new MultiFileMemoryBuffer();
         this.productService = productService;
         this.grid = new Grid<>();
         this.productFilter = new ProductFilter();
@@ -160,11 +173,6 @@ public class ProductView extends VerticalLayout {
         return categoryService.getAllCategories();
     }
 
-    private void saveProduct(Product product) {
-        productService.save(product);
-        dataProvider.refreshAll();
-    }
-
     private List<Product> getAllProducts(ProductFilter filter) {
         return productService.fetchAll(filter);
     }
@@ -216,8 +224,7 @@ public class ProductView extends VerticalLayout {
                 .withValidator(dbl -> dbl > 0, "Input value should be a positive double")
                 .bind(Product_.PRICE);
 
-        Upload images = new Upload();
-
+        Upload images = new Upload(buffer);
         // TODO: 13.02.2019 Доделать загрузку картинок
 
         formLayout.add(category, vendorCode, title, shortDescription, fullDescription, price, images);
@@ -265,8 +272,45 @@ public class ProductView extends VerticalLayout {
 
         dialog.add(content);
         dialog.open();
-        vendorCode.getElement().callFunction("focus");
+        category.getElement().callFunction("focus");
 
+    }
+
+    private void saveProduct(Product product) {
+        saveProductImages(product);
+        productService.save(product);
+        dataProvider.refreshAll();
+    }
+
+
+    private void saveProductImages(Product product) {
+        final File[] targetFile = {null};
+        createProductDir(product);
+        buffer.getFiles().forEach(fileName -> {
+            targetFile[0] = new File(File.separator + fileUploadDirectory + File.separator + product.getVendorCode() + File.separator + fileName);
+            try {
+               Files.copy(buffer.getInputStream(fileName), targetFile[0].toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            FileAsset fileAsset = new FileAsset(fileName);
+            fileAssetService.createFileAsset(fileAsset, targetFile[0]);
+            ProductImage productImage = new ProductImage();
+            productImage.setProduct(product);
+            productImage.setPath(fileName);
+            product.addImage(productImage);
+        });
+    }
+
+    private void createProductDir(Product product) {
+        Path productDir = Paths.get(File.separator + fileUploadDirectory + File.separator + product.getVendorCode());
+        if (!Files.exists(productDir)) {
+            try {
+                Files.createDirectories(productDir);
+            } catch (IOException e) {
+                throw new RuntimeException("Ошибка при создании директории: " + productDir.getFileName().toString(), e);
+            }
+        }
     }
 
 }

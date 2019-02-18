@@ -2,6 +2,7 @@ package com.geekbrains.geekmarketwinter.vaadin.ui;
 
 import com.geekbrains.geekmarketwinter.entites.Category;
 import com.geekbrains.geekmarketwinter.entites.Product;
+import com.geekbrains.geekmarketwinter.providers.ConfigurationProvider;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.services.CategoryService;
 import com.geekbrains.geekmarketwinter.services.ProductService;
@@ -32,6 +33,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.io.File;
 import java.text.NumberFormat;
 import java.util.List;
 
@@ -50,16 +52,19 @@ public class ShopView extends VerticalLayout {
     private Page<Product> page;
     private final CategoryService categoryService;
     private NumberFormat numberFormat = NumberFormat.getCurrencyInstance(LOCALE_RU);
+    private ConfigurationProvider configurationProvider;
 
     public ShopView(AuthRepository auth,
                     ProductService productService,
                     ShoppingCartService cartService,
-                    CategoryService categoryService) {
+                    CategoryService categoryService,
+                    ConfigurationProvider configurationProvider) {
         this.cartService = cartService;
         this.productService = productService;
         this.productFilter = new ProductFilter();
         this.categoryService = categoryService;
         this.page = productService.findAll(productFilter, Pageable.unpaged());
+        this.configurationProvider = configurationProvider;
         this.auth = auth;
         init();
     }
@@ -85,7 +90,11 @@ public class ShopView extends VerticalLayout {
         Image defaultImage = createImage("images/users-png.png", "Coming soon");
         Image productImage = null;
         if (product.getImages().size() > 0) {
-            productImage = createImage("images/" + product.getImages().get(0).getPath(), product.getTitle());
+//            Path pathToImg = Paths.get(configurationProvider.getFileUploadDirectory() + product.getVendorCode() +
+//                    PATH_SEPARATOR + product.getImages().get(0).getPath());
+            productImage = createImage(File.separator +
+                    configurationProvider.getFileUploadDirectory() + File.separator + product.getVendorCode() +
+                            File.separator + product.getImages().get(0).getPath(), product.getTitle());
 //            productImage.setHeight("150px");
 //            productImage.setWidth("150px");
         }
