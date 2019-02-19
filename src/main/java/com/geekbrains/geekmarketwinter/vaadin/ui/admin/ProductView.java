@@ -218,7 +218,7 @@ public class ProductView extends VerticalLayout {
         binder.forField(price)
                 // input should not be null or empty
                 .withValidator(string -> string != null && !string.isEmpty(), "Input values should not be empty")
-                // convert String to Integer, throw ValidationException if String is in incorrect format
+                // convert String to Double, throw ValidationException if String is in incorrect format
                 .withConverter(new StringToDoubleConverter("Input value should be an double"))
                 // validate converted double: it should be positive
                 .withValidator(dbl -> dbl > 0, "Input value should be a positive double")
@@ -287,11 +287,11 @@ public class ProductView extends VerticalLayout {
         final File[] targetFile = {null};
         createProductDir(product);
         buffer.getFiles().forEach(fileName -> {
-            targetFile[0] = new File(File.separator + fileUploadDirectory + File.separator + product.getVendorCode() + File.separator + fileName);
+            targetFile[0] = new File(fileUploadDirectory + product.getVendorCode() + PATH_SEPARATOR + fileName);
             try {
                Files.copy(buffer.getInputStream(fileName), targetFile[0].toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException("Ошибка копирования файла", e);
             }
             FileAsset fileAsset = new FileAsset(fileName);
             fileAssetService.createFileAsset(fileAsset, targetFile[0]);
@@ -303,7 +303,7 @@ public class ProductView extends VerticalLayout {
     }
 
     private void createProductDir(Product product) {
-        Path productDir = Paths.get(File.separator + fileUploadDirectory + File.separator + product.getVendorCode());
+        Path productDir = Paths.get(fileUploadDirectory + product.getVendorCode());
         if (!Files.exists(productDir)) {
             try {
                 Files.createDirectories(productDir);

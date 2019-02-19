@@ -45,7 +45,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .requestMatchers(SecurityUtils::isFrameworkInternalRequest).permitAll() // важный пункт, без него переход по url сбрасывал аутентификацию
                 .antMatchers(PATH_SEPARATOR + SHOP_PAGE, PATH_SEPARATOR + CART_PAGE).permitAll()
-                .antMatchers("/").permitAll()
+                .antMatchers(PATH_SEPARATOR).permitAll()
                 .antMatchers(ALL_HTTP_MATCHERS).permitAll()
                 .regexMatchers(HttpMethod.POST, "/\\?v-r=.*").permitAll()
                 .antMatchers(PATH_SEPARATOR + ADMIN_PAGE).hasRole(ADMIN)

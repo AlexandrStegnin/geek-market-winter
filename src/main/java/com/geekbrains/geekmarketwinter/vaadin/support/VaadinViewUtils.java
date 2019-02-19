@@ -17,7 +17,15 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.server.InputStreamFactory;
+import com.vaadin.flow.server.StreamResource;
+import org.springframework.util.ResourceUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.List;
 
@@ -97,6 +105,31 @@ public class VaadinViewUtils {
         formLayout.setSpacing(true);
         formLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
         return formLayout;
+    }
+
+    public static StreamResource createFileResource(File file) {
+        StreamResource sr = new StreamResource("", (InputStreamFactory) () -> {
+            try {
+                if (!Files.exists(file.toPath())) {
+                    return new FileInputStream(getDefaultImage());
+                } else {
+                    return new FileInputStream(file);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        });
+        sr.setCacheTime(0);
+        return sr;
+    }
+
+    private static File getDefaultImage() {
+        try {
+            return ResourceUtils.getFile("classpath:static/images/users-png.png");
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("Изображение по умолчанию не найдено!", e);
+        }
     }
 
 }
