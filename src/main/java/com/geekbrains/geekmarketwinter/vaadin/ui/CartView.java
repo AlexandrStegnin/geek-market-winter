@@ -108,7 +108,6 @@ public class CartView extends VerticalLayout {
 
         Div empty = new Div();
         quantityColumn.setEditorComponent(empty);
-        // TODO: 14.02.2019 Bug? Без setEditorComponent не рендерится
         // TODO: 14.02.2019 при увеличении/уменьшении кол-ва изменять строку total
 
         FooterRow footerRow = grid.appendFooterRow();

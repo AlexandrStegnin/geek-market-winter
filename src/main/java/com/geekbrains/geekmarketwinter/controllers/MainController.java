@@ -19,9 +19,7 @@ public class MainController {
 
     // TODO: 31.01.2019 Формирование заказа (Order) из корзины, привязка к пользователю SecurityContextHolder
     // TODO: 31.01.2019 Привязка адреса доставки к пользователю
-    // TODO: 31.01.2019 Разобраться с Cascade.Type Order -> OrderItem
     // TODO: 01.02.2019 После "подтвердить заказ" смена фона без перезагрузки страницы (слоями/якорями)
-    // TODO: 12.02.2019 Валидация полей при CRU операциях
 
     @RequestMapping("/api")
     public String showHomePage() {

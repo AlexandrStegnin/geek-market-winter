@@ -20,8 +20,6 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_PAG
 @PageTitle("Administration")
 @Theme(value = Material.class, variant = Material.DARK)
 public class AdminView extends VerticalLayout {
-
-    // TODO: 2019-02-06 Сделать добавление категорий/статусов
     
     private AuthRepository auth;
 

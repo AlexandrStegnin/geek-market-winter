@@ -44,7 +44,9 @@ import java.nio.file.StandardCopyOption;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
 
@@ -140,6 +142,12 @@ public class ProductView extends VerticalLayout {
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
+        grid.addColumn(product -> product.getImages().stream().map(ProductImage::getPath)
+                .collect(Collectors.joining(", ")))
+                .setHeader("Images")
+                .setTextAlign(ColumnTextAlign.CENTER)
+                .setFlexGrow(1);
+
         grid.addComponentColumn(product ->
                 VaadinViewUtils.makeEditorColumnActions(
                         e -> showDialog(product, OperationEnum.UPDATE),
@@ -225,7 +233,6 @@ public class ProductView extends VerticalLayout {
                 .bind(Product_.PRICE);
 
         Upload images = new Upload(buffer);
-        // TODO: 13.02.2019 Доделать загрузку картинок
 
         formLayout.add(category, vendorCode, title, shortDescription, fullDescription, price, images);
 
@@ -265,6 +272,7 @@ public class ProductView extends VerticalLayout {
                 save.setText("Yes");
                 save.addClickListener(e -> {
                     deleteProduct(product);
+                    dropProductDir(product);
                     dialog.close();
                 });
                 break;
@@ -282,14 +290,13 @@ public class ProductView extends VerticalLayout {
         dataProvider.refreshAll();
     }
 
-
     private void saveProductImages(Product product) {
         final File[] targetFile = {null};
         createProductDir(product);
         buffer.getFiles().forEach(fileName -> {
             targetFile[0] = new File(fileUploadDirectory + product.getVendorCode() + PATH_SEPARATOR + fileName);
             try {
-               Files.copy(buffer.getInputStream(fileName), targetFile[0].toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(buffer.getInputStream(fileName), targetFile[0].toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 throw new RuntimeException("Ошибка копирования файла", e);
             }
@@ -310,6 +317,18 @@ public class ProductView extends VerticalLayout {
             } catch (IOException e) {
                 throw new RuntimeException("Ошибка при создании директории: " + productDir.getFileName().toString(), e);
             }
+        }
+    }
+
+    private void dropProductDir(Product product) {
+        Path productDir = Paths.get(fileUploadDirectory + product.getVendorCode());
+        try {
+            Files.walk(productDir)
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        } catch (IOException e) {
+            throw new RuntimeException("Ошибка при удалении папки с изображениями продукта", e);
         }
     }
 
