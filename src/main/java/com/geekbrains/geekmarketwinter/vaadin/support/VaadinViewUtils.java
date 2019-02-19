@@ -11,6 +11,7 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -19,6 +20,8 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
 import java.io.File;
@@ -29,7 +32,19 @@ import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.List;
 
+import static com.geekbrains.geekmarketwinter.config.support.Constants.DEFAULT_SRC;
+import static com.geekbrains.geekmarketwinter.config.support.Constants.PATH_SEPARATOR;
+
+@Component
 public class VaadinViewUtils {
+
+    private static String fileUploadDirectory;
+
+    @Value("${spring.config.file-upload-directory}")
+    public void setFileUploadDirectory(String value) {
+        fileUploadDirectory = value;
+    }
+
 
     public static Div makeEditorColumnActions(ComponentEventListener<ClickEvent<Button>> editListener,
                                               ComponentEventListener<ClickEvent<Button>> deleteListener) {
@@ -107,7 +122,7 @@ public class VaadinViewUtils {
         return formLayout;
     }
 
-    public static StreamResource createFileResource(File file) {
+    private static StreamResource createFileResource(File file) {
         StreamResource sr = new StreamResource("", (InputStreamFactory) () -> {
             try {
                 if (!Files.exists(file.toPath())) {
@@ -130,6 +145,22 @@ public class VaadinViewUtils {
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Изображение по умолчанию не найдено!", e);
         }
+    }
+
+    public static Image getProductImage(Product product) {
+        String src = product.getImages().isEmpty() ? DEFAULT_SRC :
+                (fileUploadDirectory + product.getVendorCode() +
+                PATH_SEPARATOR + product.getImages().get(0).getPath());
+
+        File file = new File(src);
+        StreamResource streamResource = createFileResource(file);
+        Image image = new Image(streamResource, product.getTitle());
+        image.setHeight("150px");
+        image.setWidth("150px");
+        image.getStyle().set("position", "relative");
+        image.getStyle().set("left", "25%");
+        image.getStyle().set("margin", "0");
+        return image;
     }
 
 }

@@ -2,10 +2,8 @@ package com.geekbrains.geekmarketwinter.vaadin.ui;
 
 import com.geekbrains.geekmarketwinter.entites.Category;
 import com.geekbrains.geekmarketwinter.entites.Product;
-import com.geekbrains.geekmarketwinter.providers.ConfigurationProvider;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.services.CategoryService;
-import com.geekbrains.geekmarketwinter.services.FileAssetService;
 import com.geekbrains.geekmarketwinter.services.ProductService;
 import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.utils.filters.ProductFilter;
@@ -28,7 +26,6 @@ import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
@@ -36,11 +33,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.io.File;
 import java.text.NumberFormat;
 import java.util.List;
 
-import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
+import static com.geekbrains.geekmarketwinter.config.support.Constants.LOCALE_RU;
+import static com.geekbrains.geekmarketwinter.config.support.Constants.SHOP_PAGE;
 
 @PageTitle("Shop")
 @Route(SHOP_PAGE)
@@ -54,22 +51,16 @@ public class ShopView extends VerticalLayout {
     private Page<Product> page;
     private final CategoryService categoryService;
     private NumberFormat numberFormat = NumberFormat.getCurrencyInstance(LOCALE_RU);
-    private ConfigurationProvider configurationProvider;
-    private FileAssetService fileAssetService;
 
     public ShopView(AuthRepository auth,
                     ProductService productService,
                     ShoppingCartService cartService,
-                    CategoryService categoryService,
-                    ConfigurationProvider configurationProvider,
-                    FileAssetService fileAssetService) {
+                    CategoryService categoryService) {
         this.cartService = cartService;
         this.productService = productService;
         this.productFilter = new ProductFilter();
         this.categoryService = categoryService;
         this.page = productService.findAll(productFilter, Pageable.unpaged());
-        this.configurationProvider = configurationProvider;
-        this.fileAssetService = fileAssetService;
         this.auth = auth;
         init();
     }
@@ -92,13 +83,7 @@ public class ShopView extends VerticalLayout {
     }
 
     private Card createCard(Product product) {
-        Image defaultImage = createImage("images/users-png.png", "Coming soon");
-        Image productImage = null;
-        if (product.getImages().size() > 0) {
-            productImage = createImage(configurationProvider.getFileUploadDirectory() + product.getVendorCode() +
-                    PATH_SEPARATOR + product.getImages().get(0).getPath(), product.getTitle());
-        }
-
+        Image productImage = VaadinViewUtils.getProductImage(product);
         String price = numberFormat.format(product.getPrice());
         SecondaryLabel priceLabel = new SecondaryLabel(price);
         priceLabel.getStyle().set("text-align", "right");
@@ -124,7 +109,7 @@ public class ShopView extends VerticalLayout {
         PrimaryLabel emptyLabel = new PrimaryLabel("");
         emptyLabel.setFlexGrow(1);
 
-        IconItem productIconItem = new IconItem(productImage == null ? defaultImage : productImage, "", "");
+        IconItem productIconItem = new IconItem(productImage, "", "");
         productIconItem.setFlexGrow(1);
 
         Card card = new Card(
@@ -156,18 +141,6 @@ public class ShopView extends VerticalLayout {
         return card;
     }
 
-    private Image createImage(String src, String alt) {
-        File file = new File(src);
-        StreamResource streamResource = VaadinViewUtils.createFileResource(file);
-        Image image = new Image(streamResource, alt);
-        image.setHeight("150px");
-        image.setWidth("150px");
-        image.getStyle().set("position", "relative");
-        image.getStyle().set("left", "25%");
-        image.getStyle().set("margin", "0");
-        return image;
-    }
-
     private List<Product> getAllProducts() {
         return productService.findAll(productFilter, Pageable.unpaged()).getContent();
     }
@@ -190,8 +163,8 @@ public class ShopView extends VerticalLayout {
                 });
 
         return dataProvider
-        .withConfigurableFilter(
-                ProductFilter::new);
+                .withConfigurableFilter(
+                        ProductFilter::new);
     }
 
     private List<Category> getAllCategories() {
