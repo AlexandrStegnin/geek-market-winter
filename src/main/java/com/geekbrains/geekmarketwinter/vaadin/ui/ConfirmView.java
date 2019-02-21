@@ -1,5 +1,6 @@
 package com.geekbrains.geekmarketwinter.vaadin.ui;
 
+import com.geekbrains.geekmarketwinter.config.amqp.OrderMessageSender;
 import com.geekbrains.geekmarketwinter.entites.DeliveryAddress;
 import com.geekbrains.geekmarketwinter.entites.Order;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
@@ -34,11 +35,14 @@ public class ConfirmView extends VerticalLayout {
     private final AuthRepository auth;
     private final OrderService orderService;
     private final DeliveryAddressService addressService;
+    private final OrderMessageSender orderMessageSender;
     private String delivAddress;
 
     public ConfirmView(AuthRepository auth,
                        OrderService orderService,
-                       DeliveryAddressService addressService) {
+                       DeliveryAddressService addressService,
+                       OrderMessageSender orderMessageSender) {
+        this.orderMessageSender = orderMessageSender;
         this.addressService = addressService;
         this.orderService = orderService;
         this.auth = auth;
@@ -97,8 +101,8 @@ public class ConfirmView extends VerticalLayout {
             finalOrder = orderService.makeOrder(finalOrder);
 
             if (binder.writeBeanIfValid(finalOrder)) {
-                orderService.saveOrder(finalOrder);
-
+                finalOrder = orderService.saveOrder(finalOrder);
+                orderMessageSender.sendOrder(finalOrder);
                 Notification notification = new Notification("Order have been confirmed", 3000,
                         Notification.Position.TOP_END);
                 notification.open();

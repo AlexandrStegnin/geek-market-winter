@@ -3,7 +3,6 @@ package com.geekbrains.geekmarketwinter.services;
 import com.geekbrains.geekmarketwinter.config.security.SecurityUtils;
 import com.geekbrains.geekmarketwinter.entites.Order;
 import com.geekbrains.geekmarketwinter.entites.OrderItem;
-import com.geekbrains.geekmarketwinter.entites.OrderStatus;
 import com.geekbrains.geekmarketwinter.entites.User;
 import com.geekbrains.geekmarketwinter.repositories.OrderRepository;
 import com.geekbrains.geekmarketwinter.utils.ShoppingCart;
@@ -20,11 +19,15 @@ public class OrderService {
 
     private final OrderRepository orderRepo;
     private final ShoppingCartService cartService;
+    private final OrderStatusService orderStatusService;
 
     @Autowired
-    public OrderService(OrderRepository orderRepo, ShoppingCartService cartService) {
-        this.orderRepo = orderRepo;
+    public OrderService(OrderRepository orderRepo,
+                        ShoppingCartService cartService,
+                        OrderStatusService orderStatusService) {
+        this.orderStatusService = orderStatusService;
         this.cartService = cartService;
+        this.orderRepo = orderRepo;
     }
 
     public Order findById(Long id) {
@@ -43,10 +46,7 @@ public class OrderService {
         order.getDeliveryAddress().setUser(user);
         order.setId(0L);
         order.setUser(user);
-        OrderStatus os = new OrderStatus(); // todo исправить
-        os.setId(1L);
-        os.setTitle("Сформирован");
-        order.setStatus(os);
+        order.setStatus(orderStatusService.getDefaultStatus());
         order.setPrice(cart.getTotalCost());
         order.setOrderItems(new ArrayList<>(cart.getItems()));
         order.setDeliveryAddress(order.getDeliveryAddress());

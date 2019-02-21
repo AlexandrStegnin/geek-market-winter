@@ -31,4 +31,14 @@ public class OrderItem {
     @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "order_id")
     private Order order;
+
+    @Override
+    public String toString() {
+        return "Item order { " +
+                "id: " + getId() +
+                " product title: " + getProduct().getTitle() +
+                " quantity: " + getQuantity() +
+                " item price: " + getItemPrice() +
+                " total price: " + getTotalPrice();
+    }
 }

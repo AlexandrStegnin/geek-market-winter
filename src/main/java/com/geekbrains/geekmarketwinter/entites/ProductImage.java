@@ -1,5 +1,6 @@
 package com.geekbrains.geekmarketwinter.entites;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -11,6 +12,7 @@ import javax.persistence.*;
 @Data
 @ToString(exclude = "product")
 @EqualsAndHashCode(exclude = "product")
+@JsonIgnoreProperties("product")
 public class ProductImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
