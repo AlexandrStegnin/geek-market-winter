@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
@@ -15,7 +16,7 @@ import java.util.Collection;
 @Table(name = "orders")
 @JsonIgnoreProperties("orderItems")
 @EqualsAndHashCode(exclude = {"orderItems", "user", "deliveryAddress"})
-public class Order {
+public class Order implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

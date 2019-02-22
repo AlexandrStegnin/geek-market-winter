@@ -6,13 +6,15 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.io.Serializable;
+
 @Data
 @Entity
 @NoArgsConstructor
 @ToString(exclude = "user")
 @EqualsAndHashCode(exclude = "user")
 @Table(name = "delivery_addresses")
-public class DeliveryAddress {
+public class DeliveryAddress implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

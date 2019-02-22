@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "products_images")
@@ -13,7 +14,7 @@ import javax.persistence.*;
 @ToString(exclude = "product")
 @EqualsAndHashCode(exclude = "product")
 @JsonIgnoreProperties("product")
-public class ProductImage {
+public class ProductImage implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

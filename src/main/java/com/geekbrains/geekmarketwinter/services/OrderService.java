@@ -1,8 +1,10 @@
 package com.geekbrains.geekmarketwinter.services;
 
 import com.geekbrains.geekmarketwinter.config.security.SecurityUtils;
+import com.geekbrains.geekmarketwinter.config.support.ProducerOrder;
 import com.geekbrains.geekmarketwinter.entites.Order;
 import com.geekbrains.geekmarketwinter.entites.OrderItem;
+import com.geekbrains.geekmarketwinter.entites.OrderStatus;
 import com.geekbrains.geekmarketwinter.entites.User;
 import com.geekbrains.geekmarketwinter.repositories.OrderRepository;
 import com.geekbrains.geekmarketwinter.utils.ShoppingCart;
@@ -40,6 +42,13 @@ public class OrderService {
         return orderOut;
     }
 
+    public ProducerOrder makeOrderToProduce(Order order) {
+        ProducerOrder producerOrder = new ProducerOrder();
+        producerOrder.setId(order.getId());
+        producerOrder.setStatus(order.getStatus());
+        return producerOrder;
+    }
+
     public Order makeOrder(Order order) {
         User user = SecurityUtils.getCurrentUser();
         ShoppingCart cart = cartService.getCurrentCart(VaadinService.getCurrentRequest());
@@ -67,5 +76,12 @@ public class OrderService {
 
     public void update(Order updatedOrder) {
         orderRepo.save(updatedOrder);
+    }
+
+    public Order changeStatusAndSave(ProducerOrder producerOrder) {
+        Order order = findById(producerOrder.getId());
+        OrderStatus status = orderStatusService.getOneByTitle(producerOrder.getStatus().getTitle());
+        order.setStatus(status);
+        return saveOrder(order);
     }
 }

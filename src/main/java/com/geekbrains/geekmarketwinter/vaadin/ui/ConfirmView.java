@@ -102,7 +102,9 @@ public class ConfirmView extends VerticalLayout {
 
             if (binder.writeBeanIfValid(finalOrder)) {
                 finalOrder = orderService.saveOrder(finalOrder);
-                orderMessageSender.sendOrder(finalOrder);
+                orderMessageSender.sendOrder(
+                        orderService.makeOrderToProduce(finalOrder)
+                );
                 Notification notification = new Notification("Order have been confirmed", 3000,
                         Notification.Position.TOP_END);
                 notification.open();

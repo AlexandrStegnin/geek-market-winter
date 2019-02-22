@@ -31,4 +31,8 @@ public class OrderStatusService {
     public OrderStatus getDefaultStatus() {
         return orderStatusRepo.getByTitle(DEFAULT_STATUS_NAME);
     }
+
+    public OrderStatus getOneByTitle(String title) {
+        return orderStatusRepo.getByTitle(title);
+    }
 }
