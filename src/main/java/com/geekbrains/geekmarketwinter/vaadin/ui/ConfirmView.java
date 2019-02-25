@@ -50,7 +50,7 @@ public class ConfirmView extends VerticalLayout {
     }
 
     private void init() {
-
+        // TODO: 2019-02-25 Сбрасывать данные корзины
         FormLayout formLayout = new FormLayout();
         Binder<Order> binder = new Binder<>();
 

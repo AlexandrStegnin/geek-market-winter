@@ -16,6 +16,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -46,6 +47,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
@@ -95,6 +97,7 @@ public class ProductView extends VerticalLayout {
 
     private void init() {
         addNewBtn.setIconAfterText(true);
+        addNewBtn.setId("add_product");
         grid.setDataProvider(dataProvider);
 
         grid.addColumn(Product::getTitle)
@@ -142,8 +145,13 @@ public class ProductView extends VerticalLayout {
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        grid.addColumn(product -> product.getImages().stream().map(ProductImage::getPath)
-                .collect(Collectors.joining(", ")))
+        grid.addColumn(product -> {
+            if (!Objects.equals(null, product.getImages())) {
+                return product.getImages().stream().map(ProductImage::getPath)
+                        .collect(Collectors.joining(", "));
+            }
+            return "";
+        })
                 .setHeader("Images")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
@@ -201,28 +209,45 @@ public class ProductView extends VerticalLayout {
         if (product.getCategory() != null) {
             category.setValue(product.getCategory());
         }
+        category.setId("category_combo");
+
         TextField vendorCode = new TextField("Vendor code");
         vendorCode.setValue(product.getVendorCode() == null ? "" : product.getVendorCode());
         binder.forField(vendorCode)
+                .withValidator(string -> {
+                    Product p = dataProvider.getItems()
+                            .stream()
+                            .filter(item -> item.getVendorCode().equalsIgnoreCase(string))
+                            .findFirst().orElse(null);
+                    return p == null;
+                }, "Product with vendor code already exists")
                 .bind(Product_.VENDOR_CODE);
+        vendorCode.setId("vendor_code_fld");
 
         TextField title = new TextField("Title");
         title.setValue(product.getTitle() == null ? "" : product.getTitle());
         binder.forField(title)
                 .bind(Product_.TITLE);
+        title.setId("title_fld");
 
         TextField shortDescription = new TextField("Short description");
         shortDescription.setValue(product.getShortDescription() == null ? "" : product.getShortDescription());
         binder.forField(shortDescription)
                 .bind(Product_.SHORT_DESCRIPTION);
+        shortDescription.setId("short_descr_fld");
+
 
         TextField fullDescription = new TextField("Full description");
         fullDescription.setValue(product.getFullDescription() == null ? "" : product.getFullDescription());
         binder.forField(fullDescription)
                 .bind(Product_.FULL_DESCRIPTION);
+        fullDescription.setId("full_descr_fld");
 
         TextField price = new TextField("Price");
-        price.setValue(product.getPrice() == 0 ? String.valueOf(0d) : String.valueOf(product.getPrice()));
+        price.setValue(product.getPrice() == 0 ? "" : String.valueOf(product.getPrice()));
+        price.setId("price_fld");
+        price.setClearButtonVisible(true);
+
         binder.forField(price)
                 // input should not be null or empty
                 .withValidator(string -> string != null && !string.isEmpty(), "Input values should not be empty")
@@ -237,9 +262,12 @@ public class ProductView extends VerticalLayout {
         formLayout.add(category, vendorCode, title, shortDescription, fullDescription, price, images);
 
         Dialog dialog = VaadinViewUtils.initDialog();
+        dialog.setId("crud_dialog");
         Button save = new Button("Save");
+        save.setId("save_btn");
 
         Button cancel = new Button("Cancel", e -> dialog.close());
+        cancel.setId("cancel_btn");
         HorizontalLayout actions = new HorizontalLayout();
         actions.add(save, cancel);
 
@@ -252,6 +280,7 @@ public class ProductView extends VerticalLayout {
                     if (binder.writeBeanIfValid(product)) {
                         saveProduct(product);
                         dialog.close();
+                        showMessage("UPDATE", product);
                     }
                 });
                 break;
@@ -262,6 +291,7 @@ public class ProductView extends VerticalLayout {
                         dataProvider.getItems().add(product);
                         saveProduct(product);
                         dialog.close();
+                        showMessage("CREATE", product);
                     }
                 });
                 break;
@@ -274,6 +304,7 @@ public class ProductView extends VerticalLayout {
                     deleteProduct(product);
                     dropProductDir(product);
                     dialog.close();
+                    showMessage("DELETE", product);
                 });
                 break;
         }
@@ -322,14 +353,35 @@ public class ProductView extends VerticalLayout {
 
     private void dropProductDir(Product product) {
         Path productDir = Paths.get(fileUploadDirectory + product.getVendorCode());
-        try {
-            Files.walk(productDir)
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
-        } catch (IOException e) {
-            throw new RuntimeException("Ошибка при удалении папки с изображениями продукта", e);
+        if (Files.exists(productDir)) {
+            try {
+                Files.walk(productDir)
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            } catch (IOException e) {
+                throw new RuntimeException("Ошибка при удалении папки с изображениями продукта", e);
+            }
         }
+    }
+
+    private void showMessage(String action, Product product) {
+        Notification notification = new Notification("", 3000, Notification.Position.TOP_END);
+        notification.setId("action_status");
+        switch (action) {
+            case "CREATE":
+                notification.setText("Product: " + product.getTitle() + " successful created");
+                break;
+
+            case "UPDATE":
+                notification.setText("Product: " + product.getTitle() + " successful updated");
+                break;
+
+            case "DELETE":
+                notification.setText("Product: " + product.getTitle() + " successful deleted");
+                break;
+        }
+        notification.open();
     }
 
 }
