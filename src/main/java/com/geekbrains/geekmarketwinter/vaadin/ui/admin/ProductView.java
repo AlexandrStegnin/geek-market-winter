@@ -24,7 +24,6 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.converter.StringToDoubleConverter;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
@@ -213,15 +212,6 @@ public class ProductView extends VerticalLayout {
 
         TextField vendorCode = new TextField("Vendor code");
         vendorCode.setValue(product.getVendorCode() == null ? "" : product.getVendorCode());
-        binder.forField(vendorCode)
-                .withValidator(string -> {
-                    Product p = dataProvider.getItems()
-                            .stream()
-                            .filter(item -> item.getVendorCode().equalsIgnoreCase(string))
-                            .findFirst().orElse(null);
-                    return p == null;
-                }, "Product with vendor code already exists")
-                .bind(Product_.VENDOR_CODE);
         vendorCode.setId("vendor_code_fld");
 
         TextField title = new TextField("Title");
@@ -252,7 +242,8 @@ public class ProductView extends VerticalLayout {
                 // input should not be null or empty
                 .withValidator(string -> string != null && !string.isEmpty(), "Input values should not be empty")
                 // convert String to Double, throw ValidationException if String is in incorrect format
-                .withConverter(new StringToDoubleConverter("Input value should be an double"))
+                .withConverter(Double::parseDouble,
+                        doubleToString -> doubleToString.toString().replace(".", ","), "Input value should be an double")
                 // validate converted double: it should be positive
                 .withValidator(dbl -> dbl > 0, "Input value should be a positive double")
                 .bind(Product_.PRICE);
@@ -277,6 +268,7 @@ public class ProductView extends VerticalLayout {
             case UPDATE:
                 content.add(formLayout, actions);
                 save.addClickListener(e -> {
+                    binder.forField(vendorCode).bind(Product_.VENDOR_CODE);
                     if (binder.writeBeanIfValid(product)) {
                         saveProduct(product);
                         dialog.close();
@@ -287,6 +279,15 @@ public class ProductView extends VerticalLayout {
             case CREATE:
                 content.add(formLayout, actions);
                 save.addClickListener(e -> {
+                    binder.forField(vendorCode)
+                            .withValidator(string -> {
+                                Product p = dataProvider.getItems()
+                                        .stream()
+                                        .filter(item -> item.getVendorCode().equalsIgnoreCase(string))
+                                        .findFirst().orElse(null);
+                                return p == null;
+                            }, "Product with vendor code already exists")
+                            .bind(Product_.VENDOR_CODE);
                     if (binder.writeBeanIfValid(product)) {
                         dataProvider.getItems().add(product);
                         saveProduct(product);
