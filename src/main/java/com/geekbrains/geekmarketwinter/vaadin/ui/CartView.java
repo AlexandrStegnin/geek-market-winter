@@ -71,35 +71,53 @@ public class CartView extends VerticalLayout {
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
+        FooterRow footerRow = grid.appendFooterRow();
+        Label total = new Label("Total");
+        total.getStyle().set("font-size", "18px");
+        total.getStyle().set("color", "white");
+        footerRow.getCell(titleColumn).setComponent(total);
+
+        Label price = new Label();
+        price.getStyle().set("font-size", "18px");
+        price.getStyle().set("color", "white");
+        footerRow.getCell(priceColumn).setComponent(price);
+
+        Label quantity = new Label();
+        quantity.getStyle().set("font-size", "18px");
+        quantity.getStyle().set("color", "white");
+        updateTotalRow(price, quantity);
+
         Grid.Column<OrderItem> quantityColumn = grid.addComponentColumn(
                 orderItem -> {
                     Div div = new Div();
-                    Button quantity = new Button(orderItem.getQuantity().toString());
-                    quantity.setDisableOnClick(true);
+                    Button qnty = new Button(orderItem.getQuantity().toString());
+                    qnty.setDisableOnClick(true);
 
                     Button btnMinus = new Button("", VaadinIcon.MINUS.create(),
                             e -> {
-                                int qnt = Integer.parseInt(quantity.getText());
+                                int qnt = Integer.parseInt(qnty.getText());
                                 if (qnt > 0 && qnt - 1 > 0) {
                                     cartService.setProductCount(VaadinService.getCurrentRequest(), orderItem.getProduct(), qnt - 1L);
-                                    quantity.setText(String.valueOf(qnt - 1));
+                                    qnty.setText(String.valueOf(qnt - 1));
                                     dataProvider.refreshItem(orderItem);
                                 } else {
                                     cartService.removeFromCart(VaadinService.getCurrentRequest(), orderItem.getProduct());
-                                    quantity.setText(String.valueOf(qnt + 1));
+                                    qnty.setText(String.valueOf(qnt + 1));
                                     dataProvider.getItems().remove(orderItem);
                                     dataProvider.refreshAll();
                                 }
+                                updateTotalRow(price, quantity);
                             });
 
                     Button btnPlus = new Button("", VaadinIcon.PLUS.create(),
                             e -> {
-                                int qnt = Integer.parseInt(quantity.getText());
+                                int qnt = Integer.parseInt(qnty.getText());
                                 cartService.setProductCount(VaadinService.getCurrentRequest(), orderItem.getProduct(), qnt + 1L);
                                 dataProvider.refreshItem(orderItem);
+                                updateTotalRow(price, quantity);
                             });
 
-                    div.add(btnMinus, quantity, btnPlus);
+                    div.add(btnMinus, qnty, btnPlus);
                     return div;
                 })
                 .setHeader("Quantity")
@@ -108,23 +126,7 @@ public class CartView extends VerticalLayout {
 
         Div empty = new Div();
         quantityColumn.setEditorComponent(empty);
-        // TODO: 14.02.2019 при увеличении/уменьшении кол-ва изменять строку total
 
-        FooterRow footerRow = grid.appendFooterRow();
-        Label total = new Label("Total");
-        total.getStyle().set("font-size", "18px");
-        total.getStyle().set("color", "white");
-        footerRow.getCell(titleColumn).setComponent(total);
-
-        Label price = new Label(cartService.getCurrentCart(VaadinService.getCurrentRequest()).getTotalCost().toString());
-        price.getStyle().set("font-size", "18px");
-        price.getStyle().set("color", "white");
-        footerRow.getCell(priceColumn).setComponent(price);
-
-        Label quantity = new Label();
-        quantity.getStyle().set("font-size", "18px");
-        quantity.getStyle().set("color", "white");
-        quantity.setText(getCartItems().stream().map(OrderItem::getQuantity).reduce(0L, (a, b) -> a + b).toString());
         footerRow.getCell(quantityColumn).setComponent(quantity);
 
         Button confirm = new Button("Confirm", buttonClickEvent -> confirm());
@@ -148,4 +150,10 @@ public class CartView extends VerticalLayout {
     private void confirm() {
         this.getUI().ifPresent(ui -> ui.navigate(CONFIRM_ORDER_PAGE));
     }
+
+    private void updateTotalRow(Label price, Label quantity) {
+        price.setText(cartService.getCurrentCart(VaadinService.getCurrentRequest()).getTotalCost().toString());
+        quantity.setText(getCartItems().stream().map(OrderItem::getQuantity).reduce(0L, (a, b) -> a + b).toString());
+    }
+
 }
