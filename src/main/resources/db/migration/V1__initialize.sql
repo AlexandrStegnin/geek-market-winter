@@ -174,6 +174,7 @@ VALUES
 
 INSERT INTO orders_statuses (title)
 VALUES
+('Подготавливается'),
 ('Сформирован'),
 ('Ожидает оплаты');
 
