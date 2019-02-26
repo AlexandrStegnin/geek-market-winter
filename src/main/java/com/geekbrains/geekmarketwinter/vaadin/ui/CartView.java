@@ -107,14 +107,16 @@ public class CartView extends VerticalLayout {
                                     dataProvider.refreshAll();
                                 }
                                 updateTotalRow(price, quantity);
+                                updateBadge(quantity.getText());
                             });
 
                     Button btnPlus = new Button("", VaadinIcon.PLUS.create(),
                             e -> {
                                 int qnt = Integer.parseInt(qnty.getText());
                                 cartService.setProductCount(VaadinService.getCurrentRequest(), orderItem.getProduct(), qnt + 1L);
-                                dataProvider.refreshItem(orderItem);
+                                dataProvider.refreshAll();
                                 updateTotalRow(price, quantity);
+                                updateBadge(quantity.getText());
                             });
 
                     div.add(btnMinus, qnty, btnPlus);
@@ -154,6 +156,14 @@ public class CartView extends VerticalLayout {
     private void updateTotalRow(Label price, Label quantity) {
         price.setText(cartService.getCurrentCart(VaadinService.getCurrentRequest()).getTotalCost().toString());
         quantity.setText(getCartItems().stream().map(OrderItem::getQuantity).reduce(0L, (a, b) -> a + b).toString());
+    }
+
+    private void updateBadge(String quantity) {
+        getUI().ifPresent(ui -> ui.getElement().getChildren().forEach(element -> {
+            if (element.getTag().equalsIgnoreCase("paper-badge")) {
+                element.setAttribute("label", quantity);
+            }
+        }));
     }
 
 }

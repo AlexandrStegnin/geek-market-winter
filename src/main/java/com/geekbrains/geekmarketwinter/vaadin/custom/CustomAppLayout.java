@@ -3,6 +3,7 @@ package com.geekbrains.geekmarketwinter.vaadin.custom;
 import com.geekbrains.geekmarketwinter.config.security.SecurityUtils;
 import com.geekbrains.geekmarketwinter.config.support.Constants;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
+import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.vaadin.ui.CartView;
 import com.geekbrains.geekmarketwinter.vaadin.ui.LoginView;
 import com.geekbrains.geekmarketwinter.vaadin.ui.ShopView;
@@ -42,7 +43,8 @@ public class CustomAppLayout extends AppLayout {
         PaperBadge cartBadge = new PaperBadge(cartItem);
         cartBadge.setHeight("20px");
         cartBadge.setWidth("20px");
-        cartBadge.setLabel("0"); // TODO: 14.02.2019 Передавть кол-во товаров в корзине
+        ShoppingCartService cartService = new ShoppingCartService();
+        cartBadge.setLabel(cartService.getTotalQuantity().toString());
         cartBadge.getStyle().set("--paper-badge-background", "#b794f6");
 
         menu.addMenuItems(
