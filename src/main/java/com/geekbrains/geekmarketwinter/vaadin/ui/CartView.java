@@ -4,17 +4,22 @@ import com.geekbrains.geekmarketwinter.entites.OrderItem;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
+import com.geekbrains.geekmarketwinter.vaadin.support.VaadinViewUtils;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
@@ -45,100 +50,142 @@ public class CartView extends VerticalLayout {
     }
 
     private void init() {
+        if (cartService.getTotalQuantity() > 0L) {
+            grid.setDataProvider(dataProvider);
+            grid.setHeightByRows(true);
 
-        grid.setDataProvider(dataProvider);
-        grid.setHeightByRows(true);
+            Grid.Column<OrderItem> titleColumn = grid
+                    .addColumn(orderItem -> orderItem.getProduct().getTitle())
+                    .setHeader(new Label("Title"))
+                    .setTextAlign(ColumnTextAlign.CENTER)
+                    .setFlexGrow(1);
 
-        Grid.Column<OrderItem> titleColumn = grid
-                .addColumn(orderItem -> orderItem.getProduct().getTitle())
-                .setHeader(new Label("Title"))
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(1);
+            Grid.Column<OrderItem> priceColumn = grid
+                    .addColumn(orderItem -> orderItem.getProduct().getPrice())
+                    .setHeader(new Label("Price"))
+                    .setTextAlign(ColumnTextAlign.CENTER)
+                    .setFlexGrow(1);
 
-        Grid.Column<OrderItem> priceColumn = grid
-                .addColumn(orderItem -> orderItem.getProduct().getPrice())
-                .setHeader(new Label("Price"))
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(1);
+            grid.addColumn(orderItem -> orderItem.getProduct().getShortDescription())
+                    .setHeader("Short description")
+                    .setTextAlign(ColumnTextAlign.CENTER)
+                    .setFlexGrow(2);
 
-        grid.addColumn(orderItem -> orderItem.getProduct().getShortDescription())
-                .setHeader("Short description")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(2);
+            grid.addColumn(orderItem -> orderItem.getProduct().getFullDescription())
+                    .setHeader("Full description")
+                    .setTextAlign(ColumnTextAlign.CENTER)
+                    .setFlexGrow(1);
 
-        grid.addColumn(orderItem -> orderItem.getProduct().getFullDescription())
-                .setHeader("Full description")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(1);
+            FooterRow footerRow = grid.appendFooterRow();
+            Label total = new Label("Total");
+            total.getStyle().set("font-size", "18px");
+            total.getStyle().set("color", "black");
+            footerRow.getCell(titleColumn).setComponent(total);
 
-        FooterRow footerRow = grid.appendFooterRow();
-        Label total = new Label("Total");
-        total.getStyle().set("font-size", "18px");
-        total.getStyle().set("color", "white");
-        footerRow.getCell(titleColumn).setComponent(total);
+            Label price = new Label();
+            price.getStyle().set("font-size", "18px");
+            price.getStyle().set("color", "black");
+            footerRow.getCell(priceColumn).setComponent(price);
 
-        Label price = new Label();
-        price.getStyle().set("font-size", "18px");
-        price.getStyle().set("color", "white");
-        footerRow.getCell(priceColumn).setComponent(price);
+            Label quantity = new Label();
+            quantity.getStyle().set("font-size", "18px");
+            quantity.getStyle().set("color", "black");
+            updateTotalRow(price, quantity);
 
-        Label quantity = new Label();
-        quantity.getStyle().set("font-size", "18px");
-        quantity.getStyle().set("color", "white");
-        updateTotalRow(price, quantity);
+            Grid.Column<OrderItem> quantityColumn = grid.addComponentColumn(
+                    orderItem -> {
+                        Div div = new Div();
+                        Button qnty = new Button(orderItem.getQuantity().toString());
+                        qnty.setDisableOnClick(true);
 
-        Grid.Column<OrderItem> quantityColumn = grid.addComponentColumn(
-                orderItem -> {
-                    Div div = new Div();
-                    Button qnty = new Button(orderItem.getQuantity().toString());
-                    qnty.setDisableOnClick(true);
+                        Button btnMinus = new Button("", VaadinIcon.MINUS.create(),
+                                e -> {
+                                    int qnt = Integer.parseInt(qnty.getText());
+                                    if (qnt > 0 && qnt - 1 > 0) {
+                                        cartService.setProductCount(VaadinService.getCurrentRequest(), orderItem.getProduct(), qnt - 1L);
+                                        qnty.setText(String.valueOf(qnt - 1));
+                                        dataProvider.refreshItem(orderItem);
+                                    } else {
+                                        cartService.removeFromCart(VaadinService.getCurrentRequest(), orderItem.getProduct());
+                                        qnty.setText(String.valueOf(qnt + 1));
+                                        dataProvider.getItems().remove(orderItem);
+                                        dataProvider.refreshAll();
+                                    }
+                                    updateTotalRow(price, quantity);
+                                    updateBadge(quantity.getText());
+                                });
 
-                    Button btnMinus = new Button("", VaadinIcon.MINUS.create(),
-                            e -> {
-                                int qnt = Integer.parseInt(qnty.getText());
-                                if (qnt > 0 && qnt - 1 > 0) {
-                                    cartService.setProductCount(VaadinService.getCurrentRequest(), orderItem.getProduct(), qnt - 1L);
-                                    qnty.setText(String.valueOf(qnt - 1));
-                                    dataProvider.refreshItem(orderItem);
-                                } else {
-                                    cartService.removeFromCart(VaadinService.getCurrentRequest(), orderItem.getProduct());
-                                    qnty.setText(String.valueOf(qnt + 1));
-                                    dataProvider.getItems().remove(orderItem);
+                        Button btnPlus = new Button("", VaadinIcon.PLUS.create(),
+                                e -> {
+                                    int qnt = Integer.parseInt(qnty.getText());
+                                    cartService.setProductCount(VaadinService.getCurrentRequest(), orderItem.getProduct(), qnt + 1L);
                                     dataProvider.refreshAll();
-                                }
-                                updateTotalRow(price, quantity);
-                                updateBadge(quantity.getText());
-                            });
+                                    updateTotalRow(price, quantity);
+                                    updateBadge(quantity.getText());
+                                });
 
-                    Button btnPlus = new Button("", VaadinIcon.PLUS.create(),
-                            e -> {
-                                int qnt = Integer.parseInt(qnty.getText());
-                                cartService.setProductCount(VaadinService.getCurrentRequest(), orderItem.getProduct(), qnt + 1L);
-                                dataProvider.refreshAll();
-                                updateTotalRow(price, quantity);
-                                updateBadge(quantity.getText());
-                            });
+                        div.add(btnMinus, qnty, btnPlus);
+                        return div;
+                    })
+                    .setHeader("Quantity")
+                    .setTextAlign(ColumnTextAlign.CENTER)
+                    .setFlexGrow(1);
 
-                    div.add(btnMinus, qnty, btnPlus);
-                    return div;
-                })
-                .setHeader("Quantity")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(1);
+            quantityColumn.setEditorComponent(new Div());
 
-        Div empty = new Div();
-        quantityColumn.setEditorComponent(empty);
+            footerRow.getCell(quantityColumn).setComponent(quantity);
 
-        footerRow.getCell(quantityColumn).setComponent(quantity);
+            Button confirm = new Button("Confirm", buttonClickEvent -> confirm());
 
-        Button confirm = new Button("Confirm", buttonClickEvent -> confirm());
-        confirm.getStyle().set("margin-right", "50px");
-        VerticalLayout box = new VerticalLayout(grid, confirm);
-        box.setAlignItems(Alignment.END);
-        CustomAppLayout appLayout = new CustomAppLayout(auth, box);
+            Button clearCart = new Button("Clear cart", buttonClickEvent -> {
+                clearCart(price, quantity);
+            });
+            clearCart.getStyle().set("margin-right", "50px");
+            HorizontalLayout buttons = new HorizontalLayout(confirm, clearCart);
 
-        add(appLayout);
-        setHeight("100vh");
+            VerticalLayout box = new VerticalLayout(grid, buttons);
+            box.setAlignItems(Alignment.END);
+            CustomAppLayout appLayout = new CustomAppLayout(auth, box);
+
+            add(appLayout);
+            setHeight("100vh");
+        } else {
+            Span span = new Span("Your cart is empty");
+            span.getStyle()
+                    .set("position", "absolute")
+                    .set("top", "50%")
+                    .set("left", "45%")
+                    .set("font-size", "20px");
+            Div empty = new Div(span);
+            empty.setSizeFull();
+            CustomAppLayout appLayout = new CustomAppLayout(auth, empty);
+            add(appLayout);
+        }
+    }
+
+    private void clearCart(Label price, Label quantity) {
+        Dialog dialog = VaadinViewUtils.initDialog();
+        Button yes = new Button("Yes");
+
+        Button cancel = new Button("Cancel", e -> dialog.close());
+        HorizontalLayout actions = new HorizontalLayout();
+        actions.add(yes, cancel);
+
+        VerticalLayout content = new VerticalLayout();
+        Div contentText = new Div();
+        contentText.setText("Confirm clear cart?");
+        content.add(contentText, actions);
+        yes.addClickListener(e -> {
+            cartService.resetCart(VaadinRequest.getCurrent());
+            dataProvider.getItems().clear();
+            dataProvider.refreshAll();
+            updateTotalRow(price, quantity);
+            updateBadge(quantity.getText());
+            dialog.close();
+        });
+
+        dialog.add(content);
+        dialog.open();
     }
 
     private List<OrderItem> getCartItems() {
@@ -161,7 +208,12 @@ public class CartView extends VerticalLayout {
     private void updateBadge(String quantity) {
         getUI().ifPresent(ui -> ui.getElement().getChildren().forEach(element -> {
             if (element.getTag().equalsIgnoreCase("paper-badge")) {
-                element.setAttribute("label", quantity);
+                if (Integer.valueOf(quantity) > 0) {
+                    element.setAttribute("label", quantity);
+                    element.setVisible(true);
+                } else {
+                    element.setVisible(false);
+                }
             }
         }));
     }

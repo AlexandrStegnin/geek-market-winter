@@ -97,13 +97,13 @@ public class VaadinViewUtils {
         HorizontalLayout formLayout = new HorizontalLayout();
         TextField title = new TextField("Search by title");
         title.setValueChangeMode(ValueChangeMode.EAGER);
-        title.setPlaceholder("Search by title");
+        title.setPlaceholder("Input title");
         title.addValueChangeListener(e -> {
             dataProvider.setFilter(product -> product.getTitle().toLowerCase().contains(e.getValue().toLowerCase()));
             dataProvider.refreshAll();
         });
         ComboBox<Category> comboBox = new ComboBox<>("Search by category");
-        comboBox.setPlaceholder("Search by category");
+        comboBox.setPlaceholder("Choose category");
         comboBox.setItemLabelGenerator(Category::getTitle);
         comboBox.setItems(categories);
         comboBox.addValueChangeListener(event -> {

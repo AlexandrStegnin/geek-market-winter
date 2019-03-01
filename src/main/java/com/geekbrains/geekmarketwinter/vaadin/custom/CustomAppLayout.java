@@ -27,6 +27,8 @@ public class CustomAppLayout extends AppLayout {
 
     public CustomAppLayout(AuthRepository auth, Component component) {
         this.auth = auth;
+        ShoppingCartService cartService = new ShoppingCartService();
+        Long itemsInCart = cartService.getTotalQuantity();
         AppLayoutMenu menu = createMenu();
         Image img = new Image("https://i.imgur.com/GPpnszs.png", "Vaadin Logo");
         img.setHeight("44px");
@@ -40,13 +42,13 @@ public class CustomAppLayout extends AppLayout {
         AppLayoutMenuItem managerItem = new AppLayoutMenuItem(VaadinIcon.PACKAGE.create(), "Manage orders", e -> goToPage(OrderView.class));
 
         cartItem.setId("cartItem");
+
         PaperBadge cartBadge = new PaperBadge(cartItem);
         cartBadge.setHeight("20px");
         cartBadge.setWidth("20px");
-        ShoppingCartService cartService = new ShoppingCartService();
-        cartBadge.setLabel(cartService.getTotalQuantity().toString());
+        cartBadge.setLabel(itemsInCart.toString());
         cartBadge.getStyle().set("--paper-badge-background", "#b794f6");
-
+        cartBadge.setVisible(itemsInCart > 0);
         menu.addMenuItems(
                 homeItem,
                 cartItem

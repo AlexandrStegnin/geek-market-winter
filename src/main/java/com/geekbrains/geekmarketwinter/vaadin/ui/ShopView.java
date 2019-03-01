@@ -157,6 +157,7 @@ public class ShopView extends VerticalLayout {
                 String count = element.getAttribute("label");
                 count = String.valueOf(Integer.valueOf(count) + cnt);
                 element.setAttribute("label", count);
+                element.setVisible(true);
             }
         }));
     }
