@@ -36,10 +36,10 @@ public class CategoryView extends VerticalLayout {
 
     private final CategoryService categoryService;
     private Grid<Category> grid;
-    private final AuthService auth;
     private ListDataProvider<Category> dataProvider;
     private final Button addNewBtn;
     private Binder<Category> binder;
+    private CustomAppLayout appLayout;
 
     public CategoryView(CategoryService categoryService, AuthService auth) {
         this.addNewBtn = new Button("Add new category", e -> showDialog(new Category(), OperationEnum.CREATE));
@@ -47,7 +47,7 @@ public class CategoryView extends VerticalLayout {
         this.categoryService = categoryService;
         this.dataProvider = new ListDataProvider<>(getAllCategories());
         this.grid = new Grid<>();
-        this.auth = auth;
+        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -78,7 +78,7 @@ public class CategoryView extends VerticalLayout {
 
         verticalLayout.add(addNewBtn, grid);
         verticalLayout.setAlignItems(Alignment.END);
-        CustomAppLayout appLayout = new CustomAppLayout(auth, verticalLayout);
+        appLayout.setContent(verticalLayout);
         add(appLayout);
         setHeight("100vh");
     }

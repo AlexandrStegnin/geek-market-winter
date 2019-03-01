@@ -19,11 +19,11 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_PAG
 @PageTitle("Administration")
 @Theme(value = Material.class, variant = Material.LIGHT)
 public class AdminView extends VerticalLayout {
-    
-    private AuthRepository auth;
+
+    private CustomAppLayout appLayout;
 
     public AdminView(AuthRepository auth) {
-        this.auth = auth;
+        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -52,7 +52,7 @@ public class AdminView extends VerticalLayout {
         productsBtn.setId("products_btn");
 
         btnLayout.add(categoriesBtn, orderStatusesBtn, usersBtn, rolesBtn, productsBtn);
-        CustomAppLayout appLayout = new CustomAppLayout(auth, btnLayout);
+        appLayout.setContent(btnLayout);
         add(appLayout);
         setHeight("100vh");
     }

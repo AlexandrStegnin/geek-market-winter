@@ -36,10 +36,10 @@ public class RoleView extends VerticalLayout {
 
     private final RoleService roleService;
     private Grid<Role> grid;
-    private final AuthService auth;
     private final Button addNewBtn;
     private ListDataProvider<Role> dataProvider;
     private Binder<Role> binder;
+    private CustomAppLayout appLayout;
 
     public RoleView(RoleService roleService, AuthService auth) {
         this.roleService = roleService;
@@ -48,7 +48,7 @@ public class RoleView extends VerticalLayout {
         this.addNewBtn = new Button("New role", VaadinIcon.PLUS.create(),
                 e -> showDialog(new Role(), OperationEnum.CREATE));
         this.binder = new BeanValidationBinder<>(Role.class);
-        this.auth = auth;
+        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -79,7 +79,7 @@ public class RoleView extends VerticalLayout {
 
         verticalLayout.add(addNewBtn, grid);
         verticalLayout.setAlignItems(Alignment.END);
-        CustomAppLayout appLayout = new CustomAppLayout(auth, verticalLayout);
+        appLayout.setContent(verticalLayout);
         add(appLayout);
         setHeight("100vh");
 

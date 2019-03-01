@@ -41,13 +41,13 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.SHOP_PAGE
 @Theme(value = Material.class, variant = Material.LIGHT)
 public class ShopView extends VerticalLayout {
 
-    private final AuthRepository auth;
     private final ProductService productService;
     private final ShoppingCartService cartService;
     private ProductFilter productFilter;
     private Page<Product> page;
     private final CategoryService categoryService;
     private NumberFormat numberFormat = NumberFormat.getCurrencyInstance(LOCALE_RU);
+    private CustomAppLayout appLayout;
 
     public ShopView(AuthRepository auth,
                     ProductService productService,
@@ -58,7 +58,7 @@ public class ShopView extends VerticalLayout {
         this.productFilter = new ProductFilter();
         this.categoryService = categoryService;
         this.page = productService.findAll(productFilter, Pageable.unpaged());
-        this.auth = auth;
+        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -74,7 +74,7 @@ public class ShopView extends VerticalLayout {
             Card card = createCard(product);
             cardContainer.add(card);
         });
-        CustomAppLayout appLayout = new CustomAppLayout(auth, cardContainer);
+        appLayout.setContent(cardContainer);
         add(appLayout);
         setAlignItems(Alignment.STRETCH);
     }

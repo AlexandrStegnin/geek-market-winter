@@ -40,12 +40,11 @@ public class UserView extends VerticalLayout {
     private final UserServiceImpl userService;
     private final RoleService roleService;
     private Grid<User> grid;
-    private final AuthService auth;
     private final Button addNewBtn;
     private ListDataProvider<User> dataProvider;
     private List<Role> roles;
     private Binder<User> binder;
-
+    private CustomAppLayout appLayout;
 
     public UserView(UserServiceImpl userService, AuthService auth, RoleService roleService) {
         this.userService = userService;
@@ -55,7 +54,7 @@ public class UserView extends VerticalLayout {
         this.binder = new BeanValidationBinder<>(User.class);
         this.addNewBtn = new Button("New user", VaadinIcon.PLUS.create(), e -> showDialog(new User(), OperationEnum.CREATE));
         this.roles = getRoles();
-        this.auth = auth;
+        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -114,7 +113,7 @@ public class UserView extends VerticalLayout {
 
         VerticalLayout verticalLayout = new VerticalLayout(addNewBtn, grid);
         verticalLayout.setAlignItems(Alignment.END);
-        CustomAppLayout appLayout = new CustomAppLayout(auth, verticalLayout);
+        appLayout.setContent(verticalLayout);
         add(appLayout);
         setHeight("100vh");
     }

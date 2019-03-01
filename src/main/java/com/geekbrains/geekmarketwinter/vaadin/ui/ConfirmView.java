@@ -34,11 +34,11 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
 @Theme(value = Material.class, variant = Material.LIGHT)
 public class ConfirmView extends VerticalLayout {
 
-    private final AuthRepository auth;
     private final OrderService orderService;
     private final DeliveryAddressService addressService;
     private final OrderMessageSender orderMessageSender;
     private final ShoppingCartService cartService;
+    private CustomAppLayout appLayout;
     private String delivAddress;
 
     public ConfirmView(AuthRepository auth,
@@ -50,7 +50,7 @@ public class ConfirmView extends VerticalLayout {
         this.addressService = addressService;
         this.orderService = orderService;
         this.cartService = cartService;
-        this.auth = auth;
+        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -125,7 +125,7 @@ public class ConfirmView extends VerticalLayout {
             }
         });
 
-        CustomAppLayout appLayout = new CustomAppLayout(auth, formLayout);
+        appLayout.setContent(formLayout);
 
         add(appLayout);
         setHeight("100vh");

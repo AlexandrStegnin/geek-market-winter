@@ -35,7 +35,6 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.CONFIRM_O
 @Theme(value = Material.class)
 public class CartView extends VerticalLayout {
 
-    private final AuthRepository auth;
     private final ShoppingCartService cartService;
     private ListDataProvider<OrderItem> dataProvider;
     private Grid<OrderItem> grid;
@@ -46,7 +45,6 @@ public class CartView extends VerticalLayout {
         this.cartService = cartService;
         this.dataProvider = new ListDataProvider<>(getCartItems());
         this.grid = new Grid<>();
-        this.auth = auth;
         this.appLayout = new CustomAppLayout(auth);
         init();
     }

@@ -30,14 +30,14 @@ public class OrderStatusView extends VerticalLayout {
 
     private OrderStatusService orderStatusService;
     private Grid<OrderStatus> grid;
-    private AuthService auth;
     private ListDataProvider<OrderStatus> dataProvider;
+    private CustomAppLayout appLayout;
 
     public OrderStatusView(OrderStatusService orderStatusService, AuthService auth) {
         this.orderStatusService = orderStatusService;
         this.dataProvider = new ListDataProvider<>(getAllStatuses());
         this.grid = new Grid<>();
-        this.auth = auth;
+        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -92,7 +92,7 @@ public class OrderStatusView extends VerticalLayout {
 
         Notification message = new Notification("", 3000, Notification.Position.TOP_END);
 
-        CustomAppLayout appLayout = new CustomAppLayout(auth, grid);
+        appLayout.setContent(grid);
         add(appLayout);
         setHeight("100vh");
 

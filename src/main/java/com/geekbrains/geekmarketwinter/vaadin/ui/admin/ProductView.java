@@ -63,7 +63,6 @@ public class ProductView extends VerticalLayout {
     @Value("${spring.config.file-upload-directory}")
     private String fileUploadDirectory;
 
-    private final AuthRepository auth;
     private final ProductService productService;
     private ListDataProvider<Product> dataProvider;
     private Grid<Product> grid;
@@ -74,6 +73,7 @@ public class ProductView extends VerticalLayout {
     private Binder<Product> binder;
     private MultiFileMemoryBuffer buffer;
     private FileAssetService fileAssetService;
+    private CustomAppLayout appLayout;
 
     public ProductView(AuthRepository auth,
                        ProductService productService,
@@ -90,7 +90,7 @@ public class ProductView extends VerticalLayout {
                 OperationEnum.CREATE));
         this.dataProvider = new ListDataProvider<>(getAllProducts(productFilter));
         this.binder = new BeanValidationBinder<>(Product.class);
-        this.auth = auth;
+        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -179,7 +179,7 @@ public class ProductView extends VerticalLayout {
         horizontalLayout.setSizeFull();
         horizontalLayout.setAlignItems(Alignment.START);
         verticalLayout.setAlignItems(Alignment.END);
-        CustomAppLayout appLayout = new CustomAppLayout(auth, horizontalLayout);
+        appLayout.setContent(horizontalLayout);
         add(appLayout);
         setHeight("100vh");
     }
