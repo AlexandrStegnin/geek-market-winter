@@ -39,6 +39,7 @@ public class CartView extends VerticalLayout {
     private final ShoppingCartService cartService;
     private ListDataProvider<OrderItem> dataProvider;
     private Grid<OrderItem> grid;
+    private CustomAppLayout appLayout;
 
     public CartView(AuthRepository auth,
                     ShoppingCartService cartService) {
@@ -46,6 +47,7 @@ public class CartView extends VerticalLayout {
         this.dataProvider = new ListDataProvider<>(getCartItems());
         this.grid = new Grid<>();
         this.auth = auth;
+        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -145,20 +147,11 @@ public class CartView extends VerticalLayout {
 
             VerticalLayout box = new VerticalLayout(grid, buttons);
             box.setAlignItems(Alignment.END);
-            CustomAppLayout appLayout = new CustomAppLayout(auth, box);
-
+            appLayout.setContent(box);
             add(appLayout);
             setHeight("100vh");
         } else {
-            Span span = new Span("Your cart is empty");
-            span.getStyle()
-                    .set("position", "absolute")
-                    .set("top", "50%")
-                    .set("left", "45%")
-                    .set("font-size", "20px");
-            Div empty = new Div(span);
-            empty.setSizeFull();
-            CustomAppLayout appLayout = new CustomAppLayout(auth, empty);
+            clearContent();
             add(appLayout);
         }
     }
@@ -181,11 +174,24 @@ public class CartView extends VerticalLayout {
             dataProvider.refreshAll();
             updateTotalRow(price, quantity);
             updateBadge(quantity.getText());
+            clearContent();
             dialog.close();
         });
 
         dialog.add(content);
         dialog.open();
+    }
+
+    private void clearContent() {
+        Span span = new Span("Your cart is empty");
+        span.getStyle()
+                .set("position", "absolute")
+                .set("top", "50%")
+                .set("left", "45%")
+                .set("font-size", "20px");
+        Div empty = new Div(span);
+        empty.setSizeFull();
+        appLayout.setContent(empty);
     }
 
     private List<OrderItem> getCartItems() {
@@ -213,6 +219,7 @@ public class CartView extends VerticalLayout {
                     element.setVisible(true);
                 } else {
                     element.setVisible(false);
+                    clearContent();
                 }
             }
         }));
