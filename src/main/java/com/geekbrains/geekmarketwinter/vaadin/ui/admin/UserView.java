@@ -34,7 +34,7 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_USE
 
 @PageTitle("Users")
 @Route(ADMIN_USERS_PAGE)
-@Theme(value = Material.class, variant = Material.DARK)
+@Theme(value = Material.class, variant = Material.LIGHT)
 public class UserView extends VerticalLayout {
 
     private final UserServiceImpl userService;

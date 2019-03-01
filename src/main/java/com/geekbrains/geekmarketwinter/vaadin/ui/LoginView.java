@@ -17,7 +17,7 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
 
 @PageTitle("Login page")
 @Route(LOGIN_PAGE)
-@Theme(value = Material.class, variant = Material.DARK)
+@Theme(value = Material.class, variant = Material.LIGHT)
 public class LoginView extends VerticalLayout {
 
     private final AuthRepository authRepository;

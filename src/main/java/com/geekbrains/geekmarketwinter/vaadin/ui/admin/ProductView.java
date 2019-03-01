@@ -57,7 +57,7 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
 
 @PageTitle("Admin products")
 @Route(ADMIN_PRODUCTS_PAGE)
-@Theme(value = Material.class, variant = Material.DARK)
+@Theme(value = Material.class, variant = Material.LIGHT)
 public class ProductView extends VerticalLayout {
 
     @Value("${spring.config.file-upload-directory}")
@@ -240,10 +240,12 @@ public class ProductView extends VerticalLayout {
 
         binder.forField(price)
                 // input should not be null or empty
-                .withValidator(string -> string != null && !string.isEmpty(), "Input values should not be empty")
+                .withValidator(string -> string != null && !string.isEmpty(),
+                        "Input values should not be empty")
                 // convert String to Double, throw ValidationException if String is in incorrect format
                 .withConverter(Double::parseDouble,
-                        doubleToString -> doubleToString.toString().replace(".", ","), "Input value should be an double")
+                        doubleToString -> doubleToString.toString().replace(".", ","),
+                        "Input value should be an double")
                 // validate converted double: it should be positive
                 .withValidator(dbl -> dbl > 0, "Input value should be a positive double")
                 .bind(Product_.PRICE);

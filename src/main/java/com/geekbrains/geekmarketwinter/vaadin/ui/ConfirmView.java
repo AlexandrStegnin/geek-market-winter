@@ -31,7 +31,7 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
 
 @PageTitle("Confirm")
 @Route(CONFIRM_ORDER_PAGE)
-@Theme(value = Material.class, variant = Material.DARK)
+@Theme(value = Material.class, variant = Material.LIGHT)
 public class ConfirmView extends VerticalLayout {
 
     private final AuthRepository auth;

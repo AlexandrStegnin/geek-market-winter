@@ -22,15 +22,12 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.text.NumberFormat;
@@ -41,7 +38,7 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.SHOP_PAGE
 
 @PageTitle("Shop")
 @Route(SHOP_PAGE)
-@Theme(value = Material.class, variant = Material.DARK)
+@Theme(value = Material.class, variant = Material.LIGHT)
 public class ShopView extends VerticalLayout {
 
     private final AuthRepository auth;
@@ -143,28 +140,6 @@ public class ShopView extends VerticalLayout {
 
     private List<Product> getAllProducts() {
         return productService.findAll(productFilter, Pageable.unpaged()).getContent();
-    }
-
-    private ConfigurableFilterDataProvider<Product, String, Category> getDataProvider(ProductService service) {
-        DataProvider<Product, ProductFilter> dataProvider =
-                DataProvider.fromFilteringCallbacks(query -> {
-                    // getFilter returns Optional<String>
-                    productFilter = query.getFilter().orElse(new ProductFilter());
-                    int offset = query.getOffset();
-                    int limit = query.getLimit();
-                    page = service.findAll(
-                            productFilter, PageRequest.of(offset, limit));
-                    return page.getContent().stream();
-                }, query -> {
-                    productFilter = query.getFilter().orElse(new ProductFilter());
-                    int offset = query.getOffset();
-                    int limit = query.getLimit();
-                    return service.countByFilter(productFilter, PageRequest.of(offset, limit));
-                });
-
-        return dataProvider
-                .withConfigurableFilter(
-                        ProductFilter::new);
     }
 
     private List<Category> getAllCategories() {

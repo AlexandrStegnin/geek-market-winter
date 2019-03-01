@@ -31,7 +31,7 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_ROL
 
 @PageTitle("Roles")
 @Route(ADMIN_ROLES_PAGE)
-@Theme(value = Material.class, variant = Material.DARK)
+@Theme(value = Material.class, variant = Material.LIGHT)
 public class RoleView extends VerticalLayout {
 
     private final RoleService roleService;

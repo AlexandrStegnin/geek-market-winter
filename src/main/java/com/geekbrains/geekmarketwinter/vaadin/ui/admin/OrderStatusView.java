@@ -25,7 +25,7 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_ORD
 
 @PageTitle("Orders statuses")
 @Route(ADMIN_ORDER_STATUSES_PAGE)
-@Theme(value = Material.class, variant = Material.DARK)
+@Theme(value = Material.class, variant = Material.LIGHT)
 public class OrderStatusView extends VerticalLayout {
 
     private OrderStatusService orderStatusService;

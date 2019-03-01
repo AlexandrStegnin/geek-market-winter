@@ -6,7 +6,6 @@ import com.geekbrains.geekmarketwinter.vaadin.ui.manager.OrderView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
@@ -18,7 +17,7 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_PAG
 
 @Route(ADMIN_PAGE)
 @PageTitle("Administration")
-@Theme(value = Material.class, variant = Material.DARK)
+@Theme(value = Material.class, variant = Material.LIGHT)
 public class AdminView extends VerticalLayout {
     
     private AuthRepository auth;
@@ -67,10 +66,6 @@ public class AdminView extends VerticalLayout {
         image.setHeight("150px");
         image.setWidth("150px");
         return image;
-    }
-
-    private void showMessage() {
-        Notification.show("Coming soon...", 3000, Notification.Position.MIDDLE);
     }
 
 }

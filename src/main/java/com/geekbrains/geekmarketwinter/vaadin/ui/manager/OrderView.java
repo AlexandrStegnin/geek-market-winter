@@ -34,7 +34,7 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.MANAGER_O
 
 @PageTitle("Manage orders")
 @Route(MANAGER_ORDERS_PAGE)
-@Theme(value = Material.class, variant = Material.DARK)
+@Theme(value = Material.class, variant = Material.LIGHT)
 public class OrderView extends VerticalLayout {
     private final OrderService orderService;
     private final OrderStatusService orderStatusService;

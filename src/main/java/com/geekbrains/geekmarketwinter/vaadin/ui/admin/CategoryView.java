@@ -31,7 +31,7 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_CAT
 
 @PageTitle("Categories")
 @Route(ADMIN_CATEGORIES_PAGE)
-@Theme(value = Material.class, variant = Material.DARK)
+@Theme(value = Material.class, variant = Material.LIGHT)
 public class CategoryView extends VerticalLayout {
 
     private final CategoryService categoryService;
