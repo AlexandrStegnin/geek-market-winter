@@ -1,10 +1,12 @@
 package com.geekbrains.geekmarketwinter.vaadin.ui;
 
+import com.geekbrains.geekmarketwinter.config.amqp.OrderMessageSender;
 import com.geekbrains.geekmarketwinter.entites.DeliveryAddress;
 import com.geekbrains.geekmarketwinter.entites.Order;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.services.DeliveryAddressService;
 import com.geekbrains.geekmarketwinter.services.OrderService;
+import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -18,6 +20,7 @@ import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 
@@ -34,19 +37,24 @@ public class ConfirmView extends VerticalLayout {
     private final AuthRepository auth;
     private final OrderService orderService;
     private final DeliveryAddressService addressService;
+    private final OrderMessageSender orderMessageSender;
+    private final ShoppingCartService cartService;
     private String delivAddress;
 
     public ConfirmView(AuthRepository auth,
                        OrderService orderService,
-                       DeliveryAddressService addressService) {
+                       DeliveryAddressService addressService,
+                       OrderMessageSender orderMessageSender,
+                       ShoppingCartService cartService) {
+        this.orderMessageSender = orderMessageSender;
         this.addressService = addressService;
         this.orderService = orderService;
+        this.cartService = cartService;
         this.auth = auth;
         init();
     }
 
     private void init() {
-
         FormLayout formLayout = new FormLayout();
         Binder<Order> binder = new Binder<>();
 
@@ -97,12 +105,14 @@ public class ConfirmView extends VerticalLayout {
             finalOrder = orderService.makeOrder(finalOrder);
 
             if (binder.writeBeanIfValid(finalOrder)) {
-                orderService.saveOrder(finalOrder);
-
+                finalOrder = orderService.saveOrder(finalOrder);
+                orderMessageSender.sendOrder(
+                        orderService.makeOrderToProduce(finalOrder)
+                );
                 Notification notification = new Notification("Order have been confirmed", 3000,
                         Notification.Position.TOP_END);
                 notification.open();
-
+                cartService.resetCart(VaadinRequest.getCurrent());
                 getUI().ifPresent(ui -> ui.navigate(SHOP_PAGE));
             } else {
                 BinderValidationStatus<Order> validate = binder.validate();

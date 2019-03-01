@@ -1,19 +1,22 @@
 package com.geekbrains.geekmarketwinter.entites;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Collection;
 
 @Data
 @Entity
 @Table(name = "orders")
-@EqualsAndHashCode(exclude = {"orderItems", "user"})
-public class Order {
+@JsonIgnoreProperties("orderItems")
+@EqualsAndHashCode(exclude = {"orderItems", "user", "deliveryAddress"})
+public class Order implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -24,7 +27,7 @@ public class Order {
     private User user;
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "order", fetch = FetchType.EAGER)
-    private List<OrderItem> orderItems;
+    private Collection<OrderItem> orderItems;
 
     @ManyToOne
     @JoinColumn(name = "status_id")
@@ -57,4 +60,19 @@ public class Order {
     @JsonIgnore
     @Transient
     private boolean confirmed;
+
+    @Override
+    public String toString() {
+        return "Order: {" +
+                " id: " + getId() +
+                " user: " + getUser().getUserName() +
+                " order items: " + getOrderItems() +
+                " order status: " + getStatus() +
+                " price: " + getPrice() +
+                " delivery price: " + getDeliveryPrice() +
+                " delivery address: " + getDeliveryAddress() +
+                " phone number: " + getPhoneNumber() +
+                " delivery date: " + getDeliveryDate();
+
+    }
 }

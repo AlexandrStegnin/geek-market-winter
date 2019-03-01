@@ -1,5 +1,6 @@
 package com.geekbrains.geekmarketwinter.services;
 
+import com.geekbrains.geekmarketwinter.entites.OrderItem;
 import com.geekbrains.geekmarketwinter.entites.Product;
 import com.geekbrains.geekmarketwinter.utils.ShoppingCart;
 import com.vaadin.flow.server.VaadinRequest;
@@ -61,5 +62,11 @@ public class ShoppingCartService {
 
     public double getTotalCost(VaadinRequest request) {
         return getCurrentCart(request).getTotalCost();
+    }
+
+    public Long getTotalQuantity() {
+        return getCurrentCart(VaadinRequest.getCurrent()).getItems()
+                .stream().map(OrderItem::getQuantity)
+                .reduce(0L, (a, b) -> a + b);
     }
 }

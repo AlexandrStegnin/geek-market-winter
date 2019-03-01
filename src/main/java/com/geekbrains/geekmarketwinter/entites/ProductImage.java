@@ -1,15 +1,20 @@
 package com.geekbrains.geekmarketwinter.entites;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "products_images")
 @Data
 @ToString(exclude = "product")
-public class ProductImage {
+@EqualsAndHashCode(exclude = "product")
+@JsonIgnoreProperties("product")
+public class ProductImage implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

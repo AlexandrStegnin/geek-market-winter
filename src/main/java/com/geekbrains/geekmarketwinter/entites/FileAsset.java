@@ -2,6 +2,7 @@ package com.geekbrains.geekmarketwinter.entites;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
+@NoArgsConstructor
 @Table(name = "file_assets")
 public class FileAsset implements FileStorageEntity {
 
@@ -36,4 +38,7 @@ public class FileAsset implements FileStorageEntity {
     @UpdateTimestamp
     private LocalDateTime expiringDateTime;
 
+    public FileAsset(String name) {
+        this.name = name;
+    }
 }

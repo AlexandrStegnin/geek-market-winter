@@ -8,6 +8,7 @@ import com.geekbrains.geekmarketwinter.services.ProductService;
 import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.utils.filters.ProductFilter;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
+import com.geekbrains.geekmarketwinter.vaadin.support.VaadinViewUtils;
 import com.github.appreciated.card.Card;
 import com.github.appreciated.card.action.Actions;
 import com.github.appreciated.card.content.HorizontalCardComponentContainer;
@@ -82,14 +83,7 @@ public class ShopView extends VerticalLayout {
     }
 
     private Card createCard(Product product) {
-        Image defaultImage = createImage("images/users-png.png", "Coming soon");
-        Image productImage = null;
-        if (product.getImages().size() > 0) {
-            productImage = createImage("images/" + product.getImages().get(0).getPath(), product.getTitle());
-//            productImage.setHeight("150px");
-//            productImage.setWidth("150px");
-        }
-
+        Image productImage = VaadinViewUtils.getProductImage(product);
         String price = numberFormat.format(product.getPrice());
         SecondaryLabel priceLabel = new SecondaryLabel(price);
         priceLabel.getStyle().set("text-align", "right");
@@ -115,7 +109,7 @@ public class ShopView extends VerticalLayout {
         PrimaryLabel emptyLabel = new PrimaryLabel("");
         emptyLabel.setFlexGrow(1);
 
-        IconItem productIconItem = new IconItem(productImage == null ? defaultImage : productImage, "", "");
+        IconItem productIconItem = new IconItem(productImage, "", "");
         productIconItem.setFlexGrow(1);
 
         Card card = new Card(
@@ -147,16 +141,6 @@ public class ShopView extends VerticalLayout {
         return card;
     }
 
-    private Image createImage(String src, String alt) {
-        Image image = new Image(src, alt);
-        image.setHeight("150px");
-        image.setWidth("150px");
-        image.getStyle().set("position", "relative");
-        image.getStyle().set("left", "25%");
-        image.getStyle().set("margin", "0");
-        return image;
-    }
-
     private List<Product> getAllProducts() {
         return productService.findAll(productFilter, Pageable.unpaged()).getContent();
     }
@@ -179,8 +163,8 @@ public class ShopView extends VerticalLayout {
                 });
 
         return dataProvider
-        .withConfigurableFilter(
-                ProductFilter::new);
+                .withConfigurableFilter(
+                        ProductFilter::new);
     }
 
     private List<Category> getAllCategories() {

@@ -1,6 +1,7 @@
 package com.geekbrains.geekmarketwinter.vaadin.ui;
 
 
+import com.geekbrains.geekmarketwinter.config.security.SecurityUtils;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -12,8 +13,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 
-import static com.geekbrains.geekmarketwinter.config.support.Constants.LOGIN_PAGE;
-import static com.geekbrains.geekmarketwinter.config.support.Constants.SHOP_PAGE;
+import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
 
 @PageTitle("Login page")
 @Route(LOGIN_PAGE)
@@ -33,16 +33,24 @@ public class LoginView extends VerticalLayout {
         TextField loginField = new TextField();
         loginField.setLabel("Username");
         loginField.setPlaceholder("Login");
+        loginField.setId("user_name_field");
 
         PasswordField passwordField = new PasswordField();
         passwordField.setLabel("Password");
         passwordField.setPlaceholder("*****");
+        passwordField.setId("pwd_field");
 
         Button loginButton = new Button("LOG IN", e -> {
             if (authenticated(loginField.getValue(), passwordField.getValue()))
-                this.getUI().ifPresent(ui -> ui.navigate(SHOP_PAGE));
+                this.getUI().ifPresent(ui -> {
+                    if (SecurityUtils.isUserInRole(ROLE_ADMIN)) {
+                        ui.navigate(ADMIN_PAGE);
+                    } else {
+                        ui.navigate(SHOP_PAGE);
+                    }
+                });
         });
-
+        loginButton.setId("login_btn");
         loginForm.add(loginField, passwordField, loginButton);
         add(loginForm);
 

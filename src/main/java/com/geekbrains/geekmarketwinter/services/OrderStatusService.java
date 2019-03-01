@@ -12,6 +12,7 @@ import java.util.List;
 @Transactional
 public class OrderStatusService {
 
+    private static final String DEFAULT_STATUS_NAME = "Подготавливается";
     private final OrderStatusRepository orderStatusRepo;
 
     @Autowired
@@ -25,5 +26,13 @@ public class OrderStatusService {
 
     public void update(OrderStatus orderStatus) {
         orderStatusRepo.save(orderStatus);
+    }
+
+    public OrderStatus getDefaultStatus() {
+        return orderStatusRepo.getByTitle(DEFAULT_STATUS_NAME);
+    }
+
+    public OrderStatus getOneByTitle(String title) {
+        return orderStatusRepo.getByTitle(title);
     }
 }

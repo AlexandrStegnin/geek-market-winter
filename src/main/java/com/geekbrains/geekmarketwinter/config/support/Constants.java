@@ -51,6 +51,8 @@ public class Constants {
     public static final String LOGOUT_URL = PATH_SEPARATOR + LOGOUT_PAGE;
     public static final String LOGIN_URL = PATH_SEPARATOR + LOGIN_PAGE;
 
+    public static final String DEFAULT_SRC = "images/users-png.png";
+
     public static final String[] ALL_HTTP_MATCHERS = {
             "/VAADIN/**", "/HEARTBEAT/**", "/UIDL/**", "/resources/**",
             "/login", "/login**", "/login/**", "/manifest.json", "/icons/**", "/images/**",
