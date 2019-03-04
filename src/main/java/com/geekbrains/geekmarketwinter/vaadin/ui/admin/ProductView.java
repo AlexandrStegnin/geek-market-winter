@@ -1,12 +1,13 @@
 package com.geekbrains.geekmarketwinter.vaadin.ui.admin;
 
 import com.geekbrains.geekmarketwinter.config.support.OperationEnum;
-import com.geekbrains.geekmarketwinter.entites.*;
+import com.geekbrains.geekmarketwinter.entites.Category;
+import com.geekbrains.geekmarketwinter.entites.Product;
+import com.geekbrains.geekmarketwinter.entites.ProductImage;
+import com.geekbrains.geekmarketwinter.entites.Product_;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.services.CategoryService;
-import com.geekbrains.geekmarketwinter.services.FileAssetService;
 import com.geekbrains.geekmarketwinter.services.ProductService;
-import com.geekbrains.geekmarketwinter.utils.filters.ProductFilter;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.geekbrains.geekmarketwinter.vaadin.support.VaadinViewUtils;
 import com.vaadin.flow.component.button.Button;
@@ -32,8 +33,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,29 +65,21 @@ public class ProductView extends VerticalLayout {
     private final ProductService productService;
     private ListDataProvider<Product> dataProvider;
     private Grid<Product> grid;
-    private ProductFilter productFilter;
-    private Page<Product> page;
     private final Button addNewBtn;
     private final CategoryService categoryService;
     private Binder<Product> binder;
     private MultiFileMemoryBuffer buffer;
-    private FileAssetService fileAssetService;
     private CustomAppLayout appLayout;
 
-    public ProductView(AuthRepository auth,
-                       ProductService productService,
-                       CategoryService categoryService,
-                       FileAssetService fileAssetService) {
-        this.fileAssetService = fileAssetService;
+    public ProductView(AuthRepository auth, ProductService productService,
+                       CategoryService categoryService) {
         this.buffer = new MultiFileMemoryBuffer();
         this.productService = productService;
         this.grid = new Grid<>();
-        this.productFilter = new ProductFilter();
         this.categoryService = categoryService;
-        this.page = productService.findAll(productFilter, Pageable.unpaged());
         this.addNewBtn = new Button("Add new product", e -> showDialog(new Product(),
                 OperationEnum.CREATE));
-        this.dataProvider = new ListDataProvider<>(getAllProducts(productFilter));
+        this.dataProvider = new ListDataProvider<>(getAllProducts());
         this.binder = new BeanValidationBinder<>(Product.class);
         this.appLayout = new CustomAppLayout(auth);
         init();
@@ -188,8 +179,8 @@ public class ProductView extends VerticalLayout {
         return categoryService.getAllCategories();
     }
 
-    private List<Product> getAllProducts(ProductFilter filter) {
-        return productService.fetchAll(filter);
+    private List<Product> getAllProducts() {
+        return productService.fetchAllProducts();
     }
 
     private void deleteProduct(Product product) {
@@ -334,8 +325,6 @@ public class ProductView extends VerticalLayout {
             } catch (IOException e) {
                 throw new RuntimeException("Ошибка копирования файла", e);
             }
-            FileAsset fileAsset = new FileAsset(fileName);
-            fileAssetService.createFileAsset(fileAsset, targetFile[0]);
             ProductImage productImage = new ProductImage();
             productImage.setProduct(product);
             productImage.setPath(fileName);
