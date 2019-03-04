@@ -15,6 +15,7 @@ public class Constants {
     public static final String SHOP_PAGE = "shop";
     public static final String CART_PAGE = "cart";
     public static final String CONFIRM_ORDER_PAGE = "confirm-order";
+    public static final String PROFILE_PAGE = "profile";
 
     /* ADMINS PAGES */
     public static final String ADMIN_PAGE = "admin";

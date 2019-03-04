@@ -84,4 +84,9 @@ public class OrderService {
         order.setStatus(status);
         return saveOrder(order);
     }
+
+    public List<Order> findAllByUser(User user) {
+        return orderRepo.findAllByUser(user);
+    }
+
 }

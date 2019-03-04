@@ -6,6 +6,7 @@ import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.vaadin.ui.CartView;
 import com.geekbrains.geekmarketwinter.vaadin.ui.LoginView;
+import com.geekbrains.geekmarketwinter.vaadin.ui.ProfileView;
 import com.geekbrains.geekmarketwinter.vaadin.ui.ShopView;
 import com.geekbrains.geekmarketwinter.vaadin.ui.admin.AdminView;
 import com.geekbrains.geekmarketwinter.vaadin.ui.manager.OrderView;
@@ -40,6 +41,7 @@ public class CustomAppLayout extends AppLayout {
         AppLayoutMenuItem loginItem = new AppLayoutMenuItem(VaadinIcon.SIGN_IN.create(), "Login", e -> goToPage(LoginView.class));
         AppLayoutMenuItem adminItem = new AppLayoutMenuItem(VaadinIcon.COGS.create(), "Admin", e -> goToPage(AdminView.class));
         AppLayoutMenuItem managerItem = new AppLayoutMenuItem(VaadinIcon.PACKAGE.create(), "Manage orders", e -> goToPage(OrderView.class));
+        AppLayoutMenuItem profileItem = new AppLayoutMenuItem(VaadinIcon.USER.create(), "Profile", e -> goToPage(ProfileView.class));
 
         cartItem.setId("cartItem");
 
@@ -58,6 +60,7 @@ public class CustomAppLayout extends AppLayout {
         if (SecurityUtils.isUserInRole(ROLE_MANAGER)) menu.addMenuItem(managerItem);
         if (SecurityUtils.isUserLoggedIn()) {
             menu.addMenuItem(logoutItem);
+            menu.addMenuItem(profileItem);
         } else {
             menu.addMenuItem(loginItem);
         }
