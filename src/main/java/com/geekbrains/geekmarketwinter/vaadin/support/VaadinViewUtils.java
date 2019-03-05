@@ -147,7 +147,7 @@ public class VaadinViewUtils {
         }
     }
 
-    public static Image getProductImage(Product product) {
+    public static Image getProductImage(Product product, boolean defaultStyle) {
         String src = product.getImages().isEmpty() ? DEFAULT_SRC :
                 (fileUploadDirectory + product.getVendorCode() +
                 PATH_SEPARATOR + product.getImages().get(0).getPath());
@@ -157,9 +157,11 @@ public class VaadinViewUtils {
         Image image = new Image(streamResource, product.getTitle());
         image.setHeight("150px");
         image.setWidth("150px");
-        image.getStyle().set("position", "relative");
-        image.getStyle().set("left", "25%");
-        image.getStyle().set("margin", "0");
+        if (defaultStyle) {
+            image.getStyle().set("position", "relative");
+            image.getStyle().set("left", "25%");
+            image.getStyle().set("margin", "0");
+        }
         return image;
     }
 

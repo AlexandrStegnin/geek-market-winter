@@ -80,7 +80,7 @@ public class ShopView extends VerticalLayout {
     }
 
     private Card createCard(Product product) {
-        Image productImage = VaadinViewUtils.getProductImage(product);
+        Image productImage = VaadinViewUtils.getProductImage(product, true);
         String price = numberFormat.format(product.getPrice());
         SecondaryLabel priceLabel = new SecondaryLabel(price);
         priceLabel.getStyle().set("text-align", "right");
