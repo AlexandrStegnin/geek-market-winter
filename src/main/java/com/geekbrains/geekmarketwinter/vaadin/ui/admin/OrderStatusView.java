@@ -1,7 +1,6 @@
 package com.geekbrains.geekmarketwinter.vaadin.ui.admin;
 
 import com.geekbrains.geekmarketwinter.entites.OrderStatus;
-import com.geekbrains.geekmarketwinter.services.AuthService;
 import com.geekbrains.geekmarketwinter.services.OrderStatusService;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.vaadin.flow.component.button.Button;
@@ -10,7 +9,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -26,18 +24,18 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_ORD
 @PageTitle("Orders statuses")
 @Route(ADMIN_ORDER_STATUSES_PAGE)
 @Theme(value = Material.class, variant = Material.LIGHT)
-public class OrderStatusView extends VerticalLayout {
+public class OrderStatusView extends CustomAppLayout {
 
     private OrderStatusService orderStatusService;
     private Grid<OrderStatus> grid;
     private ListDataProvider<OrderStatus> dataProvider;
-    private CustomAppLayout appLayout;
+//    private CustomAppLayout appLayout;
 
-    public OrderStatusView(OrderStatusService orderStatusService, AuthService auth) {
+    public OrderStatusView(OrderStatusService orderStatusService/*, AuthService auth*/) {
         this.orderStatusService = orderStatusService;
         this.dataProvider = new ListDataProvider<>(getAllStatuses());
         this.grid = new Grid<>();
-        this.appLayout = new CustomAppLayout(auth);
+//        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -92,9 +90,9 @@ public class OrderStatusView extends VerticalLayout {
 
         Notification message = new Notification("", 3000, Notification.Position.TOP_END);
 
-        appLayout.setContent(grid);
-        add(appLayout);
-        setHeight("100vh");
+        /*appLayout.*/setContent(grid);
+        /*add(appLayout);
+        setHeight("100vh");*/
 
         editor.addSaveListener(event -> {
             OrderStatus updatedStatus = event.getItem();

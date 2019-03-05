@@ -3,7 +3,6 @@ package com.geekbrains.geekmarketwinter.vaadin.ui.admin;
 import com.geekbrains.geekmarketwinter.config.support.OperationEnum;
 import com.geekbrains.geekmarketwinter.entites.Role;
 import com.geekbrains.geekmarketwinter.entites.Role_;
-import com.geekbrains.geekmarketwinter.services.AuthService;
 import com.geekbrains.geekmarketwinter.services.RoleService;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.geekbrains.geekmarketwinter.vaadin.support.VaadinViewUtils;
@@ -14,6 +13,7 @@ import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -32,23 +32,21 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_ROL
 @PageTitle("Roles")
 @Route(ADMIN_ROLES_PAGE)
 @Theme(value = Material.class, variant = Material.LIGHT)
-public class RoleView extends VerticalLayout {
+public class RoleView extends CustomAppLayout {
 
     private final RoleService roleService;
     private Grid<Role> grid;
     private final Button addNewBtn;
     private ListDataProvider<Role> dataProvider;
     private Binder<Role> binder;
-    private CustomAppLayout appLayout;
 
-    public RoleView(RoleService roleService, AuthService auth) {
+    public RoleView(RoleService roleService) {
         this.roleService = roleService;
         this.grid = new Grid<>();
         this.dataProvider = new ListDataProvider<>(getAll());
         this.addNewBtn = new Button("New role", VaadinIcon.PLUS.create(),
                 e -> showDialog(new Role(), OperationEnum.CREATE));
         this.binder = new BeanValidationBinder<>(Role.class);
-        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -78,11 +76,8 @@ public class RoleView extends VerticalLayout {
         VerticalLayout verticalLayout = new VerticalLayout();
 
         verticalLayout.add(addNewBtn, grid);
-        verticalLayout.setAlignItems(Alignment.END);
-        appLayout.setContent(verticalLayout);
-        add(appLayout);
-        setHeight("100vh");
-
+        verticalLayout.setAlignItems(FlexComponent.Alignment.END);
+        setContent(verticalLayout);
     }
 
     private List<Role> getAll() {

@@ -3,7 +3,6 @@ package com.geekbrains.geekmarketwinter.vaadin.ui;
 import com.geekbrains.geekmarketwinter.config.security.SecurityUtils;
 import com.geekbrains.geekmarketwinter.entites.Order;
 import com.geekbrains.geekmarketwinter.entites.User;
-import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.services.OrderService;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.geekbrains.geekmarketwinter.vaadin.support.VaadinViewUtils;
@@ -12,7 +11,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
@@ -31,14 +29,12 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.PROFILE_P
 @Route(PROFILE_PAGE)
 @PageTitle("Profile")
 @Theme(value = Material.class)
-public class ProfileView extends VerticalLayout {
+public class ProfileView extends CustomAppLayout {
 
     private OrderService orderService;
-    private CustomAppLayout appLayout;
 
-    public ProfileView(AuthRepository auth, OrderService orderService) {
+    public ProfileView(OrderService orderService) {
         this.orderService = orderService;
-        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -63,8 +59,7 @@ public class ProfileView extends VerticalLayout {
             details.setContent(div);
             content.add(details);
         }));
-        appLayout.setContent(content);
-        add(appLayout);
+        setContent(content);
     }
 
     private List<Order> fetchOrders(User user) {

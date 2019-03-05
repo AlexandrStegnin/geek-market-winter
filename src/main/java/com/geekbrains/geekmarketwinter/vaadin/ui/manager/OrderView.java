@@ -2,7 +2,6 @@ package com.geekbrains.geekmarketwinter.vaadin.ui.manager;
 
 import com.geekbrains.geekmarketwinter.entites.Order;
 import com.geekbrains.geekmarketwinter.entites.OrderStatus;
-import com.geekbrains.geekmarketwinter.services.AuthService;
 import com.geekbrains.geekmarketwinter.services.OrderService;
 import com.geekbrains.geekmarketwinter.services.OrderStatusService;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
@@ -13,7 +12,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
@@ -35,20 +33,18 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.MANAGER_O
 @PageTitle("Manage orders")
 @Route(MANAGER_ORDERS_PAGE)
 @Theme(value = Material.class, variant = Material.LIGHT)
-public class OrderView extends VerticalLayout {
+public class OrderView extends CustomAppLayout {
     private final OrderService orderService;
     private final OrderStatusService orderStatusService;
     private Grid<Order> grid;
     private ListDataProvider<Order> dataProvider;
     private Order order;
-    private CustomAppLayout appLayout;
 
-    public OrderView(OrderService orderService, AuthService auth, OrderStatusService orderStatusService) {
+    public OrderView(OrderService orderService, OrderStatusService orderStatusService) {
         this.orderService = orderService;
         this.orderStatusService = orderStatusService;
         this.dataProvider = new ListDataProvider<>(getAllOrders());
         this.grid = new Grid<>();
-        this.appLayout = new CustomAppLayout(auth);
         this.order = new Order();
         init();
     }
@@ -156,9 +152,7 @@ public class OrderView extends VerticalLayout {
 
         Notification message = new Notification("", 3000, Notification.Position.TOP_END);
 
-        appLayout.setContent(grid);
-        add(appLayout);
-        setHeight("100vh");
+        setContent(grid);
 
         editor.addSaveListener(event -> {
             Order updatedOrder = event.getItem();

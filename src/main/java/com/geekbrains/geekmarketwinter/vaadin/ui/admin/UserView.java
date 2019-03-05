@@ -4,7 +4,6 @@ import com.geekbrains.geekmarketwinter.config.support.OperationEnum;
 import com.geekbrains.geekmarketwinter.entites.Role;
 import com.geekbrains.geekmarketwinter.entites.User;
 import com.geekbrains.geekmarketwinter.entites.User_;
-import com.geekbrains.geekmarketwinter.services.AuthService;
 import com.geekbrains.geekmarketwinter.services.RoleService;
 import com.geekbrains.geekmarketwinter.services.UserServiceImpl;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
@@ -16,6 +15,7 @@ import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -35,7 +35,7 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_USE
 @PageTitle("Users")
 @Route(ADMIN_USERS_PAGE)
 @Theme(value = Material.class, variant = Material.LIGHT)
-public class UserView extends VerticalLayout {
+public class UserView extends CustomAppLayout {
 
     private final UserServiceImpl userService;
     private final RoleService roleService;
@@ -44,9 +44,8 @@ public class UserView extends VerticalLayout {
     private ListDataProvider<User> dataProvider;
     private List<Role> roles;
     private Binder<User> binder;
-    private CustomAppLayout appLayout;
 
-    public UserView(UserServiceImpl userService, AuthService auth, RoleService roleService) {
+    public UserView(UserServiceImpl userService, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
         this.grid = new Grid<>();
@@ -54,7 +53,6 @@ public class UserView extends VerticalLayout {
         this.binder = new BeanValidationBinder<>(User.class);
         this.addNewBtn = new Button("New user", VaadinIcon.PLUS.create(), e -> showDialog(new User(), OperationEnum.CREATE));
         this.roles = getRoles();
-        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -112,10 +110,8 @@ public class UserView extends VerticalLayout {
         // TODO: 12.02.2019 Разобраться с component column, без setEditorComponent не рендерится
 
         VerticalLayout verticalLayout = new VerticalLayout(addNewBtn, grid);
-        verticalLayout.setAlignItems(Alignment.END);
-        appLayout.setContent(verticalLayout);
-        add(appLayout);
-        setHeight("100vh");
+        verticalLayout.setAlignItems(FlexComponent.Alignment.END);
+        setContent(verticalLayout);
     }
 
     private void saveUser(User user) {

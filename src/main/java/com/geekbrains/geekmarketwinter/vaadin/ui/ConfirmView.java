@@ -3,7 +3,6 @@ package com.geekbrains.geekmarketwinter.vaadin.ui;
 import com.geekbrains.geekmarketwinter.config.amqp.OrderMessageSender;
 import com.geekbrains.geekmarketwinter.entites.DeliveryAddress;
 import com.geekbrains.geekmarketwinter.entites.Order;
-import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.services.DeliveryAddressService;
 import com.geekbrains.geekmarketwinter.services.OrderService;
 import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
@@ -12,7 +11,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BinderValidationStatus;
@@ -32,17 +30,15 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
 @PageTitle("Confirm")
 @Route(CONFIRM_ORDER_PAGE)
 @Theme(value = Material.class, variant = Material.LIGHT)
-public class ConfirmView extends VerticalLayout {
+public class ConfirmView extends CustomAppLayout {
 
     private final OrderService orderService;
     private final DeliveryAddressService addressService;
     private final OrderMessageSender orderMessageSender;
     private final ShoppingCartService cartService;
-    private CustomAppLayout appLayout;
     private String delivAddress;
 
-    public ConfirmView(AuthRepository auth,
-                       OrderService orderService,
+    public ConfirmView(OrderService orderService,
                        DeliveryAddressService addressService,
                        OrderMessageSender orderMessageSender,
                        ShoppingCartService cartService) {
@@ -50,7 +46,6 @@ public class ConfirmView extends VerticalLayout {
         this.addressService = addressService;
         this.orderService = orderService;
         this.cartService = cartService;
-        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -125,14 +120,6 @@ public class ConfirmView extends VerticalLayout {
             }
         });
 
-        appLayout.setContent(formLayout);
-
-        add(appLayout);
-        setHeight("100vh");
-        setMargin(true);
-        setAlignItems(Alignment.CENTER);
-        setAlignSelf(Alignment.CENTER);
-        setJustifyContentMode(JustifyContentMode.CENTER);
-
+        setContent(formLayout);
     }
 }

@@ -5,7 +5,6 @@ import com.geekbrains.geekmarketwinter.entites.Category;
 import com.geekbrains.geekmarketwinter.entites.Product;
 import com.geekbrains.geekmarketwinter.entites.ProductImage;
 import com.geekbrains.geekmarketwinter.entites.Product_;
-import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.services.CategoryService;
 import com.geekbrains.geekmarketwinter.services.ProductService;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
@@ -18,6 +17,7 @@ import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -57,7 +57,7 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
 @PageTitle("Admin products")
 @Route(ADMIN_PRODUCTS_PAGE)
 @Theme(value = Material.class, variant = Material.LIGHT)
-public class ProductView extends VerticalLayout {
+public class ProductView extends CustomAppLayout {
 
     @Value("${spring.config.file-upload-directory}")
     private String fileUploadDirectory;
@@ -69,9 +69,8 @@ public class ProductView extends VerticalLayout {
     private final CategoryService categoryService;
     private Binder<Product> binder;
     private MultiFileMemoryBuffer buffer;
-    private CustomAppLayout appLayout;
 
-    public ProductView(AuthRepository auth, ProductService productService,
+    public ProductView(ProductService productService,
                        CategoryService categoryService) {
         this.buffer = new MultiFileMemoryBuffer();
         this.productService = productService;
@@ -81,7 +80,6 @@ public class ProductView extends VerticalLayout {
                 OperationEnum.CREATE));
         this.dataProvider = new ListDataProvider<>(getAllProducts());
         this.binder = new BeanValidationBinder<>(Product.class);
-        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -162,17 +160,15 @@ public class ProductView extends VerticalLayout {
                 .set("right", "5%");
         filterForm.add(addNewBtn);
         filterForm.setWidth("100%");
-        filterForm.setAlignSelf(Alignment.END, addNewBtn);
+        filterForm.setAlignSelf(FlexComponent.Alignment.END, addNewBtn);
         VerticalLayout verticalLayout = new VerticalLayout(/*addNewBtn, */grid);
         horizontalLayout.add(filterForm, verticalLayout);
         horizontalLayout.setSpacing(true);
         horizontalLayout.setPadding(true);
         horizontalLayout.setSizeFull();
-        horizontalLayout.setAlignItems(Alignment.START);
-        verticalLayout.setAlignItems(Alignment.END);
-        appLayout.setContent(horizontalLayout);
-        add(appLayout);
-        setHeight("100vh");
+        horizontalLayout.setAlignItems(FlexComponent.Alignment.START);
+        verticalLayout.setAlignItems(FlexComponent.Alignment.END);
+        setContent(horizontalLayout);
     }
 
     private List<Category> getAllCategories() {

@@ -3,7 +3,6 @@ package com.geekbrains.geekmarketwinter.vaadin.ui.admin;
 import com.geekbrains.geekmarketwinter.config.support.OperationEnum;
 import com.geekbrains.geekmarketwinter.entites.Category;
 import com.geekbrains.geekmarketwinter.entites.Category_;
-import com.geekbrains.geekmarketwinter.services.AuthService;
 import com.geekbrains.geekmarketwinter.services.CategoryService;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.geekbrains.geekmarketwinter.vaadin.support.VaadinViewUtils;
@@ -14,6 +13,7 @@ import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -32,22 +32,20 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_CAT
 @PageTitle("Categories")
 @Route(ADMIN_CATEGORIES_PAGE)
 @Theme(value = Material.class, variant = Material.LIGHT)
-public class CategoryView extends VerticalLayout {
+public class CategoryView extends CustomAppLayout {
 
     private final CategoryService categoryService;
     private Grid<Category> grid;
     private ListDataProvider<Category> dataProvider;
     private final Button addNewBtn;
     private Binder<Category> binder;
-    private CustomAppLayout appLayout;
 
-    public CategoryView(CategoryService categoryService, AuthService auth) {
+    public CategoryView(CategoryService categoryService) {
         this.addNewBtn = new Button("Add new category", e -> showDialog(new Category(), OperationEnum.CREATE));
         this.binder = new BeanValidationBinder<>(Category.class);
         this.categoryService = categoryService;
         this.dataProvider = new ListDataProvider<>(getAllCategories());
         this.grid = new Grid<>();
-        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -77,10 +75,8 @@ public class CategoryView extends VerticalLayout {
         VerticalLayout verticalLayout = new VerticalLayout();
 
         verticalLayout.add(addNewBtn, grid);
-        verticalLayout.setAlignItems(Alignment.END);
-        appLayout.setContent(verticalLayout);
-        add(appLayout);
-        setHeight("100vh");
+        verticalLayout.setAlignItems(FlexComponent.Alignment.END);
+        setContent(verticalLayout);
     }
 
     private List<Category> getAllCategories() {

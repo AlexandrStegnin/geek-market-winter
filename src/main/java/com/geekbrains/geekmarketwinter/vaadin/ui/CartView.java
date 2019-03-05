@@ -1,7 +1,6 @@
 package com.geekbrains.geekmarketwinter.vaadin.ui;
 
 import com.geekbrains.geekmarketwinter.entites.OrderItem;
-import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.geekbrains.geekmarketwinter.vaadin.support.VaadinViewUtils;
@@ -14,6 +13,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -33,19 +33,16 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.CONFIRM_O
 @Route(CART_PAGE)
 @PageTitle("Cart")
 @Theme(value = Material.class)
-public class CartView extends VerticalLayout {
+public class CartView extends CustomAppLayout {
 
     private final ShoppingCartService cartService;
     private ListDataProvider<OrderItem> dataProvider;
     private Grid<OrderItem> grid;
-    private CustomAppLayout appLayout;
 
-    public CartView(AuthRepository auth,
-                    ShoppingCartService cartService) {
+    public CartView(ShoppingCartService cartService) {
         this.cartService = cartService;
         this.dataProvider = new ListDataProvider<>(getCartItems());
         this.grid = new Grid<>();
-        this.appLayout = new CustomAppLayout(auth);
         init();
     }
 
@@ -144,13 +141,10 @@ public class CartView extends VerticalLayout {
             HorizontalLayout buttons = new HorizontalLayout(confirm, clearCart);
 
             VerticalLayout box = new VerticalLayout(grid, buttons);
-            box.setAlignItems(Alignment.END);
-            appLayout.setContent(box);
-            add(appLayout);
-            setHeight("100vh");
+            box.setAlignItems(FlexComponent.Alignment.END);
+            setContent(box);
         } else {
             clearContent();
-            add(appLayout);
         }
     }
 
@@ -189,7 +183,7 @@ public class CartView extends VerticalLayout {
                 .set("font-size", "20px");
         Div empty = new Div(span);
         empty.setSizeFull();
-        appLayout.setContent(empty);
+        setContent(empty);
     }
 
     private List<OrderItem> getCartItems() {

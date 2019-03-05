@@ -17,6 +17,7 @@ import com.vaadin.flow.component.applayout.AppLayoutMenuItem;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.PaperBadge;
 
 import static com.geekbrains.geekmarketwinter.config.support.Constants.ROLE_ADMIN;
@@ -24,16 +25,18 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.ROLE_MANA
 
 public class CustomAppLayout extends AppLayout {
 
-    private final AuthRepository auth;
+    @Autowired
+    private AuthRepository auth;
 
-    public CustomAppLayout(AuthRepository auth) {
-        this.auth = auth;
+    public CustomAppLayout() {
         ShoppingCartService cartService = new ShoppingCartService();
         Long itemsInCart = cartService.getTotalQuantity();
         AppLayoutMenu menu = createMenu();
         Image img = new Image("https://i.imgur.com/GPpnszs.png", "Vaadin Logo");
         img.setHeight("44px");
         setBranding(img);
+
+        this.getElement().getStyle().set("margin-top", "10px");
 
         AppLayoutMenuItem homeItem = new AppLayoutMenuItem(VaadinIcon.HOME.create(), "Home", e -> goToPage(ShopView.class));
         AppLayoutMenuItem cartItem = new AppLayoutMenuItem(VaadinIcon.CART.create(), "Cart", e -> goToPage(CartView.class));
@@ -59,11 +62,15 @@ public class CustomAppLayout extends AppLayout {
         if (SecurityUtils.isUserInRole(ROLE_ADMIN)) menu.addMenuItems(adminItem);
         if (SecurityUtils.isUserInRole(ROLE_MANAGER)) menu.addMenuItem(managerItem);
         if (SecurityUtils.isUserLoggedIn()) {
-            menu.addMenuItem(logoutItem);
             menu.addMenuItem(profileItem);
+            menu.addMenuItem(logoutItem);
         } else {
             menu.addMenuItem(loginItem);
         }
+    }
+
+    public CustomAppLayout(AuthRepository auth) {
+        this.auth = auth;
     }
 
     private void logout() {
