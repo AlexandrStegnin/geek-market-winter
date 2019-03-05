@@ -35,4 +35,13 @@ public class OrderStatusService {
     public OrderStatus getOneByTitle(String title) {
         return orderStatusRepo.getByTitle(title);
     }
+
+    public OrderStatus save(OrderStatus orderStatus) {
+        return orderStatusRepo.save(orderStatus);
+    }
+
+    public void delete(OrderStatus orderStatus) {
+        orderStatusRepo.delete(orderStatus);
+    }
+
 }

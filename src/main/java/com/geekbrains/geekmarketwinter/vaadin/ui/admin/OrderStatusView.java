@@ -1,15 +1,23 @@
 package com.geekbrains.geekmarketwinter.vaadin.ui.admin;
 
+import com.geekbrains.geekmarketwinter.config.support.OperationEnum;
 import com.geekbrains.geekmarketwinter.entites.OrderStatus;
+import com.geekbrains.geekmarketwinter.entites.OrderStatus_;
 import com.geekbrains.geekmarketwinter.services.OrderStatusService;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
+import com.geekbrains.geekmarketwinter.vaadin.support.VaadinViewUtils;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.PageTitle;
@@ -29,17 +37,21 @@ public class OrderStatusView extends CustomAppLayout {
     private OrderStatusService orderStatusService;
     private Grid<OrderStatus> grid;
     private ListDataProvider<OrderStatus> dataProvider;
-//    private CustomAppLayout appLayout;
+    private Binder<OrderStatus> binder;
+    private final Button addNewBtn;
 
-    public OrderStatusView(OrderStatusService orderStatusService/*, AuthService auth*/) {
+    public OrderStatusView(OrderStatusService orderStatusService) {
         this.orderStatusService = orderStatusService;
         this.dataProvider = new ListDataProvider<>(getAllStatuses());
         this.grid = new Grid<>();
-//        this.appLayout = new CustomAppLayout(auth);
+        this.addNewBtn = new Button("New order status", VaadinIcon.PLUS.create(),
+                e -> showDialog(new OrderStatus(), OperationEnum.CREATE));
+        this.binder = new BeanValidationBinder<>(OrderStatus.class);
         init();
     }
 
     private void init() {
+        addNewBtn.setIconAfterText(true);
 
         grid.setDataProvider(dataProvider);
 
@@ -53,62 +65,91 @@ public class OrderStatusView extends CustomAppLayout {
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        Binder<OrderStatus> binder = new Binder<>(OrderStatus.class);
-        Editor<OrderStatus> editor = grid.getEditor();
-        editor.setBinder(binder);
-        editor.setBuffered(true);
-
-        TextField titleField = new TextField();
-        binder.bind(titleField, "title");
-        titleColumn.setEditorComponent(titleField);
-        titleColumn.setTextAlign(ColumnTextAlign.CENTER);
-        titleField.setSizeFull();
-
-        Grid.Column<OrderStatus> editorColumn = grid.addComponentColumn(orderStatus -> {
-            Button edit = new Button("Edit");
-            edit.addClassName("edit");
-            edit.addClickListener(e -> editor.editItem(orderStatus));
-            return edit;
-        });
-
-        editorColumn
-                .setHeader("Actions")
+        grid.addComponentColumn(role -> VaadinViewUtils.makeEditorColumnActions(
+                e -> showDialog(role, OperationEnum.UPDATE),
+                e -> showDialog(role, OperationEnum.DELETE)))
                 .setTextAlign(ColumnTextAlign.CENTER)
-                .setFlexGrow(1);
+                .setEditorComponent(new Div())
+                .setFlexGrow(2)
+                .setHeader("Actions");
 
-        Button save = new Button("Save", e -> editor.save());
-        save.addClassName("save");
+        VerticalLayout verticalLayout = new VerticalLayout();
 
-        Button cancel = new Button("Cancel", e -> editor.cancel());
-        cancel.addClassName("cancel");
-
-        grid.getElement().addEventListener("keyup", event -> editor.cancel())
-                .setFilter("event.key === 'Escape' || event.key === 'Esc'");
-
-        Div buttons = new Div(save, cancel);
-        editorColumn.setEditorComponent(buttons);
-
-        Notification message = new Notification("", 3000, Notification.Position.TOP_END);
-
-        /*appLayout.*/setContent(grid);
-        /*add(appLayout);
-        setHeight("100vh");*/
-
-        editor.addSaveListener(event -> {
-            OrderStatus updatedStatus = event.getItem();
-            binder.writeBeanIfValid(updatedStatus);
-            grid.getDataProvider().refreshAll();
-            orderStatusService.update(updatedStatus);
-            message.setText("Status title successful updated: " +
-                    "New title = " + updatedStatus.getTitle());
-            message.open();
-        });
+        verticalLayout.add(addNewBtn, grid);
+        verticalLayout.setAlignItems(FlexComponent.Alignment.END);
+        setContent(verticalLayout);
     }
 
     private List<OrderStatus> getAllStatuses() {
         List<OrderStatus> statuses;
         statuses = orderStatusService.findAll();
         return statuses;
+    }
+
+    private void showDialog(OrderStatus orderStatus, OperationEnum operation) {
+        FormLayout orderStatusForm = new FormLayout();
+        TextField titleField = new TextField("Order title");
+        titleField.setValue(orderStatus.getTitle() == null ? "" : orderStatus.getTitle());
+        binder.forField(titleField)
+                .bind(OrderStatus_.TITLE);
+
+        orderStatusForm.add(titleField);
+
+        Dialog dialog = VaadinViewUtils.initDialog();
+        Button save = new Button("Save");
+        Button cancel = new Button("Cancel", e -> dialog.close());
+
+        HorizontalLayout actions = new HorizontalLayout();
+        actions.add(save, cancel);
+
+        VerticalLayout content = new VerticalLayout();
+
+        switch (operation) {
+            case UPDATE:
+                content.add(orderStatusForm, actions);
+                save.addClickListener(e -> {
+                    if (binder.writeBeanIfValid(orderStatus)) {
+                        saveOrderStatus(orderStatus);
+                        dialog.close();
+                    }
+                });
+                break;
+            case CREATE:
+                content.add(orderStatusForm, actions);
+                save.addClickListener(e -> {
+                    if (binder.writeBeanIfValid(orderStatus)) {
+                        dataProvider.getItems().add(orderStatus);
+                        saveOrderStatus(orderStatus);
+                        dialog.close();
+                    }
+                });
+                break;
+            case DELETE:
+                Div contentText = new Div();
+                contentText.setText("Confirm delete order status: " + orderStatus.getTitle() + "?");
+                content.add(contentText, actions);
+                save.setText("Yes");
+                save.addClickListener(e -> {
+                    deleteOrderStatus(orderStatus);
+                    dialog.close();
+                });
+                break;
+        }
+
+        dialog.add(content);
+        dialog.open();
+        titleField.getElement().callFunction("focus");
+    }
+
+    private void saveOrderStatus(OrderStatus orderStatus) {
+        orderStatusService.save(orderStatus);
+        dataProvider.refreshAll();
+    }
+
+    private void deleteOrderStatus(OrderStatus orderStatus) {
+        dataProvider.getItems().remove(orderStatus);
+        orderStatusService.delete(orderStatus);
+        dataProvider.refreshAll();
     }
 
 }
