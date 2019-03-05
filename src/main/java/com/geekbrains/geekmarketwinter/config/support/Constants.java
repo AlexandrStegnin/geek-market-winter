@@ -16,6 +16,9 @@ public class Constants {
     public static final String CART_PAGE = "cart";
     public static final String CONFIRM_ORDER_PAGE = "confirm-order";
     public static final String PROFILE_PAGE = "profile";
+    public static final String PAYPAL_PAGE = "paypal";
+    public static final String PAYMENT_METHOD = "paypal";
+    public static final String CURRENCY_RUB = "RUB";
 
     /* ADMINS PAGES */
     public static final String ADMIN_PAGE = "admin";
