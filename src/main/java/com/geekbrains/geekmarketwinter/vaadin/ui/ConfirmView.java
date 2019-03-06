@@ -10,20 +10,14 @@ import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.BinderValidationStatus;
-import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
-
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
 
@@ -105,19 +99,8 @@ public class ConfirmView extends CustomAppLayout {
                         orderService.makeOrderToProduce(finalOrder)
                 );
                 String orderId = finalOrder.getId().toString();
-                Notification notification = new Notification("Order have been confirmed", 3000,
-                        Notification.Position.TOP_END);
-                notification.open();
                 cartService.resetCart(VaadinRequest.getCurrent());
                 getUI().ifPresent(ui -> ui.navigate(PAYPAL_BUY_URL + orderId));
-            } else {
-                BinderValidationStatus<Order> validate = binder.validate();
-                String errorText = validate.getFieldValidationStatuses()
-                        .stream().filter(BindingValidationStatus::isError)
-                        .map(BindingValidationStatus::getMessage)
-                        .map(Optional::get).distinct()
-                        .collect(Collectors.joining(", "));
-                Notification.show("There are errors: " + errorText);
             }
         });
 

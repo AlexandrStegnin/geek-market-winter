@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
-import static com.geekbrains.geekmarketwinter.config.support.SecurityConstants.PAYPAL_CLIENT_ID;
-import static com.geekbrains.geekmarketwinter.config.support.SecurityConstants.PAYPAL_SECRET;
+import static com.geekbrains.geekmarketwinter.config.security.SecurityConstants.PAYPAL_CLIENT_ID;
+import static com.geekbrains.geekmarketwinter.config.security.SecurityConstants.PAYPAL_SECRET;
 
 /**
  * @author stegnin
