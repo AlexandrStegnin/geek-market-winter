@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -57,7 +57,7 @@ public class OrderService {
         order.setUser(user);
         order.setStatus(orderStatusService.getDefaultStatus());
         order.setPrice(cart.getTotalCost());
-        order.setOrderItems(new ArrayList<>(cart.getItems()));
+        order.setOrderItems(new HashSet<>(cart.getItems()));
         order.setDeliveryAddress(order.getDeliveryAddress());
         order.setDeliveryPrice(100d);
         order.setDeliveryDate(LocalDateTime.now().plusDays(7));

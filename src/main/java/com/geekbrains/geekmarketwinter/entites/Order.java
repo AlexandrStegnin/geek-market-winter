@@ -9,7 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.Set;
 
 @Data
 @Entity
@@ -27,7 +27,7 @@ public class Order implements Serializable {
     private User user;
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "order", fetch = FetchType.EAGER)
-    private Collection<OrderItem> orderItems;
+    private Set<OrderItem> orderItems;
 
     @ManyToOne
     @JoinColumn(name = "status_id")

@@ -63,7 +63,7 @@ public class ConfirmView extends CustomAppLayout {
         phone.setLabel("Phone");
         phone.setPlaceholder("999999");
 
-        Button btnPay = new Button("Pay order");
+        Button btnPay = new Button("Pay with paypal");
         Button btnCancel = new Button("Cancel", e -> getUI().ifPresent(ui -> ui.navigate(CART_PAGE)));
 
         formLayout.add(deliveryAddress, phone, btnPay, btnCancel);
@@ -104,11 +104,12 @@ public class ConfirmView extends CustomAppLayout {
                 orderMessageSender.sendOrder(
                         orderService.makeOrderToProduce(finalOrder)
                 );
+                String orderId = finalOrder.getId().toString();
                 Notification notification = new Notification("Order have been confirmed", 3000,
                         Notification.Position.TOP_END);
                 notification.open();
                 cartService.resetCart(VaadinRequest.getCurrent());
-                getUI().ifPresent(ui -> ui.navigate(SHOP_PAGE));
+                getUI().ifPresent(ui -> ui.navigate(PAYPAL_BUY_URL + orderId));
             } else {
                 BinderValidationStatus<Order> validate = binder.validate();
                 String errorText = validate.getFieldValidationStatuses()
