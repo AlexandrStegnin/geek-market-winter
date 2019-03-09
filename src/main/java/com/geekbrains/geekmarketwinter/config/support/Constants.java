@@ -6,10 +6,8 @@ public class Constants {
     //    API Main
 
     public static final String PATH_SEPARATOR = "/";
-
-    /**
-     * Application pages constants
-     */
+    public static final String SOMETHING_WENT_WRONG_MSG = "Something went wrong... Please try again later.";
+    /* Application pages constants */
     public static final String LOGIN_PAGE = "login";
     public static final String LOGOUT_PAGE = "logout";
     public static final String SHOP_PAGE = "shop";
@@ -50,9 +48,7 @@ public class Constants {
     public static final String ORDERS_PAGE = "orders";
     public static final String MANAGER_ORDERS_PAGE = MANAGER_PAGE + PATH_SEPARATOR + ORDERS_PAGE;
 
-    /**
-     * Application roles constants
-     */
+    /* Application roles constants */
     public static final String ROLE_PREFIX = "ROLE_";
     public static final String ADMIN = "ADMIN";
     public static final String EMPLOYEE = "EMPLOYEE";

@@ -87,7 +87,7 @@ public class PayPalView extends CustomAppLayout implements HasUrlParameter<Strin
         String payerId = request.getParameter(PAYER_ID);
 
         if (paymentId == null || paymentId.isEmpty() || payerId == null || payerId.isEmpty()) {
-            Div div = VaadinViewUtils.createInfoDiv("Something went wrong... Please try again later.");
+            Div div = VaadinViewUtils.createInfoDiv(SOMETHING_WENT_WRONG_MSG);
             setContent(div);
             return;
         }
@@ -114,7 +114,7 @@ public class PayPalView extends CustomAppLayout implements HasUrlParameter<Strin
                 content.setHeight("100%");
                 setContent(content);
             } else {
-                Div div = VaadinViewUtils.createInfoDiv("Something went wrong... Please try again later.");
+                Div div = VaadinViewUtils.createInfoDiv(SOMETHING_WENT_WRONG_MSG);
                 setContent(div);
             }
         } catch (PayPalRESTException e) {
