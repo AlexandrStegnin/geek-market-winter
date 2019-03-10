@@ -168,7 +168,7 @@ public class VaadinViewUtils {
 
     public static Details createDetails(Order order, @Nullable Anchor link) {
         Details details = new Details();
-        details.getElement().getStyle().set("margin", "1em 0em 1em 2em");
+        details.getElement().getStyle().set("margin", "1em");
         Div div = new Div();
         order.getOrderItems().forEach(orderItem -> {
             Image image = VaadinViewUtils.getProductImage(orderItem.getProduct(), false);

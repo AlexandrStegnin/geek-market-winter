@@ -138,7 +138,10 @@ public class OrderView extends CustomAppLayout {
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        Button save = new Button("Save", e -> editor.save());
+        Button save = new Button("Save", e -> {
+            editor.save();
+            dataProvider.refreshAll();
+        });
         save.addClassName("save");
 
         Button cancel = new Button("Cancel", e -> editor.cancel());
@@ -157,7 +160,6 @@ public class OrderView extends CustomAppLayout {
         editor.addSaveListener(event -> {
             Order updatedOrder = event.getItem();
             binder.writeBeanIfValid(updatedOrder);
-            grid.getDataProvider().refreshAll();
             orderService.update(updatedOrder);
             message.setText("Order successful updated: New status = " + updatedOrder.getStatus().getTitle());
             message.open();

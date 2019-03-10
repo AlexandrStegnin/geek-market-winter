@@ -7,6 +7,7 @@ import com.geekbrains.geekmarketwinter.services.OrderService;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.geekbrains.geekmarketwinter.vaadin.support.VaadinViewUtils;
 import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -36,13 +37,19 @@ public class ProfileView extends CustomAppLayout {
     private void init() {
         User currentUser = SecurityUtils.getCurrentUser();
         List<Order> orders = fetchOrders(currentUser);
-        HorizontalLayout content = new HorizontalLayout();
-
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        Div content = new Div();
+        content.getStyle()
+                .set("display", "flex")
+                .set("flex-flow", "row wrap")
+                .set("justify-content", "center")
+                .set("margin", "1em");
         orders.forEach(order -> {
             Details details = VaadinViewUtils.createDetails(order, null);
             content.add(details);
         });
-        setContent(content);
+        horizontalLayout.add(content);
+        setContent(horizontalLayout);
     }
 
     private List<Order> fetchOrders(User user) {
