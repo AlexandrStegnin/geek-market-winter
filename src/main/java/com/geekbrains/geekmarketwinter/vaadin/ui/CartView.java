@@ -3,7 +3,10 @@ package com.geekbrains.geekmarketwinter.vaadin.ui;
 import com.geekbrains.geekmarketwinter.config.security.SecurityUtils;
 import com.geekbrains.geekmarketwinter.config.support.DeliveryTypeEnum;
 import com.geekbrains.geekmarketwinter.config.support.PaymentTypeEnum;
-import com.geekbrains.geekmarketwinter.entites.*;
+import com.geekbrains.geekmarketwinter.entites.DeliveryAddress;
+import com.geekbrains.geekmarketwinter.entites.Order;
+import com.geekbrains.geekmarketwinter.entites.OrderItem;
+import com.geekbrains.geekmarketwinter.entites.User;
 import com.geekbrains.geekmarketwinter.services.DeliveryAddressService;
 import com.geekbrains.geekmarketwinter.services.OrderService;
 import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
@@ -47,11 +50,14 @@ public class CartView extends CustomAppLayout {
     private final OrderService orderService;
     private Binder<Order> binder;
     private ListDataProvider<OrderItem> dataProvider;
-    private VerticalLayout deliveryAddressLayout;
     private Grid<OrderItem> grid;
-    private String delivAddress;
+    private String customDeliveryAddress;
     private TextField phone;
     private ComboBox<DeliveryAddress> deliveryAddress;
+    private VerticalLayout deliveryAndPaymentTypeLayout;
+    private VerticalLayout deliveryAddressAndPhoneLayout;
+    private VerticalLayout buttonsLayout;
+    private ComboBox<DeliveryTypeEnum> deliveryTypeCombobox;
 
     public CartView(ShoppingCartService cartService, DeliveryAddressService deliveryAddressService,
                     OrderService orderService) {
@@ -60,6 +66,9 @@ public class CartView extends CustomAppLayout {
         this.cartService = cartService;
         this.dataProvider = new ListDataProvider<>(getCartItems());
         this.grid = new Grid<>();
+        this.deliveryAddressAndPhoneLayout = createDeliveryAddressAndPhoneLayout();
+        this.deliveryAndPaymentTypeLayout = createDeliveryAndPaymentTypeLayout();
+        this.buttonsLayout = createButtonsLayout(false);
         init();
     }
 
@@ -149,18 +158,17 @@ public class CartView extends CustomAppLayout {
 
             footerRow.getCell(quantityColumn).setComponent(quantity);
 
-            VerticalLayout deliveryTypeLayout = createDeliveryTypeLayout();
-            deliveryTypeLayout.setVisible(false);
-            deliveryAddressLayout = createDeliveryAddressLayout();
-            deliveryAddressLayout.setVisible(false);
-
-            Button confirmBtn = new Button("Confirm", buttonClickEvent -> confirm(deliveryTypeLayout));
+            Button confirmBtn = new Button("Confirm", buttonClickEvent -> {
+                deliveryAndPaymentTypeLayout.setVisible(true);
+                buttonsLayout.setVisible(true);
+            });
 
             Button clearCart = new Button("Clear cart", buttonClickEvent -> clearCart(price, quantity));
             clearCart.getStyle().set("margin-right", "50px");
             HorizontalLayout buttons = new HorizontalLayout(confirmBtn, clearCart);
 
-            VerticalLayout box = new VerticalLayout(grid, buttons, deliveryTypeLayout, deliveryAddressLayout);
+            VerticalLayout box = new VerticalLayout(
+                    grid, buttons, deliveryAndPaymentTypeLayout, deliveryAddressAndPhoneLayout, buttonsLayout);
             box.setAlignItems(FlexComponent.Alignment.END);
             setContent(box);
         } else {
@@ -230,11 +238,11 @@ public class CartView extends CustomAppLayout {
         }));
     }
 
-    private VerticalLayout createDeliveryTypeLayout() {
+    private VerticalLayout createDeliveryAndPaymentTypeLayout() {
         //        Выбор типа доставки (самовывоз/доставка)
         VerticalLayout infoLayout = new VerticalLayout();
         Div infoDiv = new Div();
-        ComboBox<DeliveryTypeEnum> deliveryTypeCombobox = new ComboBox<>();
+        deliveryTypeCombobox = new ComboBox<>();
         deliveryTypeCombobox.setLabel("Choose delivery type");
         deliveryTypeCombobox.setItems(DeliveryTypeEnum.values());
         infoDiv.getStyle().set("width", "50%");
@@ -245,9 +253,9 @@ public class CartView extends CustomAppLayout {
         deliveryTypeCombobox.setRequired(true);
         deliveryTypeCombobox.addValueChangeListener(event -> {
             if (!Objects.equals(null, event.getValue()) && event.getValue().compareTo(DeliveryTypeEnum.DELIVERY) == 0) {
-                deliveryAddressLayout.setVisible(true);
+                deliveryAddressAndPhoneLayout.setVisible(true);
             } else {
-                deliveryAddressLayout.setVisible(false);
+                deliveryAddressAndPhoneLayout.setVisible(false);
             }
         });
         infoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -261,6 +269,7 @@ public class CartView extends CustomAppLayout {
         paymentTypeCombobox.setItemLabelGenerator(PaymentTypeEnum::getTitle);
         paymentTypeCombobox.setWidth("45%");
         paymentTypeCombobox.setRequired(true);
+        paymentTypeCombobox.setValue(PaymentTypeEnum.CASH);
         paymentTypeCombobox.addValueChangeListener(event -> {
             Optional<DeliveryTypeEnum> deliveryAddress = deliveryTypeCombobox.getOptionalValue();
             if (deliveryAddress.isPresent()) {
@@ -274,19 +283,20 @@ public class CartView extends CustomAppLayout {
         infoDiv.add(paymentTypeCombobox);
 
         infoLayout.add(infoDiv);
-
+        infoLayout.setVisible(false);
         return infoLayout;
     }
 
-    private VerticalLayout createDeliveryAddressLayout() {
+    private VerticalLayout createDeliveryAddressAndPhoneLayout() {
         VerticalLayout infoLayout = new VerticalLayout();
-        Div deliveryAddressLayout = new Div();
+        Div deliveryAddressDiv = new Div();
         binder = new Binder<>();
 
         deliveryAddress = new ComboBox<>();
         deliveryAddress.setWidth("45%");
         deliveryAddress.getStyle().set("margin-right", "1em");
         deliveryAddress.setLabel("Choose delivery address");
+        deliveryAddress.setRequired(true);
         User currentUser = SecurityUtils.getCurrentUser();
         if (!Objects.equals(null, currentUser)) {
             deliveryAddress.setItems(deliveryAddressService.getUserAddresses(currentUser.getId()));
@@ -312,19 +322,20 @@ public class CartView extends CustomAppLayout {
 
         // Trigger cross-field validation when the other field is changed
         phone.addValueChangeListener(event -> phoneBinding.validate());
+        phone.addBlurListener(event -> phoneBinding.validate());
 
         deliveryAddress.setRequiredIndicatorVisible(true);
         deliveryAddress.setAllowCustomValue(true);
         deliveryAddress.setReadOnly(false);
-        deliveryAddress.addCustomValueSetListener(event -> delivAddress = event.getDetail());
+        deliveryAddress.addCustomValueSetListener(event -> customDeliveryAddress = event.getDetail());
 
-        deliveryAddressLayout.getStyle().set("width", "50%");
-        deliveryAddressLayout.add(deliveryAddress, phone);
+        deliveryAddressDiv.getStyle().set("width", "50%");
+        deliveryAddressDiv.add(deliveryAddress, phone);
 
-        infoLayout.add(deliveryAddressLayout);
+        infoLayout.add(deliveryAddressDiv);
         infoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         infoLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-
+        infoLayout.setVisible(false);
         return infoLayout;
     }
 
@@ -333,35 +344,11 @@ public class CartView extends CustomAppLayout {
         Div buttonsLayout = new Div();
         Button btnPay = new Button("Pay with paypal");
         btnPay.setWidth("45%");
-        Button btnCancel = new Button("Cancel", e -> getUI().ifPresent(ui -> ui.navigate(CART_PAGE)));
-        // TODO: 2019-03-09 btnCancel заменить обработчик на скрытие слоёв
+        Button btnCancel = new Button("Cancel", e -> hideLayouts());
         btnCancel.setWidth("45%");
-        Button btnConfirm = new Button("Confirm order");
+        Button btnConfirm = new Button("Confirm order", e -> confirmOrder(false));
         btnConfirm.setWidth("45%");
-        // TODO: 2019-03-09 Добавить обработчик на кнопку "confirm", менять статус заказа и переадресовывать на shop
-        btnPay.addClickListener(event -> {
-
-            Order finalOrder = new Order();
-            finalOrder.setPhoneNumber(phone.getValue());
-
-            DeliveryAddress address = deliveryAddress.getValue();
-            if (address == null) {
-                address = new DeliveryAddress(null, delivAddress);
-            }
-
-            finalOrder.setDeliveryAddress(address);
-            finalOrder = orderService.makeOrder(finalOrder);
-
-            if (binder.writeBeanIfValid(finalOrder)) {
-                finalOrder = orderService.saveOrder(finalOrder);
-//                orderMessageSender.sendOrder(
-//                        orderService.makeOrderToProduce(finalOrder)
-//                );
-                String orderId = finalOrder.getId().toString();
-                getUI().ifPresent(ui -> ui.navigate(PAYPAL_BUY_URL + orderId));
-                cartService.resetCart(VaadinRequest.getCurrent());
-            }
-        });
+        btnPay.addClickListener(event -> confirmOrder(true));
 
         buttonsLayout.getStyle().set("width", "50%");
         if (pay) {
@@ -372,6 +359,46 @@ public class CartView extends CustomAppLayout {
         infoLayout.add(buttonsLayout);
         infoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         infoLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        infoLayout.setVisible(false);
         return infoLayout;
+    }
+
+    private void confirmOrder(boolean pay) {
+        Order finalOrder = new Order();
+        finalOrder.setPhoneNumber(phone.getValue());
+
+        DeliveryAddress address = deliveryAddress.getValue();
+        User currentUser = SecurityUtils.getCurrentUser();
+        if (address == null) {
+            if (!Objects.equals(null, currentUser)) {
+                address = new DeliveryAddress(currentUser, customDeliveryAddress);
+            } else {
+                address = new DeliveryAddress(null, customDeliveryAddress);
+            }
+        }
+
+        finalOrder.setDeliveryAddress(address);
+        finalOrder = orderService.makeOrder(finalOrder);
+
+        if (binder.writeBeanIfValid(finalOrder)) {
+            finalOrder = orderService.saveOrder(finalOrder);
+//                orderMessageSender.sendOrder(
+//                        orderService.makeOrderToProduce(finalOrder)
+//                );
+            String orderId = finalOrder.getId().toString();
+            if (pay) {
+                getUI().ifPresent(ui -> ui.navigate(PAYPAL_BUY_URL + orderId));
+            } else {
+                getUI().ifPresent(ui -> ui.navigate(ShopView.class));
+            }
+            cartService.resetCart(VaadinRequest.getCurrent());
+        }
+    }
+
+    private void hideLayouts() {
+        deliveryAndPaymentTypeLayout.setVisible(false);
+        deliveryAddressAndPhoneLayout.setVisible(false);
+        deliveryTypeCombobox.setValue(null);
+        buttonsLayout.setVisible(false);
     }
 }
