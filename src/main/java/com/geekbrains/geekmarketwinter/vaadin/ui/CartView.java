@@ -389,9 +389,9 @@ public class CartView extends CustomAppLayout {
             if (pay) {
                 getUI().ifPresent(ui -> ui.navigate(PAYPAL_BUY_URL + orderId));
             } else {
+                cartService.resetCart(VaadinRequest.getCurrent());
                 getUI().ifPresent(ui -> ui.navigate(ShopView.class));
             }
-            cartService.resetCart(VaadinRequest.getCurrent());
         }
     }
 

@@ -13,4 +13,6 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
     List<Order> findAllByUser(User user);
 
+    Order findByOrderHash(String orderHash);
+
 }

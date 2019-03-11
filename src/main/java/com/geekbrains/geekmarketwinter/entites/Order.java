@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.util.DigestUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -54,8 +56,11 @@ public class Order implements Serializable {
     private LocalDateTime createAt;
 
     @Column(name = "update_at")
-    @CreationTimestamp
+    @UpdateTimestamp
     private LocalDateTime updateAt;
+
+    @Column(name = "order_hash")
+    private String orderHash;
 
     @JsonIgnore
     @Transient
@@ -74,5 +79,10 @@ public class Order implements Serializable {
                 " phone number: " + getPhoneNumber() +
                 " delivery date: " + getDeliveryDate();
 
+    }
+
+    @PrePersist
+    public void setupOrderHash() {
+        this.orderHash = DigestUtils.md5DigestAsHex((id + phoneNumber).getBytes()).toUpperCase();
     }
 }

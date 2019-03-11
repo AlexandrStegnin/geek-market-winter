@@ -14,6 +14,7 @@ public class Constants {
     public static final String CART_PAGE = "cart";
     public static final String CONFIRM_ORDER_PAGE = "confirm-order";
     public static final String PROFILE_PAGE = "profile";
+    public static final String ORDER_DETAILS_PAGE = "order-details";
 
     /* PAYPAL CONSTANTS */
     public static final String PAYPAL_PAGE = "paypal";

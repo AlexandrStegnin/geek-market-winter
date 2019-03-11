@@ -3,6 +3,7 @@ package com.geekbrains.geekmarketwinter.vaadin.ui;
 import com.geekbrains.geekmarketwinter.entites.Order;
 import com.geekbrains.geekmarketwinter.services.OrderService;
 import com.geekbrains.geekmarketwinter.services.OrderStatusService;
+import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.geekbrains.geekmarketwinter.vaadin.support.VaadinViewUtils;
 import com.paypal.api.payments.*;
@@ -39,10 +40,13 @@ public class PayPalView extends CustomAppLayout implements HasUrlParameter<Strin
 
     private OrderService orderService;
     private OrderStatusService orderStatusService;
+    private ShoppingCartService cartService;
 
-    public PayPalView(OrderService orderService, OrderStatusService orderStatusService) {
+    public PayPalView(OrderService orderService, OrderStatusService orderStatusService,
+                      ShoppingCartService cartService) {
         this.orderStatusService = orderStatusService;
         this.orderService = orderService;
+        this.cartService = cartService;
         init();
     }
 
@@ -113,6 +117,7 @@ public class PayPalView extends CustomAppLayout implements HasUrlParameter<Strin
                 content.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
                 content.setHeight("100%");
                 setContent(content);
+                cartService.resetCart(VaadinRequest.getCurrent());
             } else {
                 Div div = VaadinViewUtils.createInfoDiv(SOMETHING_WENT_WRONG_MSG);
                 setContent(div);

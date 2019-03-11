@@ -89,4 +89,8 @@ public class OrderService {
         return orderRepo.findAllByUser(user);
     }
 
+    public Order findByHash(String orderHash) {
+        return orderRepo.findByOrderHash(orderHash);
+    }
+
 }
