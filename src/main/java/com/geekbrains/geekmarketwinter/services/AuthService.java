@@ -1,16 +1,16 @@
 package com.geekbrains.geekmarketwinter.services;
 
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
-import com.vaadin.flow.component.notification.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthService extends AbstractRepository implements AuthRepository {
+public class AuthService implements AuthRepository {
 
     private DaoAuthenticationProvider daoAuthenticationProvider;
 
@@ -22,7 +22,12 @@ public class AuthService extends AbstractRepository implements AuthRepository {
     @Override
     public Authentication authenticate(String login, String password) {
         Authentication auth = new UsernamePasswordAuthenticationToken(login, password);
-        Authentication authentication = daoAuthenticationProvider.authenticate(auth);
+        Authentication authentication;
+        try {
+            authentication = daoAuthenticationProvider.authenticate(auth);
+        } catch (AuthenticationException e) {
+            return auth;
+        }
         if (authentication.isAuthenticated()) {
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } else {
