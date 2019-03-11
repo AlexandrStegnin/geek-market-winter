@@ -33,6 +33,7 @@ import java.nio.file.Files;
 import java.text.NumberFormat;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
 
@@ -86,6 +87,35 @@ public class VaadinViewUtils {
                     user.getRoles().add(userRole);
                 } else {
                     user.getRoles().remove(userRole);
+                }
+            });
+            contentDiv.add(checkbox);
+        });
+        checkBoxDiv.add(contentDiv);
+        return checkBoxDiv;
+    }
+
+    public static Div makeUserPhonesDiv(User user, Set<Phone> availablePhones) {
+        Div checkBoxDiv = new Div();
+        Div label = new Div();
+        label.setText("Remove phones");
+        label.getStyle().set("margin", "10px 0");
+        checkBoxDiv.add(label);
+        Div contentDiv = new Div();
+        if (user.getPhones() == null) user.setPhones(new HashSet<>());
+        availablePhones.forEach(phone -> {
+            Checkbox checkbox = new Checkbox(
+                    phone.getPhoneNumber(),
+                    user.getPhones().contains(phone));
+            checkbox.addValueChangeListener(e -> {
+                String phoneNumber = e.getSource().getElement().getText();
+                Phone userPhone = availablePhones.stream()
+                        .filter(p -> p.getPhoneNumber().equalsIgnoreCase(phoneNumber))
+                        .findAny().orElse(null);
+                if (e.getValue()) {
+                    user.getPhones().add(userPhone);
+                } else {
+                    user.getPhones().remove(userPhone);
                 }
             });
             contentDiv.add(checkbox);

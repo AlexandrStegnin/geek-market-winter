@@ -1,9 +1,8 @@
 package com.geekbrains.geekmarketwinter.vaadin.ui.admin;
 
 import com.geekbrains.geekmarketwinter.config.support.OperationEnum;
-import com.geekbrains.geekmarketwinter.entites.Role;
-import com.geekbrains.geekmarketwinter.entites.User;
-import com.geekbrains.geekmarketwinter.entites.User_;
+import com.geekbrains.geekmarketwinter.entites.*;
+import com.geekbrains.geekmarketwinter.services.PhoneService;
 import com.geekbrains.geekmarketwinter.services.RoleService;
 import com.geekbrains.geekmarketwinter.services.UserServiceImpl;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
@@ -28,6 +27,7 @@ import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_USERS_PAGE;
@@ -39,15 +39,17 @@ public class UserView extends CustomAppLayout {
 
     private final UserServiceImpl userService;
     private final RoleService roleService;
+    private final PhoneService phoneService;
     private Grid<User> grid;
     private final Button addNewBtn;
     private ListDataProvider<User> dataProvider;
     private List<Role> roles;
     private Binder<User> binder;
 
-    public UserView(UserServiceImpl userService, RoleService roleService) {
+    public UserView(UserServiceImpl userService, RoleService roleService, PhoneService phoneService) {
         this.userService = userService;
         this.roleService = roleService;
+        this.phoneService = phoneService;
         this.grid = new Grid<>();
         this.dataProvider = new ListDataProvider<>(getAll());
         this.binder = new BeanValidationBinder<>(User.class);
@@ -81,7 +83,8 @@ public class UserView extends CustomAppLayout {
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
 
-        grid.addColumn(User::getPhone)
+        grid.addColumn(user -> user.getPhones().stream().map(Phone::getPhoneNumber)
+                .collect(Collectors.joining(", ")))
                 .setHeader("Phone")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFlexGrow(1);
@@ -160,14 +163,17 @@ public class UserView extends CustomAppLayout {
         binder.forField(email)
                 .bind(User_.EMAIL);
 
-        TextField phone = new TextField("Phone");
-        phone.setValue(user.getPhone() == null ? "" : user.getPhone());
-        binder.forField(phone)
-                .bind(User_.PHONE);
+        TextField phone = new TextField("Add new phone");
+
+        Binder<Phone> phoneBinder = new BeanValidationBinder<>(Phone.class);
+        phoneBinder.forField(phone)
+                .bind(Phone_.PHONE_NUMBER);
+
+        Div phonesDiv = VaadinViewUtils.makeUserPhonesDiv(user, getPhones(user));
 
         Div checkBoxDiv = VaadinViewUtils.makeUserRolesDiv(user, roles);
 
-        formLayout.add(userName, pwdField, firstName, lastName, email, phone, checkBoxDiv);
+        formLayout.add(userName, pwdField, firstName, lastName, email, phone, phonesDiv, checkBoxDiv);
 
         Dialog dialog = VaadinViewUtils.initDialog();
         Button save = new Button("Save");
@@ -177,12 +183,15 @@ public class UserView extends CustomAppLayout {
         actions.add(save, cancel);
 
         VerticalLayout content = new VerticalLayout();
-
         switch (operation) {
             case UPDATE:
                 content.add(formLayout, actions);
                 save.addClickListener(e -> {
                     if (binder.writeBeanIfValid(user)) {
+                        if (!phone.getValue().trim().isEmpty()) {
+                            Phone newPhone = new Phone(phone.getValue().trim(), user);
+                            user.addPhone(phoneService.save(newPhone));
+                        }
                         saveUser(user);
                         dialog.close();
                     }
@@ -191,8 +200,10 @@ public class UserView extends CustomAppLayout {
             case CREATE:
                 content.add(formLayout, actions);
                 save.addClickListener(e -> {
-                    if (binder.writeBeanIfValid(user)) {
+                    Phone newPhone = new Phone(phone.getValue().trim(), user);
+                    if (binder.writeBeanIfValid(user) && phoneBinder.writeBeanIfValid(newPhone)) {
                         dataProvider.getItems().add(user);
+                        user.addPhone(phoneService.save(newPhone));
                         saveUser(user);
                         dialog.close();
                     }
@@ -214,5 +225,9 @@ public class UserView extends CustomAppLayout {
         dialog.open();
         userName.getElement().callFunction("focus");
 
+    }
+
+    private Set<Phone> getPhones(User user) {
+        return phoneService.getUserPhones(user);
     }
 }
