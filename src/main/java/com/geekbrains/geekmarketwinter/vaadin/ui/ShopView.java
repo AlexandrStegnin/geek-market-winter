@@ -2,7 +2,6 @@ package com.geekbrains.geekmarketwinter.vaadin.ui;
 
 import com.geekbrains.geekmarketwinter.entites.Category;
 import com.geekbrains.geekmarketwinter.entites.Product;
-import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.services.CategoryService;
 import com.geekbrains.geekmarketwinter.services.ProductService;
 import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
@@ -21,16 +20,13 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
-import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.text.NumberFormat;
@@ -41,10 +37,9 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.SHOP_PAGE
 
 @PageTitle("Shop")
 @Route(SHOP_PAGE)
-@Theme(value = Material.class, variant = Material.DARK)
-public class ShopView extends VerticalLayout {
+@Theme(value = Material.class, variant = Material.LIGHT)
+public class ShopView extends CustomAppLayout {
 
-    private final AuthRepository auth;
     private final ProductService productService;
     private final ShoppingCartService cartService;
     private ProductFilter productFilter;
@@ -52,8 +47,7 @@ public class ShopView extends VerticalLayout {
     private final CategoryService categoryService;
     private NumberFormat numberFormat = NumberFormat.getCurrencyInstance(LOCALE_RU);
 
-    public ShopView(AuthRepository auth,
-                    ProductService productService,
+    public ShopView(ProductService productService,
                     ShoppingCartService cartService,
                     CategoryService categoryService) {
         this.cartService = cartService;
@@ -61,13 +55,12 @@ public class ShopView extends VerticalLayout {
         this.productFilter = new ProductFilter();
         this.categoryService = categoryService;
         this.page = productService.findAll(productFilter, Pageable.unpaged());
-        this.auth = auth;
         init();
     }
 
     private void init() {
         HorizontalCardComponentContainer cardContainer = new HorizontalCardComponentContainer();
-        cardContainer.setJustifyContentMode(JustifyContentMode.CENTER);
+        cardContainer.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         cardContainer.getStyle().set("flex-wrap", "wrap");
         cardContainer.getStyle().set("display", "flex");
         cardContainer.setSpacing(false);
@@ -77,13 +70,11 @@ public class ShopView extends VerticalLayout {
             Card card = createCard(product);
             cardContainer.add(card);
         });
-        CustomAppLayout appLayout = new CustomAppLayout(auth, cardContainer);
-        add(appLayout);
-        setAlignItems(Alignment.STRETCH);
+        setContent(cardContainer);
     }
 
     private Card createCard(Product product) {
-        Image productImage = VaadinViewUtils.getProductImage(product);
+        Image productImage = VaadinViewUtils.getProductImage(product, true);
         String price = numberFormat.format(product.getPrice());
         SecondaryLabel priceLabel = new SecondaryLabel(price);
         priceLabel.getStyle().set("text-align", "right");
@@ -100,7 +91,7 @@ public class ShopView extends VerticalLayout {
         addToCartBtn.setHeight("100%");
 
         Item shortDescriptionItem = new Item("", product.getShortDescription());
-        shortDescriptionItem.setAlignItems(Alignment.CENTER);
+        shortDescriptionItem.setAlignItems(FlexComponent.Alignment.CENTER);
 
         TitleLabel titleLabel = new TitleLabel(product.getTitle());
         titleLabel.setFlexGrow(1);
@@ -145,43 +136,22 @@ public class ShopView extends VerticalLayout {
         return productService.findAll(productFilter, Pageable.unpaged()).getContent();
     }
 
-    private ConfigurableFilterDataProvider<Product, String, Category> getDataProvider(ProductService service) {
-        DataProvider<Product, ProductFilter> dataProvider =
-                DataProvider.fromFilteringCallbacks(query -> {
-                    // getFilter returns Optional<String>
-                    productFilter = query.getFilter().orElse(new ProductFilter());
-                    int offset = query.getOffset();
-                    int limit = query.getLimit();
-                    page = service.findAll(
-                            productFilter, PageRequest.of(offset, limit));
-                    return page.getContent().stream();
-                }, query -> {
-                    productFilter = query.getFilter().orElse(new ProductFilter());
-                    int offset = query.getOffset();
-                    int limit = query.getLimit();
-                    return service.countByFilter(productFilter, PageRequest.of(offset, limit));
-                });
-
-        return dataProvider
-                .withConfigurableFilter(
-                        ProductFilter::new);
-    }
-
     private List<Category> getAllCategories() {
         return categoryService.getAllCategories();
     }
 
     private void addToCart(Product product) {
         cartService.addToCart(VaadinService.getCurrentRequest(), product);
-        incrementBadge(1);
+        incrementBadge();
     }
 
-    private void incrementBadge(int cnt) {
+    private void incrementBadge() {
         getUI().ifPresent(ui -> ui.getElement().getChildren().forEach(element -> {
             if (element.getTag().equalsIgnoreCase("paper-badge")) {
                 String count = element.getAttribute("label");
-                count = String.valueOf(Integer.valueOf(count) + cnt);
+                count = String.valueOf(Integer.valueOf(count) + 1);
                 element.setAttribute("label", count);
+                element.setVisible(true);
             }
         }));
     }

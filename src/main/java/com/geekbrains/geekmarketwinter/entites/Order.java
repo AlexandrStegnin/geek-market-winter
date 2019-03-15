@@ -5,11 +5,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.util.DigestUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.Set;
 
 @Data
 @Entity
@@ -27,7 +29,7 @@ public class Order implements Serializable {
     private User user;
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "order", fetch = FetchType.EAGER)
-    private Collection<OrderItem> orderItems;
+    private Set<OrderItem> orderItems;
 
     @ManyToOne
     @JoinColumn(name = "status_id")
@@ -54,8 +56,11 @@ public class Order implements Serializable {
     private LocalDateTime createAt;
 
     @Column(name = "update_at")
-    @CreationTimestamp
+    @UpdateTimestamp
     private LocalDateTime updateAt;
+
+    @Column(name = "order_hash")
+    private String orderHash;
 
     @JsonIgnore
     @Transient
@@ -74,5 +79,10 @@ public class Order implements Serializable {
                 " phone number: " + getPhoneNumber() +
                 " delivery date: " + getDeliveryDate();
 
+    }
+
+    @PrePersist
+    public void setupOrderHash() {
+        this.orderHash = DigestUtils.md5DigestAsHex((id + phoneNumber).getBytes()).toUpperCase();
     }
 }

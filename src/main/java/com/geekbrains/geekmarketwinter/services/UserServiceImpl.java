@@ -4,6 +4,7 @@ import com.geekbrains.geekmarketwinter.entites.Role;
 import com.geekbrains.geekmarketwinter.entites.SystemUser;
 import com.geekbrains.geekmarketwinter.entites.User;
 import com.geekbrains.geekmarketwinter.repositories.UserRepository;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,6 +22,7 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.EMPLOYEE;
 import static com.geekbrains.geekmarketwinter.config.support.Constants.ROLE_PREFIX;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 	private RoleService roleService;
@@ -94,7 +96,9 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<User> findAll() {
-		return userRepository.findAll();
+		List<User> users = userRepository.findAll();
+		users.forEach(user -> Hibernate.initialize(user.getPhones()));
+		return users;
 	}
 
 	@Override

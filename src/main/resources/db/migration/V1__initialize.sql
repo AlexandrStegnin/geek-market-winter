@@ -176,7 +176,8 @@ INSERT INTO orders_statuses (title)
 VALUES
 ('Подготавливается'),
 ('Сформирован'),
-('Ожидает оплаты');
+('Ожидает оплаты'),
+('Оплачен');
 
 INSERT INTO products (category_id, vendor_code, title, short_description, full_description, price)
 VALUES

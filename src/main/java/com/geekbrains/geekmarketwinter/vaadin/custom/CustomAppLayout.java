@@ -6,6 +6,7 @@ import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.services.ShoppingCartService;
 import com.geekbrains.geekmarketwinter.vaadin.ui.CartView;
 import com.geekbrains.geekmarketwinter.vaadin.ui.LoginView;
+import com.geekbrains.geekmarketwinter.vaadin.ui.ProfileView;
 import com.geekbrains.geekmarketwinter.vaadin.ui.ShopView;
 import com.geekbrains.geekmarketwinter.vaadin.ui.admin.AdminView;
 import com.geekbrains.geekmarketwinter.vaadin.ui.manager.OrderView;
@@ -16,6 +17,7 @@ import com.vaadin.flow.component.applayout.AppLayoutMenuItem;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.PaperBadge;
 
 import static com.geekbrains.geekmarketwinter.config.support.Constants.ROLE_ADMIN;
@@ -23,30 +25,35 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.ROLE_MANA
 
 public class CustomAppLayout extends AppLayout {
 
-    private final AuthRepository auth;
+    @Autowired
+    private AuthRepository auth;
 
-    public CustomAppLayout(AuthRepository auth, Component component) {
-        this.auth = auth;
+    public CustomAppLayout() {
+        ShoppingCartService cartService = new ShoppingCartService();
+        Long itemsInCart = cartService.getTotalQuantity();
         AppLayoutMenu menu = createMenu();
         Image img = new Image("https://i.imgur.com/GPpnszs.png", "Vaadin Logo");
         img.setHeight("44px");
         setBranding(img);
 
-        AppLayoutMenuItem homeItem = new AppLayoutMenuItem(VaadinIcon.HOME.create(), "Home", e -> goToPage(ShopView.class));
+        this.getElement().getStyle().set("margin-top", "10px");
+
+        AppLayoutMenuItem homeItem = new AppLayoutMenuItem(VaadinIcon.HOME.create(), "Shop", e -> goToPage(ShopView.class));
         AppLayoutMenuItem cartItem = new AppLayoutMenuItem(VaadinIcon.CART.create(), "Cart", e -> goToPage(CartView.class));
         AppLayoutMenuItem logoutItem = new AppLayoutMenuItem(VaadinIcon.SIGN_OUT.create(), "Logout", e -> logout());
         AppLayoutMenuItem loginItem = new AppLayoutMenuItem(VaadinIcon.SIGN_IN.create(), "Login", e -> goToPage(LoginView.class));
         AppLayoutMenuItem adminItem = new AppLayoutMenuItem(VaadinIcon.COGS.create(), "Admin", e -> goToPage(AdminView.class));
         AppLayoutMenuItem managerItem = new AppLayoutMenuItem(VaadinIcon.PACKAGE.create(), "Manage orders", e -> goToPage(OrderView.class));
+        AppLayoutMenuItem profileItem = new AppLayoutMenuItem(VaadinIcon.USER.create(), "Profile", e -> goToPage(ProfileView.class));
 
         cartItem.setId("cartItem");
+
         PaperBadge cartBadge = new PaperBadge(cartItem);
         cartBadge.setHeight("20px");
         cartBadge.setWidth("20px");
-        ShoppingCartService cartService = new ShoppingCartService();
-        cartBadge.setLabel(cartService.getTotalQuantity().toString());
+        cartBadge.setLabel(itemsInCart.toString());
         cartBadge.getStyle().set("--paper-badge-background", "#b794f6");
-
+        cartBadge.setVisible(itemsInCart > 0);
         menu.addMenuItems(
                 homeItem,
                 cartItem
@@ -55,12 +62,15 @@ public class CustomAppLayout extends AppLayout {
         if (SecurityUtils.isUserInRole(ROLE_ADMIN)) menu.addMenuItems(adminItem);
         if (SecurityUtils.isUserInRole(ROLE_MANAGER)) menu.addMenuItem(managerItem);
         if (SecurityUtils.isUserLoggedIn()) {
+            menu.addMenuItem(profileItem);
             menu.addMenuItem(logoutItem);
         } else {
             menu.addMenuItem(loginItem);
         }
+    }
 
-        setContent(component);
+    public CustomAppLayout(AuthRepository auth) {
+        this.auth = auth;
     }
 
     private void logout() {

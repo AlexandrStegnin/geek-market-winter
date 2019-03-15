@@ -1,14 +1,11 @@
 package com.geekbrains.geekmarketwinter.vaadin.ui.admin;
 
-import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
-import com.geekbrains.geekmarketwinter.vaadin.ui.manager.OrderView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
@@ -18,19 +15,16 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.ADMIN_PAG
 
 @Route(ADMIN_PAGE)
 @PageTitle("Administration")
-@Theme(value = Material.class, variant = Material.DARK)
-public class AdminView extends VerticalLayout {
-    
-    private AuthRepository auth;
+@Theme(value = Material.class, variant = Material.LIGHT)
+public class AdminView extends CustomAppLayout {
 
-    public AdminView(AuthRepository auth) {
-        this.auth = auth;
+    public AdminView() {
         init();
     }
 
     private void init() {
         HorizontalLayout content = new HorizontalLayout();
-        content.setAlignItems(Alignment.CENTER);
+        content.setAlignItems(FlexComponent.Alignment.CENTER);
         content.setSizeFull();
 
         Image categoriesImg = createImage("images/sklad2.png", "Manage categories");
@@ -41,21 +35,19 @@ public class AdminView extends VerticalLayout {
 
         HorizontalLayout btnLayout = new HorizontalLayout();
         btnLayout.setSizeFull();
-        btnLayout.setJustifyContentMode(JustifyContentMode.CENTER);
-        btnLayout.setAlignItems(Alignment.CENTER);
+        btnLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        btnLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         btnLayout.setSpacing(true);
 
         Button categoriesBtn = new Button("Categories", categoriesImg, e -> goToPage(CategoryView.class));
-        Button orderStatusesBtn = new Button("Statuses", statusesImg, e -> goToPage(OrderView.class));
+        Button orderStatusesBtn = new Button("Statuses", statusesImg, e -> goToPage(OrderStatusView.class));
         Button usersBtn = new Button(" Users", usersImg, e -> goToPage(UserView.class));
         Button rolesBtn = new Button("Roles", rolesImg, e -> goToPage(RoleView.class));
         Button productsBtn = new Button("Products", productsImg, e -> goToPage(ProductView.class));
         productsBtn.setId("products_btn");
 
         btnLayout.add(categoriesBtn, orderStatusesBtn, usersBtn, rolesBtn, productsBtn);
-        CustomAppLayout appLayout = new CustomAppLayout(auth, btnLayout);
-        add(appLayout);
-        setHeight("100vh");
+        setContent(btnLayout);
     }
 
     private void goToPage(Class<? extends Component> clazz) {
@@ -67,10 +59,6 @@ public class AdminView extends VerticalLayout {
         image.setHeight("150px");
         image.setWidth("150px");
         return image;
-    }
-
-    private void showMessage() {
-        Notification.show("Coming soon...", 3000, Notification.Position.MIDDLE);
     }
 
 }

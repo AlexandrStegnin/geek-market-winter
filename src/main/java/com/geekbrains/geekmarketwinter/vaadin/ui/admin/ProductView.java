@@ -1,12 +1,12 @@
 package com.geekbrains.geekmarketwinter.vaadin.ui.admin;
 
 import com.geekbrains.geekmarketwinter.config.support.OperationEnum;
-import com.geekbrains.geekmarketwinter.entites.*;
-import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
+import com.geekbrains.geekmarketwinter.entites.Category;
+import com.geekbrains.geekmarketwinter.entites.Product;
+import com.geekbrains.geekmarketwinter.entites.ProductImage;
+import com.geekbrains.geekmarketwinter.entites.Product_;
 import com.geekbrains.geekmarketwinter.services.CategoryService;
-import com.geekbrains.geekmarketwinter.services.FileAssetService;
 import com.geekbrains.geekmarketwinter.services.ProductService;
-import com.geekbrains.geekmarketwinter.utils.filters.ProductFilter;
 import com.geekbrains.geekmarketwinter.vaadin.custom.CustomAppLayout;
 import com.geekbrains.geekmarketwinter.vaadin.support.VaadinViewUtils;
 import com.vaadin.flow.component.button.Button;
@@ -17,6 +17,7 @@ import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -32,8 +33,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,40 +56,30 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
 
 @PageTitle("Admin products")
 @Route(ADMIN_PRODUCTS_PAGE)
-@Theme(value = Material.class, variant = Material.DARK)
-public class ProductView extends VerticalLayout {
+@Theme(value = Material.class, variant = Material.LIGHT)
+public class ProductView extends CustomAppLayout {
 
     @Value("${spring.config.file-upload-directory}")
     private String fileUploadDirectory;
 
-    private final AuthRepository auth;
     private final ProductService productService;
     private ListDataProvider<Product> dataProvider;
     private Grid<Product> grid;
-    private ProductFilter productFilter;
-    private Page<Product> page;
     private final Button addNewBtn;
     private final CategoryService categoryService;
     private Binder<Product> binder;
     private MultiFileMemoryBuffer buffer;
-    private FileAssetService fileAssetService;
 
-    public ProductView(AuthRepository auth,
-                       ProductService productService,
-                       CategoryService categoryService,
-                       FileAssetService fileAssetService) {
-        this.fileAssetService = fileAssetService;
+    public ProductView(ProductService productService,
+                       CategoryService categoryService) {
         this.buffer = new MultiFileMemoryBuffer();
         this.productService = productService;
         this.grid = new Grid<>();
-        this.productFilter = new ProductFilter();
         this.categoryService = categoryService;
-        this.page = productService.findAll(productFilter, Pageable.unpaged());
         this.addNewBtn = new Button("Add new product", e -> showDialog(new Product(),
                 OperationEnum.CREATE));
-        this.dataProvider = new ListDataProvider<>(getAllProducts(productFilter));
+        this.dataProvider = new ListDataProvider<>(getAllProducts());
         this.binder = new BeanValidationBinder<>(Product.class);
-        this.auth = auth;
         init();
     }
 
@@ -171,25 +160,23 @@ public class ProductView extends VerticalLayout {
                 .set("right", "5%");
         filterForm.add(addNewBtn);
         filterForm.setWidth("100%");
-        filterForm.setAlignSelf(Alignment.END, addNewBtn);
+        filterForm.setAlignSelf(FlexComponent.Alignment.END, addNewBtn);
         VerticalLayout verticalLayout = new VerticalLayout(/*addNewBtn, */grid);
         horizontalLayout.add(filterForm, verticalLayout);
         horizontalLayout.setSpacing(true);
         horizontalLayout.setPadding(true);
         horizontalLayout.setSizeFull();
-        horizontalLayout.setAlignItems(Alignment.START);
-        verticalLayout.setAlignItems(Alignment.END);
-        CustomAppLayout appLayout = new CustomAppLayout(auth, horizontalLayout);
-        add(appLayout);
-        setHeight("100vh");
+        horizontalLayout.setAlignItems(FlexComponent.Alignment.START);
+        verticalLayout.setAlignItems(FlexComponent.Alignment.END);
+        setContent(horizontalLayout);
     }
 
     private List<Category> getAllCategories() {
         return categoryService.getAllCategories();
     }
 
-    private List<Product> getAllProducts(ProductFilter filter) {
-        return productService.fetchAll(filter);
+    private List<Product> getAllProducts() {
+        return productService.fetchAllProducts();
     }
 
     private void deleteProduct(Product product) {
@@ -240,10 +227,12 @@ public class ProductView extends VerticalLayout {
 
         binder.forField(price)
                 // input should not be null or empty
-                .withValidator(string -> string != null && !string.isEmpty(), "Input values should not be empty")
+                .withValidator(string -> string != null && !string.isEmpty(),
+                        "Input values should not be empty")
                 // convert String to Double, throw ValidationException if String is in incorrect format
                 .withConverter(Double::parseDouble,
-                        doubleToString -> doubleToString.toString().replace(".", ","), "Input value should be an double")
+                        doubleToString -> doubleToString.toString().replace(".", ","),
+                        "Input value should be an double")
                 // validate converted double: it should be positive
                 .withValidator(dbl -> dbl > 0, "Input value should be a positive double")
                 .bind(Product_.PRICE);
@@ -332,8 +321,6 @@ public class ProductView extends VerticalLayout {
             } catch (IOException e) {
                 throw new RuntimeException("Ошибка копирования файла", e);
             }
-            FileAsset fileAsset = new FileAsset(fileName);
-            fileAssetService.createFileAsset(fileAsset, targetFile[0]);
             ProductImage productImage = new ProductImage();
             productImage.setProduct(product);
             productImage.setPath(fileName);

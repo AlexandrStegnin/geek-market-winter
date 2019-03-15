@@ -6,15 +6,29 @@ public class Constants {
     //    API Main
 
     public static final String PATH_SEPARATOR = "/";
-
-    /**
-     * Application pages constants
-     */
+    public static final String SOMETHING_WENT_WRONG_MSG = "Something went wrong... Please try again later.";
+    /* Application pages constants */
     public static final String LOGIN_PAGE = "login";
     public static final String LOGOUT_PAGE = "logout";
     public static final String SHOP_PAGE = "shop";
     public static final String CART_PAGE = "cart";
     public static final String CONFIRM_ORDER_PAGE = "confirm-order";
+    public static final String PROFILE_PAGE = "profile";
+    public static final String ORDER_DETAILS_PAGE = "order-details";
+
+    /* PAYPAL CONSTANTS */
+    public static final String PAYPAL_PAGE = "paypal";
+    public static final String PAYMENT_METHOD = "paypal";
+    public static final String CURRENCY_RUB = "RUB";
+    public static final String PAYMENT_ID = "paymentId";
+    public static final String PAYER_ID = "PayerID";
+    public static final String PAYPAL_INTENT_SALE = "sale";
+    public static final String PAYPAL_APPROVAL_URL = "approval_url";
+    public static final String PAYPAL_APPROVED = "approved";
+    public static final String PAYPAL_MODE_SANDBOX = "sandbox";
+    public static final String PAYPAL_BUY_PAGE = "buy";
+    public static final String PAYPAL_BUY_SUCCESS_PAGE = "success";
+    public static final String PAYPAL_BUY_URL = PAYPAL_PAGE + PATH_SEPARATOR + PAYPAL_BUY_PAGE + PATH_SEPARATOR;
 
     /* ADMINS PAGES */
     public static final String ADMIN_PAGE = "admin";
@@ -35,9 +49,7 @@ public class Constants {
     public static final String ORDERS_PAGE = "orders";
     public static final String MANAGER_ORDERS_PAGE = MANAGER_PAGE + PATH_SEPARATOR + ORDERS_PAGE;
 
-    /**
-     * Application roles constants
-     */
+    /* Application roles constants */
     public static final String ROLE_PREFIX = "ROLE_";
     public static final String ADMIN = "ADMIN";
     public static final String EMPLOYEE = "EMPLOYEE";

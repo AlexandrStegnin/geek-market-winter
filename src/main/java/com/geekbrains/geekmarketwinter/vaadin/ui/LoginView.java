@@ -4,10 +4,9 @@ package com.geekbrains.geekmarketwinter.vaadin.ui;
 import com.geekbrains.geekmarketwinter.config.security.SecurityUtils;
 import com.geekbrains.geekmarketwinter.repositories.AuthRepository;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.login.LoginForm;
+import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
@@ -17,7 +16,7 @@ import static com.geekbrains.geekmarketwinter.config.support.Constants.*;
 
 @PageTitle("Login page")
 @Route(LOGIN_PAGE)
-@Theme(value = Material.class, variant = Material.DARK)
+@Theme(value = Material.class, variant = Material.LIGHT)
 public class LoginView extends VerticalLayout {
 
     private final AuthRepository authRepository;
@@ -28,20 +27,9 @@ public class LoginView extends VerticalLayout {
     }
 
     private void init() {
-        FormLayout loginForm = new FormLayout();
-
-        TextField loginField = new TextField();
-        loginField.setLabel("Username");
-        loginField.setPlaceholder("Login");
-        loginField.setId("user_name_field");
-
-        PasswordField passwordField = new PasswordField();
-        passwordField.setLabel("Password");
-        passwordField.setPlaceholder("*****");
-        passwordField.setId("pwd_field");
-
-        Button loginButton = new Button("LOG IN", e -> {
-            if (authenticated(loginField.getValue(), passwordField.getValue()))
+        LoginForm loginForm = new LoginForm();
+        loginForm.addLoginListener(e -> {
+            if (authenticated(e.getUsername(), e.getPassword())) {
                 this.getUI().ifPresent(ui -> {
                     if (SecurityUtils.isUserInRole(ROLE_ADMIN)) {
                         ui.navigate(ADMIN_PAGE);
@@ -49,20 +37,42 @@ public class LoginView extends VerticalLayout {
                         ui.navigate(SHOP_PAGE);
                     }
                 });
+            } else {
+                loginForm.setError(true);
+            }
         });
-        loginButton.setId("login_btn");
-        loginForm.add(loginField, passwordField, loginButton);
+        loginForm.setForgotPasswordButtonVisible(false);
+        setJustifyContentMode(JustifyContentMode.CENTER);
+        setAlignItems(Alignment.CENTER);
+        setSizeFull();
         add(loginForm);
 
-        setMargin(true);
-        setAlignSelf(Alignment.CENTER);
-        setAlignItems(Alignment.CENTER);
-        setHeight("100%");
-        setJustifyContentMode(JustifyContentMode.CENTER);
+        Button updateI18nButton = new Button("Switch to Russian",
+                event -> loginForm.setI18n(createRussianI18n()));
+        add(updateI18nButton);
     }
 
     private boolean authenticated(String login, String password) {
         return authRepository.authenticate(login, password).isAuthenticated();
+    }
+
+    private LoginI18n createRussianI18n() {
+        final LoginI18n i18n = LoginI18n.createDefault();
+
+        i18n.setHeader(new LoginI18n.Header());
+        i18n.getHeader().setTitle("Название приложения");
+        i18n.getHeader().setDescription("Описание приложения");
+        i18n.getForm().setUsername("Имя пользователя");
+        i18n.getForm().setTitle("Форма входа");
+        i18n.getForm().setSubmit("Войти");
+        i18n.getForm().setPassword("Пароль");
+        i18n.getForm().setForgotPassword("Забыли пароль?");
+        i18n.getErrorMessage().setTitle("Имя пользователя/пароль указаны неверно");
+        i18n.getErrorMessage()
+                .setMessage("Проверьте правильность ввода имени пользователя и пароля.");
+//        i18n.setAdditionalInformation(
+//                "Дополнительная информация.");
+        return i18n;
     }
 
 }

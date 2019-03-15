@@ -1,0 +1,1 @@
+ALTER TABLE orders ADD order_hash varchar(100) NOT NULL;

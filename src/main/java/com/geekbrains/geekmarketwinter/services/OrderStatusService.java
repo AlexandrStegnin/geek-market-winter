@@ -13,6 +13,7 @@ import java.util.List;
 public class OrderStatusService {
 
     private static final String DEFAULT_STATUS_NAME = "Подготавливается";
+    private static final String PAYED_STATUS_NAME = "Оплачен";
     private final OrderStatusRepository orderStatusRepo;
 
     @Autowired
@@ -35,4 +36,17 @@ public class OrderStatusService {
     public OrderStatus getOneByTitle(String title) {
         return orderStatusRepo.getByTitle(title);
     }
+
+    public OrderStatus save(OrderStatus orderStatus) {
+        return orderStatusRepo.save(orderStatus);
+    }
+
+    public void delete(OrderStatus orderStatus) {
+        orderStatusRepo.delete(orderStatus);
+    }
+
+    public OrderStatus getStatusPayed() {
+        return orderStatusRepo.getByTitle(PAYED_STATUS_NAME);
+    }
+
 }
